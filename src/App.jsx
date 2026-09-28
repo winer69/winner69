@@ -45,11 +45,13 @@ const IMG_CLASSICSLOTS = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wB
 // until an admin actually moves a slider. Adjustable per game, 10%-100%.
 const DEFAULT_EDGES = { dice: 99, limbo: 97, mines: 97, hilo: 97, keno: 97, slot: 97, jungle: 95, classicslots: 96, hoohey: 96, horserace: 94, roulette: 97.3, fortune: 95, dragontiger: 96.5, neonfortune: 97, plushieparadise: 92, neonfishing: 94, stocktrading: 96 };
 const GAME_LABELS = { dice: "Dice", limbo: "Limbo", mines: "Mines", hilo: "Hi-Lo", keno: "Keno", slot: "Gilt Reels", jungle: "Jungle Riches", classicslots: "Classic Slots", hoohey: "น้ำเต้าปูปลา", horserace: "Horse Riches", roulette: "Roulette", fortune: "Fortune Riches", dragontiger: "Dragon Tiger", neonfortune: "Neon Fortune", plushieparadise: "Plushie Paradise", neonfishing: "Neon Fishing", stocktrading: "Stock Trading" };
+// Admin PINs are NOT in this file any more: they are checked by the backend
+// (Railway variable ADMIN_PINS, format admin1=code,admin2=code,...).
 const ADMIN_ACCOUNTS = [
-  { id: "admin1", name: "แอดมินใหญ่", pin: "dnubby" },
-  { id: "admin2", name: "แอดมิน 2", pin: "eypuof" },
-  { id: "admin3", name: "แอดมิน 3", pin: "gwjgfu" },
-  { id: "admin4", name: "แอดมิน 4", pin: "ydnnqt" },
+  { id: "admin1", name: "แอดมินใหญ่" },
+  { id: "admin2", name: "แอดมิน 2" },
+  { id: "admin3", name: "แอดมิน 3" },
+  { id: "admin4", name: "แอดมิน 4" },
 ];
 const BOOST_BETS_PER_USE = 3; // one press of "ใช้" boosts this many bets
 const DEMO_USERS = {};
@@ -1324,10 +1326,22 @@ function AdminPanel({ onBack }) {
     setEdgeDraft({ ...baseEdges }); setBoostDraft(boostBonusPerStack); setEdgeSavedMsg("");
   }
 
-  function tryUnlock() {
-    const found = ADMIN_ACCOUNTS.find((a) => a.pin === pin);
-    if (found) { try { localStorage.setItem("winner69_adminId", found.id); } catch (e) {} setCurrentAdmin(found); setError(""); setPin(""); markNotificationsRead(); }
-    else setError("PIN ไม่ถูกต้อง");
+  async function tryUnlock() {
+    if (!API_URL) { setError("ยังไม่ได้ตั้งค่า VITE_API_URL — เข้าแอดมินไม่ได้"); return; }
+    if (!pin) return;
+    setError("กำลังตรวจสอบ…");
+    try {
+      const r = await apiFetch("/api/admin/login", { method: "POST", body: JSON.stringify({ pin }) });
+      const found = ADMIN_ACCOUNTS.find((a) => a.id === r.id);
+      if (!found) { setError("PIN ไม่ถูกต้อง"); return; }
+      try {
+        localStorage.setItem("winner69_adminId", found.id);
+        if (r.adminKey) { localStorage.setItem(ADMIN_KEY_STORAGE, r.adminKey); setAdminKeyInput(r.adminKey); }
+      } catch (e) {}
+      setCurrentAdmin(found); setError(""); setPin(""); markNotificationsRead();
+    } catch (e) {
+      setError(String(e.message || "").includes("401") ? "PIN ไม่ถูกต้อง" : String(e.message || "").includes("429") ? "ลองผิดบ่อยเกินไป รอสักครู่" : "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้");
+    }
   }
   function lockAgain() { try { localStorage.removeItem("winner69_adminId"); localStorage.removeItem("winner69_adminView"); } catch (e) {} setCurrentAdmin(null); setPin(""); }
   const adminName = currentAdmin?.name;
@@ -1400,7 +1414,7 @@ function AdminPanel({ onBack }) {
             onChange={(e) => setPin(e.target.value.trim())} onKeyDown={(e) => { if (e.key === "Enter") tryUnlock(); }} placeholder="••••••" />
           {error && <div style={{ color: "#ef5350", fontSize: 12, marginBottom: 10 }}>{error}</div>}
           <button className="primary-btn" onClick={tryUnlock}>ปลดล็อก</button>
-          <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 10 }}>รองรับบัญชีแอดมินสูงสุด 4 คน แต่ละคนมี PIN ของตัวเอง</div>
+          <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 10 }}>รองรับบัญชีแอดมินสูงสุด 4 คน แต่ละคนมี PIN ของตัวเอง (ตรวจสอบที่เซิร์ฟเวอร์)</div>
         </div>
       ) : (
         <div className="panel" style={{ maxWidth: 560 }}>
@@ -1804,9 +1818,9 @@ function WalletPage({ onBack }) {
     setSlipImage(null);
     setStage("slip"); setMessage("");
   }
-  function submitDepositSlip() {
+  async function submitDepositSlip() {
     if (!slipImage) { setMessage("กรุณาแนบรูปสลิปการโอนก่อนส่งตรวจสอบ"); return; }
-    notifyDeposit(amount, slipImage);
+    await notifyDeposit(amount, slipImage);
     setStage("done");
     setMessage(`ส่งสลิปฝาก ${amount.toLocaleString()} B แล้ว — รอแอดมินตรวจสอบสลิปและอนุมัติเครดิตเข้าบัญชี`);
   }
@@ -5277,6 +5291,46 @@ const API_URL = ((typeof import.meta !== "undefined" && import.meta.env && impor
 const ADMIN_KEY_STORAGE = "winner69_adminKey";
 const NOTIF_STORAGE = "winner69_withdrawRequests";
 const REFUNDED_STORAGE = "winner69_refundedWithdrawals";
+const DEPOSIT_STORAGE = "winner69_depositRequests";
+const CREDITED_STORAGE = "winner69_creditedDeposits";
+const DEVICE_STORAGE = "winner69_deviceId";
+// Random id for THIS browser: lets a request be refunded/credited only on the device that made it,
+// even when two devices happen to have a member with the same username (e.g. US0001).
+const DEVICE_ID = (() => {
+  try {
+    let d = localStorage.getItem(DEVICE_STORAGE);
+    if (!d) { d = "d" + Math.random().toString(36).slice(2, 12) + Date.now().toString(36); localStorage.setItem(DEVICE_STORAGE, d); }
+    return d;
+  } catch (e) { return "d-nostorage"; }
+})();
+function readList(key) { try { const v = JSON.parse(localStorage.getItem(key) || "[]"); return Array.isArray(v) ? v : []; } catch (e) { return []; } }
+function addToList(key, ids) {
+  try {
+    const set = readList(key);
+    ids.forEach((id) => { if (!set.includes(id)) set.push(id); });
+    localStorage.setItem(key, JSON.stringify(set.slice(-500)));
+  } catch (e) {}
+}
+// Shrink a slip photo before it is stored/sent (max 900px JPEG) so it stays small.
+function compressImage(dataUrl, maxSide = 900, quality = 0.7) {
+  return new Promise((resolve) => {
+    try {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+          const c = document.createElement("canvas");
+          c.width = Math.max(1, Math.round(img.width * scale));
+          c.height = Math.max(1, Math.round(img.height * scale));
+          c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+          resolve(c.toDataURL("image/jpeg", quality));
+        } catch (e) { resolve(dataUrl); }
+      };
+      img.onerror = () => resolve(dataUrl);
+      img.src = dataUrl;
+    } catch (e) { resolve(dataUrl); }
+  });
+}
 function readAdminKey() { try { return localStorage.getItem(ADMIN_KEY_STORAGE) || ""; } catch (e) { return ""; } }
 function readRefunded() { try { return JSON.parse(localStorage.getItem(REFUNDED_STORAGE) || "[]"); } catch (e) { return []; } }
 function markRefunded(ids) {
@@ -5434,7 +5488,26 @@ export default function GiltRowApp() {
     window.addEventListener("storage", onStorage);
     return () => window.removeEventListener("storage", onStorage);
   }, []);
-  const [depositRequests, setDepositRequests] = useState([]);
+  const [depositRequests, setDepositRequests] = useState(() => readList(DEPOSIT_STORAGE));
+  const depositRef = useRef(depositRequests);
+  useEffect(() => {
+    depositRef.current = depositRequests;
+    try {
+      // keep the slip photo only while a request is pending (saves browser storage)
+      localStorage.setItem(DEPOSIT_STORAGE, JSON.stringify(depositRequests.map((d) => (d.status === "pending" ? d : { ...d, slipImage: null }))));
+    } catch (e) {}
+  }, [depositRequests]);
+  useEffect(() => {
+    const onStorage = (e) => {
+      if (e.key !== DEPOSIT_STORAGE || !e.newValue) return;
+      try {
+        const incoming = JSON.parse(e.newValue);
+        setDepositRequests((prev) => incoming.map((d) => ({ ...d, slipImage: d.slipImage || prev.find((x) => x.id === d.id)?.slipImage || null })));
+      } catch (err) {}
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
   // Bank/transfer details the admin publishes for members to see on the
   // deposit screen - persisted the same way House Edge is, so it survives
   // a refresh instead of resetting.
@@ -5687,14 +5760,14 @@ export default function GiltRowApp() {
     if (!currentUser) return;
     const item = {
       id: "w" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
-      username: currentUser, amount, account: account || "", time: Date.now(),
+      username: currentUser, amount, account: account || "", time: Date.now(), deviceId: DEVICE_ID,
       read: false, status: "pending", synced: !API_URL,
     };
     setNotifications((n) => [item, ...n].slice(0, 50));
     if (API_URL) {
       apiFetch("/api/withdraw-requests", {
         method: "POST",
-        body: JSON.stringify({ id: item.id, username: item.username, amount: item.amount, account: item.account, time: item.time }),
+        body: JSON.stringify({ id: item.id, username: item.username, amount: item.amount, account: item.account, time: item.time, deviceId: DEVICE_ID }),
       })
         .then(() => setNotifications((n) => n.map((x) => (x.id === item.id ? { ...x, synced: true } : x))))
         .catch(() => {}); // retried by the sync loop below
@@ -5731,7 +5804,7 @@ export default function GiltRowApp() {
           try {
             await apiFetch("/api/withdraw-requests", {
               method: "POST",
-              body: JSON.stringify({ id: n.id, username: n.username, amount: n.amount, account: n.account, time: n.time }),
+              body: JSON.stringify({ id: n.id, username: n.username, amount: n.amount, account: n.account, time: n.time, deviceId: n.deviceId || DEVICE_ID }),
             });
             setNotifications((arr) => arr.map((x) => (x.id === n.id ? { ...x, synced: true } : x)));
           } catch (e) {}
@@ -5750,7 +5823,7 @@ export default function GiltRowApp() {
           for (const r of remote) {
             const cur = byId.get(r.id);
             if (!cur) {
-              byId.set(r.id, { id: r.id, username: r.username, amount: r.amount, account: r.account || "", time: r.time, read: r.status !== "pending", status: r.status, synced: true });
+              byId.set(r.id, { id: r.id, username: r.username, amount: r.amount, account: r.account || "", time: r.time, deviceId: r.deviceId, read: r.status !== "pending", status: r.status, synced: true });
               changed = true;
             } else if (cur.status !== r.status || cur.synced === false) {
               // keep a just-made local decision until the server has caught up
@@ -5773,7 +5846,7 @@ export default function GiltRowApp() {
   useEffect(() => {
     if (!currentUser) return;
     const done = readRefunded();
-    const due = notifications.filter((n) => n.username === currentUser && n.status === "rejected" && !done.includes(n.id));
+    const due = notifications.filter((n) => n.username === currentUser && n.status === "rejected" && !done.includes(n.id) && (!n.deviceId || n.deviceId === DEVICE_ID));
     if (due.length === 0) return;
     markRefunded(due.map((n) => n.id));
     const total = due.reduce((sum, n) => sum + n.amount, 0);
@@ -5786,29 +5859,115 @@ export default function GiltRowApp() {
   // waits for admin approval before the credit actually lands - the same
   // approval pattern already used for withdrawals, just in reverse (credit
   // only added on approval instead of held-then-refunded on rejection). ----
-  const notifyDeposit = (amount, slipImage) => {
+  const notifyDeposit = async (amount, slipImage) => {
     if (!currentUser) return;
-    setDepositRequests((d) => [
-      { id: Date.now() + Math.random(), username: currentUser, amount, slipImage: slipImage || null, time: Date.now(), status: "pending" },
-      ...d,
-    ].slice(0, 50));
+    const slip = slipImage ? await compressImage(slipImage) : null;
+    const item = {
+      id: "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
+      username: currentUser, amount, slipImage: slip, time: Date.now(), deviceId: DEVICE_ID,
+      status: "pending", synced: !API_URL, hasSlip: !!slip,
+    };
+    setDepositRequests((d) => [item, ...d].slice(0, 40));
+    if (API_URL) {
+      apiFetch("/api/deposit-requests", {
+        method: "POST",
+        body: JSON.stringify({ id: item.id, username: item.username, amount: item.amount, slipImage: slip, time: item.time, deviceId: DEVICE_ID }),
+      })
+        .then(() => setDepositRequests((d) => d.map((x) => (x.id === item.id ? { ...x, synced: true } : x))))
+        .catch(() => {}); // retried by the sync loop
+    }
   };
+  const remoteSetDepositStatus = (id, status) => {
+    if (!API_URL) return;
+    apiFetch("/api/admin/deposit-requests/" + encodeURIComponent(id), {
+      method: "PATCH",
+      headers: { "x-admin-key": readAdminKey() },
+      body: JSON.stringify({ status }),
+    }).catch(() => {});
+  };
+  // The credit itself is added on the member's own device (effect below), so it also works
+  // when the admin approves from a different device.
   const approveDeposit = (id, adminName) => {
     const target = depositRequests.find((x) => x.id === id);
-    if (target) {
-      setUsers((u) => ({
-        ...u,
-        [target.username]: { ...u[target.username], balance: Math.round(((u[target.username].balance || 0) + target.amount) * 100) / 100 },
-      }));
-    }
-    setDepositRequests((d) => d.map((x) => (x.id === id ? { ...x, status: "approved" } : x)));
+    setDepositRequests((d) => d.map((x) => (x.id === id ? { ...x, status: "approved", statusChangedAt: Date.now() } : x)));
+    remoteSetDepositStatus(id, "approved");
     if (adminName && target) logAdminAction(adminName, `อนุมัติฝากเครดิต ${target.username} ${target.amount.toLocaleString()} B`);
   };
   const rejectDeposit = (id, adminName) => {
     const target = depositRequests.find((x) => x.id === id);
-    setDepositRequests((d) => d.map((x) => (x.id === id ? { ...x, status: "rejected" } : x)));
+    setDepositRequests((d) => d.map((x) => (x.id === id ? { ...x, status: "rejected", statusChangedAt: Date.now() } : x)));
+    remoteSetDepositStatus(id, "rejected");
     if (adminName && target) logAdminAction(adminName, `ปฏิเสธการฝากเครดิต ${target.username} ${target.amount.toLocaleString()} B (ไม่พบสลิปที่ถูกต้อง)`);
   };
+
+  // Sync deposit requests with the backend (same idea as withdrawals).
+  useEffect(() => {
+    if (!API_URL) return;
+    let stopped = false;
+    const tick = async () => {
+      if (stopped || document.hidden) return;
+      try {
+        for (const d of depositRef.current.filter((x) => x.synced === false && x.status === "pending")) {
+          try {
+            await apiFetch("/api/deposit-requests", {
+              method: "POST",
+              body: JSON.stringify({ id: d.id, username: d.username, amount: d.amount, slipImage: d.slipImage || null, time: d.time, deviceId: d.deviceId || DEVICE_ID }),
+            });
+            setDepositRequests((arr) => arr.map((x) => (x.id === d.id ? { ...x, synced: true } : x)));
+          } catch (e) {}
+        }
+        let remote = [];
+        const key = readAdminKey();
+        if (key) remote = (await apiFetch("/api/admin/deposit-requests", { headers: { "x-admin-key": key } })).requests || [];
+        else if (currentUser) remote = (await apiFetch("/api/deposit-requests?username=" + encodeURIComponent(currentUser))).requests || [];
+        if (stopped) return;
+        if (remote.length > 0) {
+          setDepositRequests((prev) => {
+            const byId = new Map(prev.map((x) => [x.id, x]));
+            let changed = false;
+            for (const r of remote) {
+              const cur = byId.get(r.id);
+              if (!cur) {
+                byId.set(r.id, { id: r.id, username: r.username, amount: r.amount, slipImage: null, hasSlip: !!r.hasSlip, time: r.time, deviceId: r.deviceId, status: r.status, synced: true });
+                changed = true;
+              } else if (cur.status !== r.status || cur.synced === false) {
+                if (r.status === "pending" && cur.statusChangedAt && Date.now() - cur.statusChangedAt < 15000) continue;
+                byId.set(r.id, { ...cur, status: r.status, synced: true });
+                changed = true;
+              }
+            }
+            if (!changed) return prev;
+            return [...byId.values()].sort((a, b) => b.time - a.time).slice(0, 40);
+          });
+        }
+        // admin: download slip photos of pending requests once
+        if (key) {
+          for (const d of depositRef.current.filter((x) => x.status === "pending" && x.hasSlip && !x.slipImage).slice(0, 3)) {
+            try {
+              const r = await apiFetch("/api/admin/deposit-requests/" + encodeURIComponent(d.id) + "/slip", { headers: { "x-admin-key": key } });
+              if (r.slipImage) setDepositRequests((arr) => arr.map((x) => (x.id === d.id ? { ...x, slipImage: r.slipImage } : x)));
+            } catch (e) {}
+          }
+        }
+      } catch (e) { /* offline - try again next tick */ }
+    };
+    tick();
+    const id = setInterval(tick, 5000);
+    return () => { stopped = true; clearInterval(id); };
+  }, [currentUser]);
+
+  // An approved deposit adds its credit to the member - once per request, on the requesting device.
+  useEffect(() => {
+    if (!currentUser) return;
+    const done = readList(CREDITED_STORAGE);
+    const due = depositRequests.filter((d) => d.username === currentUser && d.status === "approved" && !done.includes(d.id) && (!d.deviceId || d.deviceId === DEVICE_ID));
+    if (due.length === 0) return;
+    addToList(CREDITED_STORAGE, due.map((d) => d.id));
+    const total = due.reduce((sum, d) => sum + d.amount, 0);
+    setUsers((u) => (u[currentUser]
+      ? { ...u, [currentUser]: { ...u[currentUser], balance: Math.round(((u[currentUser].balance || 0) + total) * 100) / 100 } }
+      : u));
+  }, [depositRequests, currentUser]);
   // Purely decorative "recent withdrawals" ticker feed - pushes one simulated,
   // already-approved entry at a time. Never touches any real user's balance;
   // it only ever appends a display-only row to the notifications list. The
