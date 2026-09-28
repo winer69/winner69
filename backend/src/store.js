@@ -12,6 +12,7 @@ function ensure() {
       users: [],
       rounds: [],
       withdrawals: [],
+      deposits: [],
       audit: []
     }, null, 2));
   }
