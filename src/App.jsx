@@ -46,11 +46,12 @@ const IMG_CLASSICSLOTS = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wB
 const DEFAULT_EDGES = { dice: 99, limbo: 97, mines: 97, hilo: 97, keno: 97, slot: 97, jungle: 95, classicslots: 96, hoohey: 96, horserace: 94, roulette: 97.3, fortune: 95, dragontiger: 96.5, neonfortune: 97, plushieparadise: 92, neonfishing: 94, stocktrading: 96 };
 const GAME_LABELS = { dice: "Dice", limbo: "Limbo", mines: "Mines", hilo: "Hi-Lo", keno: "Keno", slot: "Gilt Reels", jungle: "Jungle Riches", classicslots: "Classic Slots", hoohey: "น้ำเต้าปูปลา", horserace: "Horse Riches", roulette: "Roulette", fortune: "Fortune Riches", dragontiger: "Dragon Tiger", neonfortune: "Neon Fortune", plushieparadise: "Plushie Paradise", neonfishing: "Neon Fishing", stocktrading: "Stock Trading" };
 const ADMIN_ACCOUNTS = [
-  { id: "admin1", name: "แอดมินใหญ่", pin: "1234" },
-  { id: "admin2", name: "แอดมิน 2", pin: "2345" },
-  { id: "admin3", name: "แอดมิน 3", pin: "3456" },
-  { id: "admin4", name: "แอดมิน 4", pin: "4567" },
+  { id: "admin1", name: "แอดมินใหญ่", pin: "dnubby" },
+  { id: "admin2", name: "แอดมิน 2", pin: "eypuof" },
+  { id: "admin3", name: "แอดมิน 3", pin: "gwjgfu" },
+  { id: "admin4", name: "แอดมิน 4", pin: "ydnnqt" },
 ];
+const BOOST_BETS_PER_USE = 3; // one press of "ใช้" boosts this many bets
 const DEMO_USERS = {};
 const NEW_MEMBER_STARTING_BALANCE = 0;
 
@@ -1277,13 +1278,21 @@ function DailyBarChart({ days }) {
 
 function AdminPanel({ onBack }) {
   const { baseEdges, setEdge, stats, dailyStats, users, userStats, txHistory, boostBonusPerStack, setBoostBonusPerStack, notifications, markNotificationsRead, adminLog, approveWithdraw, rejectWithdraw, coupons, adminCreateCoupon, adminDeleteCoupon, chatThreads, sendAdminChatMessage, markChatRead, depositRequests, approveDeposit, rejectDeposit, bankInfo, setBankInfo } = useApp();
+  const [adminKeyInput, setAdminKeyInput] = useState(() => readAdminKey());
+  const [adminKeySaved, setAdminKeySaved] = useState(false);
+  const saveAdminKey = () => {
+    try { localStorage.setItem(ADMIN_KEY_STORAGE, adminKeyInput.trim()); setAdminKeySaved(true); setTimeout(() => setAdminKeySaved(false), 2000); } catch (e) {}
+  };
   const [bankInfoDraft, setBankInfoDraft] = useState(bankInfo);
   const [bankInfoSaved, setBankInfoSaved] = useState(false);
   const [openChatUser, setOpenChatUser] = useState(null);
   const [adminChatText, setAdminChatText] = useState("");
   const [adminChatImage, setAdminChatImage] = useState(null);
   const adminChatFileRef = useRef(null);
-  const [currentAdmin, setCurrentAdmin] = useState(null);
+  const [currentAdmin, setCurrentAdmin] = useState(() => {
+    // admin stays signed in (survives closing/reopening the app) until "ล็อก / สลับบัญชี"
+    try { return ADMIN_ACCOUNTS.find((a) => a.id === localStorage.getItem("winner69_adminId")) || null; } catch (e) { return null; }
+  });
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
   const [newCouponCode, setNewCouponCode] = useState("");
@@ -1317,10 +1326,10 @@ function AdminPanel({ onBack }) {
 
   function tryUnlock() {
     const found = ADMIN_ACCOUNTS.find((a) => a.pin === pin);
-    if (found) { setCurrentAdmin(found); setError(""); setPin(""); markNotificationsRead(); }
+    if (found) { try { localStorage.setItem("winner69_adminId", found.id); } catch (e) {} setCurrentAdmin(found); setError(""); setPin(""); markNotificationsRead(); }
     else setError("PIN ไม่ถูกต้อง");
   }
-  function lockAgain() { setCurrentAdmin(null); setPin(""); }
+  function lockAgain() { try { localStorage.removeItem("winner69_adminId"); localStorage.removeItem("winner69_adminView"); } catch (e) {} setCurrentAdmin(null); setPin(""); }
   const adminName = currentAdmin?.name;
 
   const totalWagered = Object.values(stats.byGame).reduce((s, g) => s + g.wagered, 0);
@@ -1387,8 +1396,8 @@ function AdminPanel({ onBack }) {
       {!currentAdmin ? (
         <div className="admin-lock">
           <div className="field-label">กรอก PIN แอดมิน</div>
-          <input className="field-input" style={{ marginBottom: 12, textAlign: "center", width: "100%" }} type="password" value={pin}
-            onChange={(e) => setPin(e.target.value)} placeholder="••••" />
+          <input className="field-input" style={{ marginBottom: 12, textAlign: "center", width: "100%" }} type="password" value={pin} autoCapitalize="none" autoCorrect="off" autoComplete="off" spellCheck={false}
+            onChange={(e) => setPin(e.target.value.trim())} onKeyDown={(e) => { if (e.key === "Enter") tryUnlock(); }} placeholder="••••••" />
           {error && <div style={{ color: "#ef5350", fontSize: 12, marginBottom: 10 }}>{error}</div>}
           <button className="primary-btn" onClick={tryUnlock}>ปลดล็อก</button>
           <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 10 }}>รองรับบัญชีแอดมินสูงสุด 4 คน แต่ละคนมี PIN ของตัวเอง</div>
@@ -1468,6 +1477,16 @@ function AdminPanel({ onBack }) {
           </>)}
 
           {adminTab === "finance" && (<>
+          {API_URL && (
+            <div style={{ marginBottom: 14, fontSize: 12 }}>
+              <div style={{ color: "var(--muted)", marginBottom: 4 }}>ใส่ ADMIN_KEY ของเซิร์ฟเวอร์ เพื่อรับแจ้งเตือนคำขอถอนจากสมาชิกทุกเครื่อง</div>
+              <div style={{ display: "flex", gap: 6 }}>
+                <input className="field-input" type="password" autoComplete="off" placeholder="ADMIN_KEY" value={adminKeyInput}
+                  onChange={(e) => setAdminKeyInput(e.target.value)} style={{ flex: 1 }} />
+                <button className="chip-btn" onClick={saveAdminKey}>{adminKeySaved ? "✓ บันทึกแล้ว" : "บันทึก"}</button>
+              </div>
+            </div>
+          )}
           <div className="admin-section-title" style={{ marginTop: 0 }}>🔔 คำขอถอนเครดิต (ต้องอนุมัติก่อนจึงจะถอนได้จริง)</div>
           {notifications.length === 0 ? (
             <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 10 }}>ยังไม่มีคำขอถอนเครดิต</div>
@@ -1755,7 +1774,7 @@ function FakeQr({ seed }) {
   );
 }
 function WalletPage({ onBack }) {
-  const { balance, notifyWithdraw, redeemCoupon, notifyDeposit, bankInfo } = useApp();
+  const { balance, setBalance, notifyWithdraw, redeemCoupon, notifyDeposit, bankInfo } = useApp();
   const [tab, setTab] = useState("deposit");
   const [amount, setAmount] = useState(1000);
   const [stage, setStage] = useState("form");
@@ -1834,7 +1853,7 @@ function WalletPage({ onBack }) {
             <input className="field-input" style={{ width: "100%", marginBottom: 14 }} type="text" value={withdrawAccount}
               onChange={(e) => setWithdrawAccount(e.target.value)} placeholder="เช่น กสิกรไทย 123-4-56789-0" />
             {message && <div style={{ color: "#f08a7c", fontSize: 12, marginBottom: 10 }}>{message}</div>}
-            <button className="primary-btn" onClick={doWithdraw}>ยืนยันถอน (จำลอง)</button>
+            <button className="primary-btn" onClick={doWithdraw}>ยืนยัน</button>
           </>
         )}
         {tab === "coupon" && (
@@ -1853,7 +1872,7 @@ function WalletPage({ onBack }) {
             </div>
           </>
         )}
-        {stage === "pending" && tab === "withdraw" && <div style={{ textAlign: "center", padding: "20px 0", color: "var(--muted)" }}>กำลังจำลองการโอนเครดิต…</div>}
+        {stage === "pending" && tab === "withdraw" && <div style={{ textAlign: "center", padding: "20px 0", color: "var(--muted)" }}>กำลังส่งคำขอถอนไปยังแอดมิน…</div>}
         {tab === "deposit" && stage === "slip" && (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
             <div style={{ fontSize: 12, color: "var(--muted)" }}>โอน {amount.toLocaleString()} B เข้าบัญชีด้านล่าง แล้วแนบสลิปเพื่อยืนยัน</div>
@@ -4861,7 +4880,7 @@ function ChatPage({ onBack, username }) {
 // ---------- Profile ----------
 // ---------- Shop (boost item) ----------
 function ShopPage({ onBack }) {
-  const { balance, boostStacks, boostActive, boostBonusPerStack, buyBoost, useBoostCharge, boostCost, nextBoostPrice } = useApp();
+  const { balance, boostStacks, boostActive, boostBetsLeft, boostBonusPerStack, buyBoost, useBoostCharge, boostCost, nextBoostPrice } = useApp();
   const [justBought, setJustBought] = useState(false);
   const [justUsed, setJustUsed] = useState(false);
   const price = nextBoostPrice();
@@ -4885,10 +4904,10 @@ function ShopPage({ onBack }) {
       <div className="panel" style={{ maxWidth: 420, marginBottom: 14, textAlign: "center" }}>
         <div style={{ fontSize: 40, marginBottom: 8 }}>🧪</div>
         <div className="top-name" style={{ fontSize: 20 }}>ไอเทมบูสต์</div>
-        <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 14 }}>เพิ่มอัตราการชนะทันทีที่กดใช้ ทุกเกม ทุกยอดเดิมพัน</div>
+        <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 14 }}>เพิ่มอัตราการชนะ กดใช้ 1 ครั้ง ใช้ได้ 3 ตาเดิมพัน (เกมไหนก็ได้)</div>
         <div className="stat-bar" style={{ justifyContent: "space-around" }}>
           <span>จำนวนที่ใช้ได้: <b>{boostStacks}</b> ครั้ง</span>
-          <span>สถานะ: <b style={{ color: boostActive ? "var(--teal)" : "var(--muted)" }}>{boostActive ? "เปิดใช้งานอยู่ ✅" : "ยังไม่ได้เปิดใช้"}</b></span>
+          <span>สถานะ: <b style={{ color: boostActive ? "var(--teal)" : "var(--muted)" }}>{boostActive ? `เปิดอยู่ ✅ เหลือ ${boostBetsLeft} ตา` : "ยังไม่ได้เปิดใช้"}</b></span>
         </div>
       </div>
 
@@ -4898,7 +4917,7 @@ function ShopPage({ onBack }) {
           <li>ซื้อ 1 ครั้ง ได้ <b style={{ color: "var(--text)" }}>2 ครั้งใช้งาน</b></li>
           <li>ราคาต่อการซื้อในวันเดียวกัน: ครั้งที่ 1 = <b style={{ color: "var(--text)" }}>{BOOST_COST} B</b>, ครั้งที่ 2 = <b style={{ color: "var(--text)" }}>{BOOST_COST + 100} B</b>, ครั้งที่ 3 = <b style={{ color: "var(--text)" }}>{BOOST_COST + 200} B</b> ไปเรื่อยๆ (+100 ทุกครั้งที่ซื้อ)</li>
           <li>ราคาจะรีเซ็ตกลับเป็น {BOOST_COST} B ในวันถัดไปโดยอัตโนมัติ</li>
-          <li>กด "ใช้" 1 ครั้ง = เพิ่มอัตราการชนะของทุกเกมเป็นอย่างน้อย <b style={{ color: "var(--text)" }}>{boostBonusPerStack}%</b> (ถ้าเกมนั้นตั้งไว้สูงกว่าอยู่แล้ว จะไม่ลดลง)</li>
+          <li>กด "ใช้" 1 ครั้ง = บูสต์ทำงาน <b style={{ color: "var(--text)" }}>3 ตาเดิมพัน</b> (เล่นเกมไหนก็ได้ ตาที่ 4 กลับเป็นปกติ) โดยเพิ่มอัตราการชนะของทุกเกมเป็นอย่างน้อย <b style={{ color: "var(--text)" }}>{boostBonusPerStack}%</b> (ถ้าเกมนั้นตั้งไว้สูงกว่าอยู่แล้ว จะไม่ลดลง)</li>
           <li>อัตราคงที่เท่ากันไม่ว่าจะเดิมพันเท่าไหร่ ไม่มีเงื่อนไขวงเงินซ่อนอยู่</li>
         </ul>
       </div>
@@ -4911,9 +4930,9 @@ function ShopPage({ onBack }) {
 
         <button className="chip-btn" style={{ width: "100%", marginTop: 12, background: boostActive ? undefined : "var(--gold)", color: boostActive ? undefined : "#1c1204" }}
           onClick={handleUse} disabled={boostStacks <= 0}>
-          {boostStacks <= 0 ? "ไม่มีครั้งที่ใช้ได้" : boostActive ? `ใช้เพิ่มอีก (เหลือ ${boostStacks} ครั้ง)` : `กดใช้บูสต์ (เหลือ ${boostStacks} ครั้ง)`}
+          {boostStacks <= 0 ? "ไม่มีครั้งที่ใช้ได้" : boostActive ? `ใช้เพิ่มอีก +3 ตา (เหลือ ${boostStacks} ครั้ง)` : `กดใช้บูสต์ 3 ตา (เหลือ ${boostStacks} ครั้ง)`}
         </button>
-        {justUsed && <div style={{ color: "var(--teal)", fontSize: 12.5, textAlign: "center", marginTop: 10 }}>เปิดใช้งานบูสต์แล้ว! อัตราการชนะเพิ่มเป็นอย่างน้อย {boostBonusPerStack}% ทุกเกม</div>}
+        {justUsed && <div style={{ color: "var(--teal)", fontSize: 12.5, textAlign: "center", marginTop: 10 }}>เปิดใช้งานบูสต์แล้ว! ใช้ได้อีก {boostBetsLeft} ตา อัตราการชนะอย่างน้อย {boostBonusPerStack}% ทุกเกม</div>}
       </div>
     </div>
   );
@@ -5250,6 +5269,30 @@ function LoginPage({ users, onLogin, onRegister, onAdmin, initialMode }) {
   );
 }
 
+// ---------- Withdraw-request sync ----------
+// Requests are kept in localStorage (shared between tabs of one browser) and,
+// when VITE_API_URL is set, also sent to the backend so an admin on ANOTHER
+// device receives them. Members pick up approve/reject the same way.
+const API_URL = ((typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_API_URL) || "").replace(/\/+$/, "");
+const ADMIN_KEY_STORAGE = "winner69_adminKey";
+const NOTIF_STORAGE = "winner69_withdrawRequests";
+const REFUNDED_STORAGE = "winner69_refundedWithdrawals";
+function readAdminKey() { try { return localStorage.getItem(ADMIN_KEY_STORAGE) || ""; } catch (e) { return ""; } }
+function readRefunded() { try { return JSON.parse(localStorage.getItem(REFUNDED_STORAGE) || "[]"); } catch (e) { return []; } }
+function markRefunded(ids) {
+  try {
+    const set = readRefunded();
+    ids.forEach((id) => { if (!set.includes(id)) set.push(id); });
+    localStorage.setItem(REFUNDED_STORAGE, JSON.stringify(set.slice(-500)));
+  } catch (e) {}
+}
+async function apiFetch(path, options = {}) {
+  const res = await fetch(API_URL + path, { ...options, headers: { "Content-Type": "application/json", ...(options.headers || {}) } });
+  if (!res.ok) throw new Error("HTTP " + res.status);
+  return res.json();
+}
+
+
 // ---------- App root ----------
 const BOOST_COST = 50;
 // New members get an auto-assigned username US0001, US0002, ... US9999,
@@ -5260,7 +5303,17 @@ function nextUsername(seq) { return "US" + String(seq).padStart(4, "0"); }
 const DEFAULT_BOOST_BONUS = 40; // win rate %, floor applied to every game while a boost charge is active
 
 export default function GiltRowApp() {
-  const [view, setView] = useState("lobby");
+  const [view, setView] = useState(() => {
+    // reopen straight on the admin page if an admin is still signed in
+    try { if (localStorage.getItem("winner69_adminId") && localStorage.getItem("winner69_adminView") === "1") return "admin"; } catch (e) {}
+    return "lobby";
+  });
+  useEffect(() => {
+    try {
+      if (view === "admin") localStorage.setItem("winner69_adminView", "1");
+      else localStorage.removeItem("winner69_adminView");
+    } catch (e) {}
+  }, [view]);
   const [loginMode, setLoginMode] = useState("login");
   const [showAuthGate, setShowAuthGate] = useState(false);
   // Member accounts + the logged-in session are persisted to localStorage so
@@ -5364,7 +5417,23 @@ export default function GiltRowApp() {
   }, [txHistory]);
   const [confettiKey, setConfettiKey] = useState(0);
   const [winTier, setWinTier] = useState("normal");
-  const [notifications, setNotifications] = useState([]);
+  const [notifications, setNotifications] = useState(() => {
+    try { const saved = JSON.parse(localStorage.getItem(NOTIF_STORAGE) || "[]"); return Array.isArray(saved) ? saved : []; } catch (e) { return []; }
+  });
+  const notifRef = useRef(notifications);
+  useEffect(() => {
+    notifRef.current = notifications;
+    try { localStorage.setItem(NOTIF_STORAGE, JSON.stringify(notifications)); } catch (e) {}
+  }, [notifications]);
+  // Another tab of the same browser changed the requests (e.g. admin tab).
+  useEffect(() => {
+    const onStorage = (e) => {
+      if (e.key !== NOTIF_STORAGE || !e.newValue) return;
+      try { setNotifications(JSON.parse(e.newValue)); } catch (err) {}
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
   const [depositRequests, setDepositRequests] = useState([]);
   // Bank/transfer details the admin publishes for members to see on the
   // deposit screen - persisted the same way House Edge is, so it survives
@@ -5391,6 +5460,8 @@ export default function GiltRowApp() {
   // game that's already set more generous than that.
   const boostStacks = currentUser ? (users[currentUser]?.boost ?? 0) : 0;
   const boostActive = currentUser ? !!users[currentUser]?.boostActive : false;
+  // Each press of "ใช้" gives BOOST_BETS_PER_USE bets with the boost on; it switches itself off when they run out.
+  const boostBetsLeft = currentUser && boostActive ? (users[currentUser]?.boostBetsLeft ?? 0) : 0;
   const edges = useMemo(
     () => Object.fromEntries(Object.keys(baseEdges).map((g) => [
       g,
@@ -5430,6 +5501,13 @@ export default function GiltRowApp() {
       return next;
     });
     if (currentUser) {
+      // one bet used up while the boost is on; turns off after the last one
+      setUsers((u) => {
+        const cur = u[currentUser];
+        if (!cur || !cur.boostActive) return u;
+        const left = (cur.boostBetsLeft || 0) - 1;
+        return { ...u, [currentUser]: { ...cur, boostBetsLeft: Math.max(0, left), boostActive: left > 0 } };
+      });
       setUserStats((us) => {
         const prev = us[currentUser] || { rounds: 0, wagered: 0, payout: 0, biggestWin: 0 };
         return {
@@ -5590,39 +5668,119 @@ export default function GiltRowApp() {
     setUsers((u) => {
       const cur = u[currentUser];
       if (!cur || (cur.boost || 0) <= 0) return u;
-      return { ...u, [currentUser]: { ...cur, boost: cur.boost - 1, boostActive: true } };
+      const left = cur.boostActive ? (cur.boostBetsLeft || 0) : 0;
+      return { ...u, [currentUser]: { ...cur, boost: cur.boost - 1, boostActive: true, boostBetsLeft: left + BOOST_BETS_PER_USE } };
     });
   };
-  // Withdrawals now require admin approval before any "success" state -
-  // the request holds the credit (already deducted in WalletPage) in a
-  // pending state until an admin approves (finalizes it) or rejects it
-  // (refunds the credit back to the member).
+  // Withdrawals require admin approval: the credit is deducted when the member
+  // presses "ยืนยัน" (see WalletPage) and the request sits as "pending" until an
+  // admin approves it (final) or rejects it (credit is returned to the member).
+  const remoteSetStatus = (id, status) => {
+    if (!API_URL) return;
+    apiFetch("/api/admin/withdraw-requests/" + encodeURIComponent(id), {
+      method: "PATCH",
+      headers: { "x-admin-key": readAdminKey() },
+      body: JSON.stringify({ status }),
+    }).catch(() => {});
+  };
   const notifyWithdraw = (amount, account) => {
     if (!currentUser) return;
-    setNotifications((n) => [
-      { id: Date.now(), username: currentUser, amount, account: account || "", time: Date.now(), read: false, status: "pending" },
-      ...n,
-    ].slice(0, 50));
+    const item = {
+      id: "w" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
+      username: currentUser, amount, account: account || "", time: Date.now(),
+      read: false, status: "pending", synced: !API_URL,
+    };
+    setNotifications((n) => [item, ...n].slice(0, 50));
+    if (API_URL) {
+      apiFetch("/api/withdraw-requests", {
+        method: "POST",
+        body: JSON.stringify({ id: item.id, username: item.username, amount: item.amount, account: item.account, time: item.time }),
+      })
+        .then(() => setNotifications((n) => n.map((x) => (x.id === item.id ? { ...x, synced: true } : x))))
+        .catch(() => {}); // retried by the sync loop below
+    }
   };
   const markNotificationsRead = () => {
     setNotifications((n) => n.map((x) => ({ ...x, read: true })));
   };
   const approveWithdraw = (notificationId, adminName) => {
     const target = notifications.find((x) => x.id === notificationId);
-    setNotifications((n) => n.map((x) => (x.id === notificationId ? { ...x, status: "approved", read: true } : x)));
+    setNotifications((n) => n.map((x) => (x.id === notificationId ? { ...x, status: "approved", read: true, statusChangedAt: Date.now() } : x)));
+    remoteSetStatus(notificationId, "approved");
     if (adminName && target) logAdminAction(adminName, `อนุมัติถอนเครดิต ${target.username} ${target.amount.toLocaleString()} B`);
   };
+  // The refund itself is applied on the member's side (see effect below) so it
+  // also works when the admin and the member are on different devices.
   const rejectWithdraw = (notificationId, adminName) => {
     const target = notifications.find((x) => x.id === notificationId);
-    if (target) {
-      setUsers((u) => ({
-        ...u,
-        [target.username]: { ...u[target.username], balance: Math.max(0, Math.round((u[target.username].balance + target.amount) * 100) / 100) },
-      }));
-    }
-    setNotifications((n) => n.map((x) => (x.id === notificationId ? { ...x, status: "rejected", read: true } : x)));
-    if (adminName && target) logAdminAction(adminName, `ปฏิเสธถอนเครดิต ${target.username} ${target.amount.toLocaleString()} B (คืนเครดิตแล้ว)`);
+    setNotifications((n) => n.map((x) => (x.id === notificationId ? { ...x, status: "rejected", read: true, statusChangedAt: Date.now() } : x)));
+    remoteSetStatus(notificationId, "rejected");
+    if (adminName && target) logAdminAction(adminName, `ปฏิเสธถอนเครดิต ${target.username} ${target.amount.toLocaleString()} B (คืนเครดิตให้สมาชิก)`);
   };
+
+  // Poll the backend (only when VITE_API_URL is configured): pushes requests that
+  // have not reached the server yet and merges in the server's latest statuses.
+  // An admin who saved the ADMIN_KEY sees every member's requests; a member sees their own.
+  useEffect(() => {
+    if (!API_URL) return;
+    let stopped = false;
+    const tick = async () => {
+      if (stopped || document.hidden) return;
+      try {
+        for (const n of notifRef.current.filter((x) => x.synced === false && x.status === "pending")) {
+          try {
+            await apiFetch("/api/withdraw-requests", {
+              method: "POST",
+              body: JSON.stringify({ id: n.id, username: n.username, amount: n.amount, account: n.account, time: n.time }),
+            });
+            setNotifications((arr) => arr.map((x) => (x.id === n.id ? { ...x, synced: true } : x)));
+          } catch (e) {}
+        }
+        let remote = [];
+        const key = readAdminKey();
+        if (key) {
+          remote = (await apiFetch("/api/admin/withdraw-requests", { headers: { "x-admin-key": key } })).requests || [];
+        } else if (currentUser) {
+          remote = (await apiFetch("/api/withdraw-requests?username=" + encodeURIComponent(currentUser))).requests || [];
+        }
+        if (stopped || remote.length === 0) return;
+        setNotifications((prev) => {
+          const byId = new Map(prev.map((x) => [x.id, x]));
+          let changed = false;
+          for (const r of remote) {
+            const cur = byId.get(r.id);
+            if (!cur) {
+              byId.set(r.id, { id: r.id, username: r.username, amount: r.amount, account: r.account || "", time: r.time, read: r.status !== "pending", status: r.status, synced: true });
+              changed = true;
+            } else if (cur.status !== r.status || cur.synced === false) {
+              // keep a just-made local decision until the server has caught up
+              if (r.status === "pending" && cur.statusChangedAt && Date.now() - cur.statusChangedAt < 15000) continue;
+              byId.set(r.id, { ...cur, status: r.status, synced: true, read: cur.read || r.status !== "pending" });
+              changed = true;
+            }
+          }
+          if (!changed) return prev;
+          return [...byId.values()].sort((a, b) => b.time - a.time).slice(0, 50);
+        });
+      } catch (e) { /* offline / server asleep - try again next tick */ }
+    };
+    tick();
+    const id = setInterval(tick, 5000);
+    return () => { stopped = true; clearInterval(id); };
+  }, [currentUser]);
+
+  // A rejected request returns the held credit to the member - once per request.
+  useEffect(() => {
+    if (!currentUser) return;
+    const done = readRefunded();
+    const due = notifications.filter((n) => n.username === currentUser && n.status === "rejected" && !done.includes(n.id));
+    if (due.length === 0) return;
+    markRefunded(due.map((n) => n.id));
+    const total = due.reduce((sum, n) => sum + n.amount, 0);
+    setUsers((u) => (u[currentUser]
+      ? { ...u, [currentUser]: { ...u[currentUser], balance: Math.round(((u[currentUser].balance || 0) + total) * 100) / 100 } }
+      : u));
+  }, [notifications, currentUser]);
 
   // ---- Deposit requests: user generates a QR, attaches a slip photo, and
   // waits for admin approval before the credit actually lands - the same
@@ -5692,7 +5850,7 @@ export default function GiltRowApp() {
     balance, setBalance, edges, baseEdges, setEdge, stats, dailyStats, recordRound, users,
     adminSetMemberBalance, adminAdjustMemberBalance, adminSetMemberBoost, adminSetMemberSuspended, adminSetMemberNote,
     userStats, changePassword, celebrate,
-    boostStacks, boostActive, boostBonusPerStack, setBoostBonusPerStack: (v, adminName) => { setBoostBonusPerStackRaw(v); if (adminName) logAdminAction(adminName, `ปรับอัตราการชนะเมื่อใช้บูสต์เป็น ${v}%`); }, buyBoost, useBoostCharge, boostCost: BOOST_COST, nextBoostPrice: () => nextBoostPrice(currentUser),
+    boostStacks, boostActive, boostBetsLeft, boostBonusPerStack, setBoostBonusPerStack: (v, adminName) => { setBoostBonusPerStackRaw(v); if (adminName) logAdminAction(adminName, `ปรับอัตราการชนะเมื่อใช้บูสต์เป็น ${v}%`); }, buyBoost, useBoostCharge, boostCost: BOOST_COST, nextBoostPrice: () => nextBoostPrice(currentUser),
     notifications, notifyWithdraw, markNotificationsRead, simulatedWithdrawals, pushSimulatedWithdraw, approveWithdraw, rejectWithdraw,
     muted, toggleMuted, setWagerLimit, currentUser, txHistory,
     adminLog, logAdminAction,
