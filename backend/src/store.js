@@ -11,6 +11,7 @@ function ensure() {
     fs.writeFileSync(file, JSON.stringify({
       users: [],
       rounds: [],
+      withdrawals: [],
       audit: []
     }, null, 2));
   }
