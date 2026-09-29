@@ -532,7 +532,7 @@ export default function NeonFortuneSlot({
     }
 
     function calculateWins(grid, betTotal){
-      const betPerLine = betTotal / GAME_CONFIG.paylines;
+      const betPerLine = betTotal / 5; // line pays x4 of the table (same as backend/src/games.js nfWins)
       const lineWins=[];
       let totalLineWin=0;
 
