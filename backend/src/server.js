@@ -5,6 +5,7 @@ import cors from "cors";
 import jwt from "jsonwebtoken";
 import { readDb, writeDb, id, now, audit, saveSlip, loadSlip, deleteSlip } from "./store.js";
 import { registerGames, gameSettings, cleanGameSettings } from "./games.js";
+import { registerLottery } from "./lottery.js";
 import { hashPassword, verifyPassword, signUser, auth } from "./auth.js";
 
 const app = express();
@@ -734,6 +735,7 @@ app.post("/api/admin/chats/:username/read", adminOnly, (req, res) => {
 });
 
 registerGames(app, { readDb, writeDb, findMember, memberAuth, rateLimit, publicMember });
+registerLottery(app, { readDb, writeDb, audit, id, findMember, memberAuth, adminOnly, rateLimit, publicMember });
 app.get("/api/admin/game-stats", adminOnly, (_req, res) => { res.json({ stats: readDb().gameStats || {} }); });
 
 // ---------------------------------------------------------------------------
