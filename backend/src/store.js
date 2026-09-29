@@ -13,6 +13,8 @@ function ensure() {
       rounds: [],
       withdrawals: [],
       deposits: [],
+      members: [],
+      meta: { memberSeq: 0 },
       audit: []
     }, null, 2));
   }
@@ -37,4 +39,23 @@ export function now() {
 
 export function audit(db, action, actor, details = {}) {
   db.audit.push({ id: id(), at: now(), action, actor, details });
+}
+
+// Slip photos live in their own files (next to db.json) so db.json stays small -
+// it is read on every member sync.
+const slipDir = path.join(dir, "slips");
+function slipPath(id) {
+  return path.join(slipDir, String(id).replace(/[^A-Za-z0-9_-]/g, "_") + ".txt");
+}
+export function saveSlip(id, dataUrl) {
+  if (!dataUrl) return false;
+  fs.mkdirSync(slipDir, { recursive: true });
+  fs.writeFileSync(slipPath(id), dataUrl);
+  return true;
+}
+export function loadSlip(id) {
+  try { return fs.readFileSync(slipPath(id), "utf8"); } catch { return ""; }
+}
+export function deleteSlip(id) {
+  try { fs.unlinkSync(slipPath(id)); } catch {}
 }
