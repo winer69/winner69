@@ -1279,7 +1279,7 @@ function DailyBarChart({ days }) {
 }
 
 function AdminPanel({ onBack }) {
-  const { baseEdges, setEdge, stats, dailyStats, users, userStats, txHistory, boostBonusPerStack, setBoostBonusPerStack, notifications, markNotificationsRead, adminLog, approveWithdraw, rejectWithdraw, coupons, adminCreateCoupon, adminDeleteCoupon, chatThreads, sendAdminChatMessage, markChatRead, depositRequests, approveDeposit, rejectDeposit, bankInfo, setBankInfo } = useApp();
+  const { saveGameSettings, baseEdges, setEdge, stats, dailyStats, users, userStats, txHistory, boostBonusPerStack, setBoostBonusPerStack, notifications, markNotificationsRead, adminLog, approveWithdraw, rejectWithdraw, coupons, adminCreateCoupon, adminDeleteCoupon, chatThreads, sendAdminChatMessage, markChatRead, depositRequests, approveDeposit, rejectDeposit, bankInfo, setBankInfo } = useApp();
   const [adminKeyInput, setAdminKeyInput] = useState(() => readAdminKey());
   const [adminKeySaved, setAdminKeySaved] = useState(false);
   const saveAdminKey = () => {
@@ -1287,6 +1287,9 @@ function AdminPanel({ onBack }) {
   };
   const [bankInfoDraft, setBankInfoDraft] = useState(bankInfo);
   const [bankInfoSaved, setBankInfoSaved] = useState(false);
+  const [bankInfoError, setBankInfoError] = useState("");
+  const bankInfoDirtyRef = useRef(false);
+  useEffect(() => { if (!bankInfoDirtyRef.current) setBankInfoDraft(bankInfo); }, [bankInfo]);
   const [openChatUser, setOpenChatUser] = useState(null);
   const [adminChatText, setAdminChatText] = useState("");
   const [adminChatImage, setAdminChatImage] = useState(null);
@@ -1316,7 +1319,9 @@ function AdminPanel({ onBack }) {
   const changedGames = Object.keys(DEFAULT_EDGES).filter((g) => edgeDraft[g] !== baseEdges[g]);
   const boostChanged = boostDraft !== boostBonusPerStack;
   const edgesDirty = changedGames.length > 0 || boostChanged;
-  function saveEdgeDraft() {
+  async function saveEdgeDraft() {
+    const ok = await saveGameSettings({ ...edgeDraft }, boostDraft);
+    if (!ok) { setEdgeSavedMsg("❌ บันทึกไปที่เซิร์ฟเวอร์ไม่สำเร็จ — ตรวจว่าเข้าแอดมินด้วยรหัสที่ถูกต้อง"); return; }
     changedGames.forEach((g) => setEdge(g, edgeDraft[g], adminName));
     if (boostChanged) setBoostBonusPerStack(boostDraft, adminName);
     const n = changedGames.length + (boostChanged ? 1 : 0);
@@ -1569,9 +1574,15 @@ function AdminPanel({ onBack }) {
 
           <div className="admin-section-title">🏦 ข้อมูลบัญชีสำหรับโอนเงิน (โชว์ให้สมาชิกเห็นตอนฝาก)</div>
           <textarea className="field-input" style={{ width: "100%", minHeight: 80, marginBottom: 10, fontFamily: "inherit", resize: "vertical" }}
-            value={bankInfoDraft} onChange={(e) => { setBankInfoDraft(e.target.value); setBankInfoSaved(false); }} />
-          <button className="chip-btn" onClick={() => { setBankInfo(bankInfoDraft, adminName); setBankInfoSaved(true); }}>บันทึกข้อมูลบัญชี</button>
-          {bankInfoSaved && <span style={{ color: "var(--teal)", fontSize: 12, marginLeft: 10 }}>✅ บันทึกแล้ว</span>}
+            value={bankInfoDraft} onChange={(e) => { bankInfoDirtyRef.current = true; setBankInfoDraft(e.target.value); setBankInfoSaved(false); setBankInfoError(""); }} />
+          <button className="chip-btn" onClick={async () => {
+            setBankInfoError("");
+            const ok = await setBankInfo(bankInfoDraft, adminName);
+            if (ok) { bankInfoDirtyRef.current = false; setBankInfoSaved(true); }
+            else setBankInfoError("บันทึกไม่สำเร็จ — ตรวจว่าเข้าแอดมินด้วยรหัสที่ถูกต้อง แล้วลองอีกครั้ง");
+          }}>บันทึกข้อมูลบัญชี</button>
+          {bankInfoSaved && <span style={{ color: "var(--teal)", fontSize: 12, marginLeft: 10 }}>✅ บันทึกแล้ว (สมาชิกทุกเครื่องเห็น)</span>}
+          {bankInfoError && <div style={{ color: "var(--red)", fontSize: 12, marginTop: 6 }}>{bankInfoError}</div>}
           </>)}
 
           {adminTab === "members" && (<>
@@ -1802,8 +1813,8 @@ function WalletPage({ onBack }) {
   const timerRef = useRef(null);
   useEffect(() => () => clearTimeout(timerRef.current), []);
 
-  function handleRedeemCoupon() {
-    const result = redeemCoupon(couponCode);
+  async function handleRedeemCoupon() {
+    const result = await redeemCoupon(couponCode);
     if (result.success) {
       setCouponMsg({ ok: true, text: `แลกคูปองสำเร็จ! ได้รับเครดิต +${result.amount.toLocaleString()} B` });
       setCouponCode("");
@@ -1829,6 +1840,18 @@ function WalletPage({ onBack }) {
     if (amount > balance) { setMessage("เครดิตไม่เพียงพอ"); return; }
     if (!withdrawAccount.trim()) { setMessage("กรุณากรอกบัญชีปลายทางที่ต้องการรับเงิน"); return; }
     setStage("pending"); setMessage("");
+    if (API_URL) {
+      Promise.resolve(notifyWithdraw(amount, withdrawAccount.trim())).then((ok) => {
+        if (ok === true) {
+          setStage("done");
+          setMessage(`ส่งคำขอถอน ${amount.toLocaleString()} B แล้ว — เครดิตถูกพักไว้ รอแอดมินตรวจสอบ`);
+        } else {
+          setStage("form");
+          setMessage(ok === "insufficient" ? "เครดิตไม่เพียงพอ" : "ส่งคำขอไม่สำเร็จ ลองใหม่อีกครั้ง");
+        }
+      });
+      return;
+    }
     timerRef.current = setTimeout(() => {
       setBalance((b) => b - amount);
       setStage("done");
@@ -1980,8 +2003,15 @@ function Dice3D({ n, rolling, size = 64 }) {
   );
 }
 
+// With a backend, these games ask the server for the result (so it can't be faked in the browser).
+function gameErrorText(e) {
+  if (e && e.message === "insufficient_balance") return "เครดิตไม่พอสำหรับเดิมพันนี้";
+  if (e && e.message === "no_round") return "รอบนี้จบไปแล้ว เริ่มรอบใหม่ได้เลย";
+  if (e && e.status === 403) return "บัญชีนี้ถูกระงับการใช้งานชั่วคราว";
+  return "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ลองใหม่อีกครั้ง";
+}
 function DiceGame({ onBack }) {
-  const { balance, setBalance, edges, recordRound, celebrate } = useApp();
+  const { balance, setBalance, edges, recordRound, celebrate, serverAction, releaseHeld } = useApp();
   const [bet, setBet] = useState(100);
   const [betText, setBetText] = useState("100");
   const [target, setTarget] = useState(50);
@@ -2008,14 +2038,23 @@ function DiceGame({ onBack }) {
   // each other. The player's target/mode choice still changes the payout
   // multiplier (bigger reward for a narrower target) - it just no longer
   // changes the actual odds of winning, which are set globally by the admin.
-  function roll() {
+  async function roll() {
     if (rolling || bet > balance || bet <= 0) return;
-    setBalance((b) => b - bet); setResult(null); setRolling(true);
-    const won = Math.random() * 100 < edges.dice;
-    const raw = won
-      ? (mode === "over" ? target + Math.random() * (100 - target) : Math.random() * target)
-      : (mode === "over" ? Math.random() * target : target + Math.random() * (100 - target));
-    const final = Math.round(raw * 100) / 100;
+    let won, final, serverPayout = null, holdId = null;
+    if (API_URL) {
+      setResult(null); setRolling(true);
+      try {
+        const r = await serverAction("/api/games/dice", { bet, target, mode }, (x) => x.payout);
+        won = r.won; final = r.roll; serverPayout = r.payout; holdId = r.holdId;
+      } catch (e) { setRolling(false); alert(gameErrorText(e)); return; }
+    } else {
+      setBalance((b) => b - bet); setResult(null); setRolling(true);
+      won = Math.random() * 100 < edges.dice;
+      const raw = won
+        ? (mode === "over" ? target + Math.random() * (100 - target) : Math.random() * target)
+        : (mode === "over" ? Math.random() * target : target + Math.random() * (100 - target));
+      final = Math.round(raw * 100) / 100;
+    }
     let ticks = 0;
     timerRef.current = setInterval(() => {
       ticks += 1; setDisplay(Math.round(Math.random() * 10000) / 100);
@@ -2025,10 +2064,11 @@ function DiceGame({ onBack }) {
         const whole = Math.round(final * 100);
         setDiceFaces([1 + (Math.floor(whole / 10) % 6), 1 + (whole % 6)]);
         setLandTrigger((t) => t + 1);
-        const payout = won ? Math.round(bet * multiplier * 100) / 100 : 0;
+        const payout = serverPayout !== null ? serverPayout : won ? Math.round(bet * multiplier * 100) / 100 : 0;
         setTimeout(() => {
-          if (won) { setBalance((b) => b + payout); celebrate(payout / bet); }
-          recordRound("dice", bet, payout);
+          if (serverPayout !== null) { releaseHeld(holdId); if (won) celebrate(payout / bet); }
+          else if (won) { setBalance((b) => b + payout); celebrate(payout / bet); }
+          recordRound("dice", bet, payout, serverPayout !== null);
           setResult(won ? "win" : "lose");
           setHistory((h) => [{ id: Date.now(), won, roll: final }, ...h].slice(0, 12));
           setRolling(false);
@@ -2086,7 +2126,7 @@ function DiceGame({ onBack }) {
 
 // ---------- Limbo ----------
 function LimboGame({ onBack }) {
-  const { balance, setBalance, edges, recordRound, celebrate } = useApp();
+  const { balance, setBalance, edges, recordRound, celebrate, serverAction, releaseHeld } = useApp();
   const [bet, setBet] = useState(100);
   const [betText, setBetText] = useState("100");
   const [target, setTarget] = useState(2.0);
@@ -2101,16 +2141,25 @@ function LimboGame({ onBack }) {
   function adjustBet(fn) { if (!playing) setBet((b) => { const next = Math.max(10, Math.min(balance, Math.round(fn(b)))); setBetText(String(next)); return next; }); }
   function adjustTarget(fn) { if (!playing) setTarget((t) => Math.max(1.01, Math.round(fn(t) * 100) / 100)); }
 
-  function play() {
+  async function play() {
     if (playing || bet > balance || bet <= 0 || target < 1.01) return;
-    setBalance((b) => b - bet); setResult(null); setPlaying(true);
-    // Win/lose decided first by edges.limbo (the admin win rate), then the
-    // displayed multiplier is generated to land on the correct side of the
-    // player's target - see DiceGame for the same pattern explained in full.
-    const won0 = Math.random() * 100 < edges.limbo;
-    const rolled = won0
-      ? Math.round((target + Math.random() * target * 4) * 100) / 100
-      : Math.round((1 + Math.random() * Math.max(0.01, target - 1.01)) * 100) / 100;
+    let rolled, serverPayout = null, holdId = null;
+    if (API_URL) {
+      setResult(null); setPlaying(true);
+      try {
+        const r = await serverAction("/api/games/limbo", { bet, target }, (x) => x.payout);
+        rolled = r.rolled; serverPayout = r.payout; holdId = r.holdId;
+      } catch (e) { setPlaying(false); alert(gameErrorText(e)); return; }
+    } else {
+      setBalance((b) => b - bet); setResult(null); setPlaying(true);
+      // Win/lose decided first by edges.limbo (the admin win rate), then the
+      // displayed multiplier is generated to land on the correct side of the
+      // player's target - see DiceGame for the same pattern explained in full.
+      const won0 = Math.random() * 100 < edges.limbo;
+      rolled = won0
+        ? Math.round((target + Math.random() * target * 4) * 100) / 100
+        : Math.round((1 + Math.random() * Math.max(0.01, target - 1.01)) * 100) / 100;
+    }
     let ticks = 0; const steps = 14;
     timerRef.current = setInterval(() => {
       ticks += 1;
@@ -2119,10 +2168,11 @@ function LimboGame({ onBack }) {
       if (ticks >= steps) {
         clearInterval(timerRef.current); setDisplay(rolled);
         const won = rolled >= target;
-        const payout = won ? Math.round(bet * target * 100) / 100 : 0;
+        const payout = serverPayout !== null ? serverPayout : won ? Math.round(bet * target * 100) / 100 : 0;
         setTimeout(() => {
-          if (won) { setBalance((b) => b + payout); celebrate(payout / bet); }
-          recordRound("limbo", bet, payout);
+          if (serverPayout !== null) { releaseHeld(holdId); if (won) celebrate(payout / bet); }
+          else if (won) { setBalance((b) => b + payout); celebrate(payout / bet); }
+          recordRound("limbo", bet, payout, serverPayout !== null);
           setResult(won ? "win" : "lose");
           setHistory((h) => [{ id: Date.now(), won, rolled }, ...h].slice(0, 12));
           setPlaying(false);
@@ -2177,7 +2227,7 @@ const KENO_BASE_PAYTABLE = {
   9: [0, 0, 0, 0.3, 0.8, 2.5, 8, 25, 100, 500], 10: [0, 0, 0, 0.2, 0.5, 1.5, 4, 12, 40, 150, 1000],
 };
 function KenoGame({ onBack }) {
-  const { balance, setBalance, edges, recordRound, celebrate } = useApp();
+  const { balance, setBalance, edges, recordRound, celebrate , serverAction, releaseHeld } = useApp();
   const [bet, setBet] = useState(100);
   const [betText, setBetText] = useState("100");
   const [selected, setSelected] = useState([]);
@@ -2205,8 +2255,15 @@ function KenoGame({ onBack }) {
   // picked. The drawn numbers are then built to match that outcome (a
   // random slice of the player's own picks for "hits", filled out with
   // non-picked numbers) - see DiceGame for the pattern in full.
-  function draw() {
+  async function draw() {
     if (drawing || selected.length === 0 || bet > balance || bet <= 0) return;
+    let result, server = null;
+    if (API_URL) {
+      setOutcome(null); setDrawing(true); setRevealCount(0);
+      try { server = await serverAction("/api/games/play/keno", { bet, picks: selected }, (x) => x.payout); }
+      catch (e) { setDrawing(false); alert(gameErrorText(e)); return; }
+      result = server.drawn;
+    } else {
     setBalance((b) => b - bet); setOutcome(null); setDrawing(true); setRevealCount(0);
     const payTable = KENO_BASE_PAYTABLE[selected.length] || [];
     const won0 = Math.random() * 100 < edges.keno;
@@ -2218,7 +2275,8 @@ function KenoGame({ onBack }) {
     const hitPool = [...selected].sort(() => Math.random() - 0.5).slice(0, Math.min(targetHits, selected.length));
     const nonSelected = KENO_GRID.filter((n) => !selected.includes(n));
     const missPool = [...nonSelected].sort(() => Math.random() - 0.5).slice(0, KENO_DRAW - hitPool.length);
-    const result = [...hitPool, ...missPool].sort(() => Math.random() - 0.5);
+    result = [...hitPool, ...missPool].sort(() => Math.random() - 0.5);
+    }
     setDrawn(result);
     let r = 0;
     const timer = setInterval(() => {
@@ -2228,11 +2286,12 @@ function KenoGame({ onBack }) {
         const hits = selected.filter((n) => result.includes(n)).length;
         const table = KENO_BASE_PAYTABLE[selected.length] || [];
         const baseMult = table[hits] ?? 0;
-        const mult = Math.round(baseMult * scale * 100) / 100;
-        const payout = Math.round(bet * mult * 100) / 100;
+        const mult = server ? server.mult : Math.round(baseMult * scale * 100) / 100;
+        const payout = server ? server.payout : Math.round(bet * mult * 100) / 100;
         setTimeout(() => {
-          if (payout > 0) { setBalance((b) => b + payout); celebrate(payout / bet); }
-          recordRound("keno", bet, payout);
+          if (server) { releaseHeld(server.holdId); if (payout > 0) celebrate(payout / bet); }
+          else if (payout > 0) { setBalance((b) => b + payout); celebrate(payout / bet); }
+          recordRound("keno", bet, payout, !!server);
           setOutcome({ hits, mult, payout });
           setDrawing(false);
         }, 200);
@@ -2310,7 +2369,9 @@ function freshDeck() {
   return deck;
 }
 function HiLoGame({ onBack }) {
-  const { balance, setBalance, edges, recordRound, celebrate, muted } = useApp();
+  const { balance, setBalance, edges, recordRound, celebrate, muted, serverAction, releaseHeld } = useApp();
+  const [busy, setBusy] = useState(false);
+  const [serverOdds, setServerOdds] = useState(null); // higher/lower hints from the server's deck
   const [bet, setBet] = useState(100);
   const [betText, setBetText] = useState("100");
   const [active, setActive] = useState(false);
@@ -2329,8 +2390,21 @@ function HiLoGame({ onBack }) {
     for (const c of remaining) { if (c.rank > current.rank) higher++; else if (c.rank < current.rank) lower++; }
     return { higher, lower, total: remaining.length };
   }
-  function start() {
-    if (active || bet > balance || bet <= 0) return;
+  async function start() {
+    if (active || busy || bet > balance || bet <= 0) return;
+    if (API_URL) {
+      setBusy(true);
+      let r;
+      try { r = await serverAction("/api/games/hilo/start", { bet }); }
+      catch (e) { setBusy(false); alert(gameErrorText(e)); return; }
+      setBusy(false);
+      dRef.current = freshDeck(); // only used to show the higher/lower hints
+      if (!muted) playCardFlip();
+      setServerOdds(r.odds || null);
+      setPos(1); setCurrent(r.card); setMultiplier(1); setMessage(""); setFlash(null); setActive(true);
+      setFlipTrigger((t) => t + 1);
+      return;
+    }
     setBalance((b) => b - bet);
     const fresh = freshDeck(); dRef.current = fresh;
     if (!muted) playCardFlip();
@@ -2343,8 +2417,34 @@ function HiLoGame({ onBack }) {
   // Clamped so it always lands on a valid rank (2-14); at the extreme
   // boundary (already on a 2 or an Ace) it may fall back to a tie/push,
   // which the existing tie-handling below already treats as a safe no-op.
-  function guess(direction) {
-    if (!active || !current) return;
+  async function guess(direction) {
+    if (!active || !current || busy) return;
+    if (API_URL) {
+      setBusy(true);
+      let r;
+      try { r = await serverAction("/api/games/hilo/guess", { direction }); }
+      catch (e) { setBusy(false); if (e.message === "no_round") setActive(false); alert(gameErrorText(e)); return; }
+      setBusy(false);
+      if (!muted) playCardFlip();
+      setFlipTrigger((t) => t + 1);
+      setCurrent(r.card); setPos((p) => p + 1);
+      if (r.odds) setServerOdds(r.odds);
+      if (r.outcome === "push") {
+        setFlash("push"); setMessage("ไพ่เท่ากัน — เสมอ ไม่นับผล");
+        setTimeout(() => setFlash(null), 500);
+      } else if (r.outcome === "win") {
+        setMultiplier(r.multiplier);
+        setFlash("win"); setMessage(`ถูกต้อง! ตัวคูณสะสม ${r.multiplier}×`);
+        if (!muted) setTimeout(playCorrectDing, 120);
+        setTimeout(() => setFlash(null), 500);
+      } else {
+        setFlash("lose"); setMessage("ทายผิด — เสียเดิมพันรอบนี้");
+        if (!muted) setTimeout(playWrongBuzz, 120);
+        recordRound("hilo", bet, 0, true);
+        setTimeout(() => { setActive(false); setFlash(null); }, 700);
+      }
+      return;
+    }
     const { higher, lower, total } = remainingCounts(pos);
     if (!muted) playCardFlip();
     setFlipTrigger((t) => t + 1);
@@ -2383,8 +2483,19 @@ function HiLoGame({ onBack }) {
       setTimeout(() => { setActive(false); setFlash(null); }, 700);
     }
   }
-  function cashOut() {
-    if (!active) return;
+  async function cashOut() {
+    if (!active || busy) return;
+    if (API_URL) {
+      setBusy(true);
+      let r;
+      try { r = await serverAction("/api/games/hilo/cashout", {}); }
+      catch (e) { setBusy(false); if (e.message === "no_round") setActive(false); alert(gameErrorText(e)); return; }
+      setBusy(false);
+      celebrate(r.payout / bet);
+      recordRound("hilo", bet, r.payout, true);
+      setMessage(`เก็บเงินสำเร็จ +${r.payout.toLocaleString()} B`); setActive(false);
+      return;
+    }
     const payout = Math.round(bet * multiplier * 100) / 100;
     setBalance((b) => b + payout);
     celebrate(payout / bet);
@@ -2392,7 +2503,7 @@ function HiLoGame({ onBack }) {
     setMessage(`เก็บเงินสำเร็จ +${payout.toLocaleString()} B`); setActive(false);
   }
   function adjustBet(fn) { if (!active) setBet((b) => { const next = Math.max(10, Math.min(balance, Math.round(fn(b)))); setBetText(String(next)); return next; }); }
-  const chances = current && active ? (() => { const { higher, lower, total } = remainingCounts(pos); return { higherPct: (higher / total) * 100, lowerPct: (lower / total) * 100 }; })() : null;
+  const chances = current && active ? (() => { const { higher, lower, total } = API_URL && serverOdds ? serverOdds : remainingCounts(pos); return { higherPct: (higher / total) * 100, lowerPct: (lower / total) * 100 }; })() : null;
   const isRed = current && ["♥", "♦"].includes(current.suit);
 
   return (
@@ -2453,7 +2564,8 @@ function HiLoGame({ onBack }) {
 // ---------- Mines ----------
 const MINES_SIZE = 25;
 function MinesGame({ onBack }) {
-  const { balance, setBalance, edges, recordRound, celebrate } = useApp();
+  const { balance, setBalance, edges, recordRound, celebrate, serverAction } = useApp();
+  const [busy, setBusy] = useState(false);
   const [bet, setBet] = useState(100);
   const [betText, setBetText] = useState("100");
   const [mineCount, setMineCount] = useState(5);
@@ -2479,13 +2591,41 @@ function MinesGame({ onBack }) {
   // difficulty the player picked) still drives the payout multiplier via
   // computeMultiplier below, exactly like target/mode do in DiceGame - it
   // just no longer drives the actual survive/hit odds, which are global.
-  function start() {
-    if (active || bet > balance || bet <= 0) return;
+  async function start() {
+    if (active || busy || bet > balance || bet <= 0) return;
+    if (API_URL) {
+      setBusy(true);
+      try { await serverAction("/api/games/mines/start", { bet, mineCount }); }
+      catch (e) { setBusy(false); alert(gameErrorText(e)); return; }
+      setBusy(false);
+      setMines([]); setRevealed([]); setMessage(""); setActive(true);
+      return;
+    }
     setBalance((b) => b - bet);
     setMines([]); setRevealed([]); setMessage(""); setActive(true);
   }
-  function clickTile(i) {
-    if (!active || revealed.includes(i)) return;
+  async function clickTile(i) {
+    if (!active || busy || revealed.includes(i)) return;
+    if (API_URL) {
+      setBusy(true);
+      let r;
+      try { r = await serverAction("/api/games/mines/click", { tile: i }); }
+      catch (e) { setBusy(false); if (e.message === "no_round") setActive(false); alert(gameErrorText(e)); return; }
+      setBusy(false);
+      if (r.hit) {
+        setMines(r.mines);
+        setRevealed((rv) => [...rv, i, ...r.mines]); setActive(false); setMessage("บึ้ม! เสียเดิมพันรอบนี้");
+        recordRound("mines", bet, 0, true);
+      } else if (r.finished) {
+        setRevealed((rv) => [...rv, i]); setActive(false);
+        setMessage(`เปิดครบทุกช่องปลอดภัย! +${r.payout.toLocaleString()} B`);
+        celebrate(r.payout / bet);
+        recordRound("mines", bet, r.payout, true);
+      } else {
+        setRevealed((rv) => [...rv, i]);
+      }
+      return;
+    }
     const hit = Math.random() * 100 >= edges.mines;
     if (hit) {
       const remainingUnrevealed = Array.from({ length: MINES_SIZE }, (_, x) => x).filter((x) => !revealed.includes(x) && x !== i);
@@ -2505,8 +2645,19 @@ function MinesGame({ onBack }) {
       recordRound("mines", bet, payout);
     }
   }
-  function cashOut() {
-    if (!active || revealedSafeCount === 0) return;
+  async function cashOut() {
+    if (!active || busy || revealedSafeCount === 0) return;
+    if (API_URL) {
+      setBusy(true);
+      let r;
+      try { r = await serverAction("/api/games/mines/cashout", {}); }
+      catch (e) { setBusy(false); if (e.message === "no_round") setActive(false); alert(gameErrorText(e)); return; }
+      setBusy(false);
+      setMessage(`เก็บเงินสำเร็จ +${r.payout.toLocaleString()} B`); setActive(false);
+      celebrate(r.payout / bet);
+      recordRound("mines", bet, r.payout, true);
+      return;
+    }
     const payout = Math.round(bet * multiplier * 100) / 100;
     setBalance((b) => b + payout); setMessage(`เก็บเงินสำเร็จ +${payout.toLocaleString()} B`); setActive(false);
     celebrate(payout / bet);
@@ -2576,7 +2727,7 @@ const SLOT_SYMBOLS = [
 const SLOT_POOL = SLOT_SYMBOLS.flatMap((s) => Array(s.weight).fill(s));
 function spinReel() { return SLOT_POOL[Math.floor(Math.random() * SLOT_POOL.length)]; }
 function SlotGame({ onBack }) {
-  const { balance, setBalance, edges, recordRound, celebrate, muted } = useApp();
+  const { balance, setBalance, edges, recordRound, celebrate, muted , serverAction, releaseHeld } = useApp();
   const [bet, setBet] = useState(100);
   const [betText, setBetText] = useState("100");
   const [reels, setReels] = useState([SLOT_SYMBOLS[0], SLOT_SYMBOLS[1], SLOT_SYMBOLS[2]]);
@@ -2592,9 +2743,17 @@ function SlotGame({ onBack }) {
   useEffect(() => () => { timers.current.forEach(clearTimeout); clearInterval(clickTimerRef.current); }, []);
 
   function adjustBet(fn) { if (!busy) setBet((b) => { const next = Math.max(10, Math.min(balance, Math.round(fn(b)))); setBetText(String(next)); return next; }); }
-  function spin() {
+  async function spin() {
     if (busy || bet > balance || bet <= 0) return;
+    let server = null;
+    if (API_URL) {
+      setBusy(true);
+      try { server = await serverAction("/api/games/play/slot", { bet }, (x) => x.payout); }
+      catch (e) { setBusy(false); alert(gameErrorText(e)); return; }
+      setMessage(""); setSpinning([true, true, true]);
+    } else {
     setBalance((b) => b - bet); setMessage(""); setBusy(true); setSpinning([true, true, true]);
+    }
     setBurstTrigger((t) => t + 1);
     clearInterval(clickTimerRef.current);
     if (!muted) clickTimerRef.current = setInterval(playReelClick, 90);
@@ -2604,7 +2763,9 @@ function SlotGame({ onBack }) {
     // pattern in full.
     const won0 = Math.random() * 100 < edges.slot;
     let finals;
-    if (won0) {
+    if (server) {
+      finals = server.reels.map((id) => SLOT_SYMBOLS.find((x) => x.id === id) || SLOT_SYMBOLS[0]);
+    } else if (won0) {
       const symA = spinReel();
       const symC = Math.random() < 0.15 ? symA : spinReel();
       finals = [symA, symA, symC].sort(() => Math.random() - 0.5);
@@ -2630,11 +2791,12 @@ function SlotGame({ onBack }) {
           else if (a.id === b2.id) baseMult = a.pay2;
           else if (b2.id === c.id) baseMult = b2.pay2;
           else if (a.id === c.id) baseMult = a.pay2;
-          const mult = Math.round(baseMult * scale * 100) / 100;
-          const payout = Math.round(bet * mult * 100) / 100;
+          const mult = server ? server.mult : Math.round(baseMult * scale * 100) / 100;
+          const payout = server ? server.payout : Math.round(bet * mult * 100) / 100;
           setTimeout(() => {
-            if (payout > 0) { setBalance((bal) => bal + payout); celebrate(payout / bet); }
-            recordRound("slot", bet, payout);
+            if (server) { releaseHeld(server.holdId); if (payout > 0) celebrate(payout / bet); }
+            else if (payout > 0) { setBalance((bal) => bal + payout); celebrate(payout / bet); }
+            recordRound("slot", bet, payout, !!server);
             setMessage(mult > 0 ? `ชนะ! ${mult}× (+${payout.toLocaleString()} B)` : "ไม่ถูกรางวัล ลองใหม่");
             setHistory((h) => [{ id: Date.now(), mult }, ...h].slice(0, 10));
             setBusy(false);
@@ -2693,6 +2855,22 @@ function SlotGame({ onBack }) {
   );
 }
 
+// The four big games talk to the server through this: every call goes through the
+// shared server lock, winnings stay hidden until the game reports the round finished.
+function useServerGame() {
+  const { serverAction, releaseHeld } = useApp();
+  const holdsRef = useRef([]);
+  const server = useMemo(() => (API_URL ? {
+    call: async (path, body) => {
+      const r = await serverAction(path, body, (x) => (typeof x.payout === "number" ? x.payout : typeof x.receive === "number" ? x.receive : 0));
+      if (r.holdId) holdsRef.current.push(r.holdId);
+      return r;
+    },
+  } : null), []); // eslint-disable-line react-hooks/exhaustive-deps
+  const releaseAll = () => { const ids = holdsRef.current; holdsRef.current = []; ids.forEach((id) => releaseHeld(id)); };
+  return { server, releaseAll };
+}
+
 // ---------- Neon Fortune (premium slot, credits synced with the shared wallet) ----------
 function NeonFortuneGame({ onBack }) {
   const { balance, setBalance, edges, recordRound, celebrate, muted } = useApp();
@@ -2702,11 +2880,14 @@ function NeonFortuneGame({ onBack }) {
   // the shared wallet (and thus the top bar everywhere else in the app) stays in sync.
   const initialBalanceRef = useRef(balance);
 
+  const { server, releaseAll } = useServerGame();
   const handleBalanceDelta = (delta) => {
+    if (API_URL) return; // the server already moved the money
     setBalance((b) => Math.max(0, Math.round((b + delta) * 100) / 100));
   };
   const handleRound = (wager, payout) => {
-    recordRound("neonfortune", wager, payout);
+    recordRound("neonfortune", wager, payout, !!API_URL);
+    releaseAll();
   };
   const handleBigWin = (multiplier) => {
     celebrate(multiplier);
@@ -2733,6 +2914,7 @@ function NeonFortuneGame({ onBack }) {
           winRate={edges.neonfortune}
           onBalanceDelta={handleBalanceDelta}
           onRound={handleRound}
+          server={server}
           onBigWin={handleBigWin}
           muted={muted}
         />
@@ -2748,11 +2930,14 @@ function StockTradingGame({ onBack }) {
   const { balance, setBalance, edges, recordRound, celebrate } = useApp();
   const initialBalanceRef = useRef(balance);
 
+  const { server, releaseAll } = useServerGame();
   const handleBalanceDelta = (delta) => {
+    if (API_URL) return; // the server already moved the money
     setBalance((b) => Math.max(0, Math.round((b + delta) * 100) / 100));
   };
   const handleRound = (wager, payout) => {
-    recordRound("stocktrading", wager, payout);
+    recordRound("stocktrading", wager, payout, !!API_URL);
+    releaseAll();
   };
   const handleBigWin = (multiplier) => {
     celebrate(multiplier);
@@ -2779,6 +2964,7 @@ function StockTradingGame({ onBack }) {
           winRate={edges.stocktrading}
           onBalanceDelta={handleBalanceDelta}
           onRound={handleRound}
+          server={server}
           onBigWin={handleBigWin}
         />
       </div>
@@ -2790,11 +2976,14 @@ function NeonFishingGame({ onBack }) {
   const { balance, setBalance, edges, recordRound, celebrate, muted } = useApp();
   const initialBalanceRef = useRef(balance);
 
+  const { server, releaseAll } = useServerGame();
   const handleBalanceDelta = (delta) => {
+    if (API_URL) return; // the server already moved the money
     setBalance((b) => Math.max(0, Math.round((b + delta) * 100) / 100));
   };
   const handleRound = (wager, payout) => {
-    recordRound("neonfishing", wager, payout);
+    recordRound("neonfishing", wager, payout, !!API_URL);
+    releaseAll();
   };
   const handleBigWin = (multiplier) => {
     celebrate(multiplier);
@@ -2821,6 +3010,7 @@ function NeonFishingGame({ onBack }) {
           winRate={edges.neonfishing}
           onBalanceDelta={handleBalanceDelta}
           onRound={handleRound}
+          server={server}
           onBigWin={handleBigWin}
           muted={muted}
         />
@@ -2833,11 +3023,14 @@ function PlushieParadiseGame({ onBack }) {
   const { balance, setBalance, edges, recordRound, celebrate, muted } = useApp();
   const initialBalanceRef = useRef(balance);
 
+  const { server, releaseAll } = useServerGame();
   const handleBalanceDelta = (delta) => {
+    if (API_URL) return; // the server already moved the money
     setBalance((b) => Math.max(0, Math.round((b + delta) * 100) / 100));
   };
   const handleRound = (wager, payout) => {
-    recordRound("plushieparadise", wager, payout);
+    recordRound("plushieparadise", wager, payout, !!API_URL);
+    releaseAll();
   };
   const handleBigWin = (multiplier) => {
     celebrate(multiplier);
@@ -2864,6 +3057,7 @@ function PlushieParadiseGame({ onBack }) {
           winRate={edges.plushieparadise}
           onBalanceDelta={handleBalanceDelta}
           onRound={handleRound}
+          server={server}
           onBigWin={handleBigWin}
           muted={muted}
         />
@@ -2883,7 +3077,7 @@ const CLASSIC_SYMBOLS = [
 const CLASSIC_POOL = CLASSIC_SYMBOLS.flatMap((s) => Array(s.weight).fill(s));
 function classicSpinReel() { return CLASSIC_POOL[Math.floor(Math.random() * CLASSIC_POOL.length)]; }
 function ClassicSlotsGame({ onBack }) {
-  const { balance, setBalance, edges, recordRound, celebrate, muted } = useApp();
+  const { balance, setBalance, edges, recordRound, celebrate, muted , serverAction, releaseHeld } = useApp();
   const [bet, setBet] = useState(100);
   const [betText, setBetText] = useState("100");
   const [reels, setReels] = useState([CLASSIC_SYMBOLS[0], CLASSIC_SYMBOLS[1], CLASSIC_SYMBOLS[2]]);
@@ -2899,9 +3093,17 @@ function ClassicSlotsGame({ onBack }) {
   useEffect(() => () => { timers.current.forEach(clearTimeout); clearInterval(clickTimerRef.current); }, []);
 
   function adjustBet(fn) { if (!busy) setBet((b) => { const next = Math.max(10, Math.min(balance, Math.round(fn(b)))); setBetText(String(next)); return next; }); }
-  function spin() {
+  async function spin() {
     if (busy || bet > balance || bet <= 0) return;
+    let server = null;
+    if (API_URL) {
+      setBusy(true);
+      try { server = await serverAction("/api/games/play/classicslots", { bet }, (x) => x.payout); }
+      catch (e) { setBusy(false); alert(gameErrorText(e)); return; }
+      setMessage(""); setSpinning([true, true, true]);
+    } else {
     setBalance((b) => b - bet); setMessage(""); setBusy(true); setSpinning([true, true, true]);
+    }
     setBurstTrigger((t) => t + 1);
     clearInterval(clickTimerRef.current);
     if (!muted) clickTimerRef.current = setInterval(playReelClick, 90);
@@ -2909,7 +3111,9 @@ function ClassicSlotsGame({ onBack }) {
     // for the pattern in full.
     const won0 = Math.random() * 100 < edges.classicslots;
     let finals;
-    if (won0) {
+    if (server) {
+      finals = server.reels.map((id) => CLASSIC_SYMBOLS.find((x) => x.id === id) || CLASSIC_SYMBOLS[0]);
+    } else if (won0) {
       const symA = classicSpinReel();
       const symC = Math.random() < 0.15 ? symA : classicSpinReel();
       finals = [symA, symA, symC].sort(() => Math.random() - 0.5);
@@ -2935,11 +3139,12 @@ function ClassicSlotsGame({ onBack }) {
           else if (a.id === b2.id) baseMult = a.pay2;
           else if (b2.id === c.id) baseMult = b2.pay2;
           else if (a.id === c.id) baseMult = a.pay2;
-          const mult = Math.round(baseMult * scale * 100) / 100;
-          const payout = Math.round(bet * mult * 100) / 100;
+          const mult = server ? server.mult : Math.round(baseMult * scale * 100) / 100;
+          const payout = server ? server.payout : Math.round(bet * mult * 100) / 100;
           setTimeout(() => {
-            if (payout > 0) { setBalance((bal) => bal + payout); celebrate(payout / bet); }
-            recordRound("classicslots", bet, payout);
+            if (server) { releaseHeld(server.holdId); if (payout > 0) celebrate(payout / bet); }
+            else if (payout > 0) { setBalance((bal) => bal + payout); celebrate(payout / bet); }
+            recordRound("classicslots", bet, payout, !!server);
             setMessage(mult > 0 ? `ชนะ! ${mult}× (+${payout.toLocaleString()} B)` : "ไม่ถูกรางวัล ลองใหม่");
             setHistory((h) => [{ id: Date.now(), mult }, ...h].slice(0, 10));
             setBusy(false);
@@ -3082,7 +3287,7 @@ function HooDie3D({ n, rolling, size = 58 }) {
 }
 
 function HooHeyGame({ onBack }) {
-  const { balance, setBalance, edges, recordRound, celebrate } = useApp();
+  const { balance, setBalance, edges, recordRound, celebrate , serverAction, releaseHeld } = useApp();
   const [bet, setBet] = useState(100);
   const [betText, setBetText] = useState("100");
   const [picked, setPicked] = useState(4); // default: crab
@@ -3098,15 +3303,21 @@ function HooHeyGame({ onBack }) {
 
   function adjustBet(fn) { if (!rolling) setBet((b) => { const next = Math.max(10, Math.min(balance, Math.round(fn(b)))); setBetText(String(next)); return next; }); }
 
-  function roll() {
+  async function roll() {
     if (rolling || bet > balance || bet <= 0) return;
-    setBalance((b) => b - bet); setOutcome(null); setRolling(true);
+    let server = null;
+    if (API_URL) {
+      setOutcome(null); setRolling(true);
+      try { server = await serverAction("/api/games/play/hoohey", { bet, picked }, (x) => x.payout); }
+      catch (e) { setRolling(false); alert(gameErrorText(e)); return; }
+    } else { setBalance((b) => b - bet); setOutcome(null); setRolling(true); }
     // Win/lose decided first by edges.hoohey (admin win rate) - see
     // DiceGame for the pattern in full. Win = at least one die is forced
     // to show the player's picked symbol; lose = none of the three do.
     const won0 = Math.random() * 100 < edges.hoohey;
     let finalDice;
-    if (won0) {
+    if (server) finalDice = server.dice;
+    else if (won0) {
       const guaranteedIdx = Math.floor(Math.random() * 3);
       finalDice = [0, 1, 2].map((i) => (i === guaranteedIdx ? picked + 1 : 1 + Math.floor(Math.random() * 6)));
     } else {
@@ -3122,11 +3333,12 @@ function HooHeyGame({ onBack }) {
         setLandTrigger((t) => t + 1);
         const matches = finalDice.filter((d) => d === picked + 1).length;
         const baseMult = HOOHEY_PAYTABLE[matches];
-        const mult = Math.round(baseMult * scale * 100) / 100;
-        const payout = matches > 0 ? Math.round(bet * mult * 100) / 100 : 0;
+        const mult = server ? server.mult : Math.round(baseMult * scale * 100) / 100;
+        const payout = server ? server.payout : matches > 0 ? Math.round(bet * mult * 100) / 100 : 0;
         setTimeout(() => {
-          if (payout > 0) { setBalance((b) => b + payout); celebrate(payout / bet); }
-          recordRound("hoohey", bet, payout);
+          if (server) { releaseHeld(server.holdId); if (payout > 0) celebrate(payout / bet); }
+          else if (payout > 0) { setBalance((b) => b + payout); celebrate(payout / bet); }
+          recordRound("hoohey", bet, payout, !!server);
           setOutcome({ matches, mult, payout });
           setHistory((h) => [{ id: Date.now(), matches, payout }, ...h].slice(0, 12));
           setRolling(false);
@@ -3222,7 +3434,7 @@ function pickWeightedHorse() {
 }
 
 function HorseRaceGame({ onBack }) {
-  const { balance, setBalance, edges, recordRound, celebrate, muted } = useApp();
+  const { balance, setBalance, edges, recordRound, celebrate, muted , serverAction, releaseHeld } = useApp();
   const [bet, setBet] = useState(100);
   const [betText, setBetText] = useState("100");
   const [picked, setPicked] = useState(1);
@@ -3250,13 +3462,14 @@ function HorseRaceGame({ onBack }) {
       const maxDur = Math.max(...Object.values(durations));
       timerRef.current = setTimeout(() => {
         clearInterval(hoofTimerRef.current);
-        const { winner, betAtStart } = raceDataRef.current;
+        const { winner, betAtStart, server } = raceDataRef.current;
         const won = picked === winner.id;
         const pickedHorse = HORSES.find((h) => h.id === picked);
-        const mult = won ? Math.round(pickedHorse.odds * scale * 100) / 100 : 0;
-        const payout = won ? Math.round(betAtStart * mult * 100) / 100 : 0;
-        if (won) { setBalance((b) => b + payout); celebrate(payout / betAtStart); }
-        recordRound("horserace", betAtStart, payout);
+        const mult = server ? server.mult : won ? Math.round(pickedHorse.odds * scale * 100) / 100 : 0;
+        const payout = server ? server.payout : won ? Math.round(betAtStart * mult * 100) / 100 : 0;
+        if (server) { releaseHeld(server.holdId); if (payout > 0) celebrate(payout / betAtStart); }
+        else if (won) { setBalance((b) => b + payout); celebrate(payout / betAtStart); }
+        recordRound("horserace", betAtStart, payout, !!server);
         setResult({ winner, won, payout, mult });
         setHistory((h) => [{ id: Date.now(), won, horse: winner.name }, ...h].slice(0, 10));
         setPhase("done");
@@ -3268,8 +3481,21 @@ function HorseRaceGame({ onBack }) {
 
   function adjustBet(fn) { if (!racing) setBet((b) => { const next = Math.max(10, Math.min(balance, Math.round(fn(b)))); setBetText(String(next)); return next; }); }
 
-  function startRace() {
-    if (racing || bet > balance || bet <= 0) return;
+  const [starting, setStarting] = useState(false);
+  async function startRace() {
+    if (racing || starting || bet > balance || bet <= 0) return;
+    if (API_URL) {
+      setStarting(true);
+      let server;
+      try { server = await serverAction("/api/games/play/horserace", { bet, picked }, (x) => x.payout); }
+      catch (e) { setStarting(false); alert(gameErrorText(e)); return; }
+      setStarting(false);
+      setResult(null);
+      setDurations(server.durations);
+      raceDataRef.current = { winner: HORSES.find((h) => h.id === server.winner), betAtStart: bet, server };
+      setPhase("reset");
+      return;
+    }
     setBalance((b) => b - bet);
     setResult(null);
     // Win/lose decided first by edges.horserace (admin win rate) - the
@@ -3410,7 +3636,7 @@ function rouletteCheckWin(n, betType, straightNum) {
 }
 
 function RouletteGame({ onBack }) {
-  const { balance, setBalance, edges, recordRound, celebrate, muted } = useApp();
+  const { balance, setBalance, edges, recordRound, celebrate, muted , serverAction, releaseHeld } = useApp();
   const [bet, setBet] = useState(100);
   const [betText, setBetText] = useState("100");
   const [betType, setBetType] = useState("red");
@@ -3427,11 +3653,15 @@ function RouletteGame({ onBack }) {
 
   function adjustBet(fn) { if (!spinning) setBet((b) => { const next = Math.max(10, Math.min(balance, Math.round(fn(b)))); setBetText(String(next)); return next; }); }
 
-  function spin() {
+  async function spin() {
     if (spinning || bet > balance || bet <= 0) return;
-    setBalance((b) => b - bet);
+    let server = null;
+    if (API_URL) {
+      setSpinning(true);
+      try { server = await serverAction("/api/games/play/roulette", { bet, betType, straightNum }, (x) => x.payout); }
+      catch (e) { setSpinning(false); alert(gameErrorText(e)); return; }
+    } else { setBalance((b) => b - bet); setSpinning(true); }
     setResult(null);
-    setSpinning(true);
     if (!muted) playLeverPull();
     hoofTimerRef.current = setInterval(() => { if (!muted) playReelClick(); }, 90);
 
@@ -3444,7 +3674,7 @@ function RouletteGame({ onBack }) {
     const winningNums = allRouletteNums.filter((n) => rouletteCheckWin(n, betType, straightNum));
     const losingNums = allRouletteNums.filter((n) => !rouletteCheckWin(n, betType, straightNum));
     const roulettePool = won0 && winningNums.length > 0 ? winningNums : losingNums.length > 0 ? losingNums : allRouletteNums;
-    const winNum = roulettePool[Math.floor(Math.random() * roulettePool.length)];
+    const winNum = server ? server.number : roulettePool[Math.floor(Math.random() * roulettePool.length)];
     const idx = ROULETTE_WHEEL_ORDER.indexOf(winNum);
     const targetAngle = idx * ROULETTE_SEG;
     const turns = 8 + Math.floor(Math.random() * 3);
@@ -3461,10 +3691,11 @@ function RouletteGame({ onBack }) {
       if (!muted) playLeverPull();
       const won = rouletteCheckWin(winNum, betType, straightNum);
       const baseMult = ROULETTE_BASE_MULT[betType];
-      const mult = won ? Math.round(baseMult * scale * 100) / 100 : 0;
-      const payout = won ? Math.round(bet * mult * 100) / 100 : 0;
-      if (won) { setBalance((b) => b + payout); celebrate(payout / bet); }
-      recordRound("roulette", bet, payout);
+      const mult = server ? server.mult : won ? Math.round(baseMult * scale * 100) / 100 : 0;
+      const payout = server ? server.payout : won ? Math.round(bet * mult * 100) / 100 : 0;
+      if (server) { releaseHeld(server.holdId); if (payout > 0) celebrate(payout / bet); }
+      else if (won) { setBalance((b) => b + payout); celebrate(payout / bet); }
+      recordRound("roulette", bet, payout, !!server);
       setResult({ number: winNum, won, payout, mult });
       setHistory((h) => [{ id: Date.now(), number: winNum, won }, ...h].slice(0, 14));
       setSpinning(false);
@@ -3613,7 +3844,7 @@ function pickFortuneSegment() {
 }
 
 function FortuneWheelGame({ onBack }) {
-  const { balance, setBalance, edges, recordRound, celebrate, muted } = useApp();
+  const { balance, setBalance, edges, recordRound, celebrate, muted , serverAction, releaseHeld } = useApp();
   const [bet, setBet] = useState(100);
   const [betText, setBetText] = useState("100");
   const [spinning, setSpinning] = useState(false);
@@ -3630,14 +3861,27 @@ function FortuneWheelGame({ onBack }) {
 
   function adjustBet(fn) { if (!spinning) setBet((b) => { const next = Math.max(10, Math.min(balance, Math.round(fn(b)))); setBetText(String(next)); return next; }); }
 
-  function spin() {
+  // free spins are kept on the server: load how many are waiting
+  useEffect(() => {
+    if (!API_URL || !readMemberToken()) return;
+    memberFetch("/api/games/fortune/free").then((r) => setFreeSpins(r.freeSpins || 0)).catch(() => {});
+  }, []);
+  async function spin() {
     if (spinning) return;
     if (!usingFree && (bet > balance || bet <= 0)) return;
-    const wager = usingFree ? 0 : bet;
-    if (!usingFree) setBalance((b) => b - bet);
-    else setFreeSpins((f) => f - 1);
+    let server = null;
+    let wager = usingFree ? 0 : bet;
+    if (API_URL) {
+      setSpinning(true);
+      try { server = await serverAction("/api/games/play/fortune", { bet }, (x) => x.payout); }
+      catch (e) { setSpinning(false); alert(gameErrorText(e)); return; }
+      wager = server.wager;
+    } else {
+      if (!usingFree) setBalance((b) => b - bet);
+      else setFreeSpins((f) => f - 1);
+      setSpinning(true);
+    }
     setResult(null);
-    setSpinning(true);
     if (!muted) playLeverPull();
     hoofTimerRef.current = setInterval(() => { if (!muted) playReelClick(); }, 90);
 
@@ -3654,7 +3898,7 @@ function FortuneWheelGame({ onBack }) {
       for (const seg of list) { if (r < seg.weight) return seg.i; r -= seg.weight; }
       return list[list.length - 1].i;
     }
-    const idx = won0 && payingSegs.length > 0 ? pickWeightedFrom(payingSegs) : pickWeightedFrom(nonPayingSegs);
+    const idx = server ? server.segment : won0 && payingSegs.length > 0 ? pickWeightedFrom(payingSegs) : pickWeightedFrom(nonPayingSegs);
     const seg = FORTUNE_SEGMENTS[idx];
     const centerAngle = idx * FORTUNE_SEG_ANGLE + FORTUNE_SEG_ANGLE / 2;
     const targetMod = (360 - centerAngle) % 360;
@@ -3671,14 +3915,19 @@ function FortuneWheelGame({ onBack }) {
       clearInterval(hoofTimerRef.current);
       if (!muted) playLeverPull();
       let payout = 0;
-      if (seg.free) {
+      if (server) {
+        payout = server.payout;
+        setFreeSpins(server.freeSpins);
+        releaseHeld(server.holdId);
+        if (payout > 0) celebrate(payout / Math.max(server.bet, 1));
+      } else if (seg.free) {
         setFreeSpins((f) => f + 1);
       } else {
         const mult = Math.round(seg.mult * scale * 100) / 100;
         payout = Math.round(bet * mult * 100) / 100;
         if (payout > 0) { setBalance((b) => b + payout); celebrate(payout / Math.max(bet, 1)); }
       }
-      recordRound("fortune", wager, payout);
+      recordRound("fortune", wager, payout, !!server);
       setResult({ seg, payout });
       setHistory((h) => [{ id: Date.now(), label: seg.label, payout }, ...h].slice(0, 12));
       setSpinning(false);
@@ -3762,7 +4011,7 @@ function FortuneWheelGame({ onBack }) {
 
 // ---------- Dragon Tiger ----------
 function DragonTigerGame({ onBack }) {
-  const { balance, setBalance, edges, recordRound, celebrate, muted } = useApp();
+  const { balance, setBalance, edges, recordRound, celebrate, muted , serverAction, releaseHeld } = useApp();
   const [bet, setBet] = useState(100);
   const [betText, setBetText] = useState("100");
   const [betType, setBetType] = useState("dragon"); // dragon | tiger | tie
@@ -3782,9 +4031,14 @@ function DragonTigerGame({ onBack }) {
 
   function adjustBet(fn) { if (!dealing) setBet((b) => { const next = Math.max(10, Math.min(balance, Math.round(fn(b)))); setBetText(String(next)); return next; }); }
 
-  function deal() {
+  async function deal() {
     if (dealing || bet > balance || bet <= 0) return;
-    setBalance((b) => b - bet);
+    let server = null;
+    if (API_URL) {
+      setDealing(true);
+      try { server = await serverAction("/api/games/play/dragontiger", { bet, betType }, (x) => x.payout); }
+      catch (e) { setDealing(false); alert(gameErrorText(e)); return; }
+    } else setBalance((b) => b - bet);
     setResult(null);
     setDragonCard(null); setTigerCard(null);
     setDealing(true);
@@ -3816,6 +4070,7 @@ function DragonTigerGame({ onBack }) {
       else { do { rd = dtRandRank(); rt = dtRandRank(); } while (wantDragonHigher ? rd >= rt : rd <= rt); }
       d = { rank: rd, suit: dtRandSuit() }; t = { rank: rt, suit: dtRandSuit() };
     }
+    if (server) { d = server.dragon; t = server.tiger; }
 
     // beat 1: build tension while both backs pulse
     timerRef.current = setTimeout(() => {
@@ -3842,9 +4097,11 @@ function DragonTigerGame({ onBack }) {
           } else if (outcome === "tie") {
             payout = Math.round(bet * 0.5 * 100) / 100; // Dragon/Tiger bets get half back on a tie
           }
-          if (payout > 0) { setBalance((b) => b + payout); celebrate(payout / bet); }
+          if (server) payout = server.payout;
+          if (server) { releaseHeld(server.holdId); if (payout > 0) celebrate(payout / bet); }
+          else if (payout > 0) { setBalance((b) => b + payout); celebrate(payout / bet); }
           if (!muted) { if (payout > bet) setTimeout(playCorrectDing, 80); else if (payout === 0) setTimeout(playWrongBuzz, 80); }
-          recordRound("dragontiger", bet, payout);
+          recordRound("dragontiger", bet, payout, !!server);
           setResult({ outcome, payout });
           setHistory((h) => [{ id: Date.now(), outcome, payout }, ...h].slice(0, 12));
           setDealing(false);
@@ -3956,7 +4213,7 @@ function DragonTigerGame({ onBack }) {
 }
 
 function JungleRichesGame({ onBack }) {
-  const { balance, setBalance, edges, recordRound, celebrate } = useApp();
+  const { balance, setBalance, edges, recordRound, celebrate , serverAction, releaseHeld } = useApp();
   const [bet, setBet] = useState(100);
   const [betText, setBetText] = useState("100");
   const [grid, setGrid] = useState(jungleRandomGrid);
@@ -3971,10 +4228,17 @@ function JungleRichesGame({ onBack }) {
 
   function adjustBet(fn) { if (!spinning) setBet((b) => { const next = Math.max(10, Math.min(balance, Math.round(fn(b)))); setBetText(String(next)); return next; }); }
 
-  function spin() {
+  async function spin() {
     if (spinning || bet > balance || bet <= 0) return;
-    setBalance((b) => b - bet);
-    setSpinning(true);
+    let server = null;
+    if (API_URL) {
+      setSpinning(true);
+      try { server = await serverAction("/api/games/play/jungle", { bet }, (x) => x.payout); }
+      catch (e) { setSpinning(false); alert(gameErrorText(e)); return; }
+    } else {
+      setBalance((b) => b - bet);
+      setSpinning(true);
+    }
     setWinAmount(0);
     setBurstTrigger((t) => t + 1);
 
@@ -3983,7 +4247,9 @@ function JungleRichesGame({ onBack }) {
     const won = Math.random() * 100 < edges.jungle;
     timerRef.current = setTimeout(() => {
       clearInterval(flickerRef.current);
-      const newGrid = jungleRandomGridForOutcome(won);
+      const newGrid = server
+        ? server.grid.map((row) => row.map((id) => { const base = JUNGLE_SYMBOLS.find((x) => x.id === id.replace(/_x$/, "")) || JUNGLE_SYMBOLS[2]; return base.id === id ? base : { ...base, id }; }))
+        : jungleRandomGridForOutcome(won);
       setGrid(newGrid);
       let totalWin = 0;
       newGrid.forEach((row) => {
@@ -3991,9 +4257,10 @@ function JungleRichesGame({ onBack }) {
           totalWin += bet * (row[0].mult / 10);
         }
       });
-      totalWin = Math.round(totalWin * 100) / 100;
-      if (totalWin > 0) { setBalance((b) => b + totalWin); celebrate(totalWin / bet); }
-      recordRound("jungle", bet, totalWin);
+      totalWin = server ? server.payout : Math.round(totalWin * 100) / 100;
+      if (server) { releaseHeld(server.holdId); if (totalWin > 0) celebrate(totalWin / bet); }
+      else if (totalWin > 0) { setBalance((b) => b + totalWin); celebrate(totalWin / bet); }
+      recordRound("jungle", bet, totalWin, !!server);
       setWinAmount(totalWin);
       setHistory((h) => [{ id: Date.now(), win: totalWin }, ...h].slice(0, 10));
       setSpinning(false);
@@ -4821,10 +5088,12 @@ function ChatPage({ onBack, username }) {
   const scrollRef = useRef(null);
   const messages = chatThreads[username] || [];
 
+  const unreadHere = messages.filter((m) => m.from === "admin" && !m.read).length;
   useEffect(() => {
-    if (username) markChatRead(username, "admin");
+    // opening the page, or a new reply arriving while it is open, counts as read
+    if (username && (unreadHere > 0 || messages.length === 0)) markChatRead(username, "admin");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [unreadHere]);
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages.length]);
@@ -4899,15 +5168,22 @@ function ShopPage({ onBack }) {
   const [justUsed, setJustUsed] = useState(false);
   const price = nextBoostPrice();
 
-  function handleBuy() {
-    if (balance < price) return;
-    buyBoost();
+  const [busy, setBusy] = useState(false);
+  async function handleBuy() {
+    if (balance < price || busy) return;
+    setBusy(true);
+    const ok = await buyBoost();
+    setBusy(false);
+    if (ok === false) { alert("ซื้อไม่สำเร็จ ลองใหม่อีกครั้ง"); return; }
     setJustBought(true);
     setTimeout(() => setJustBought(false), 1800);
   }
-  function handleUse() {
-    if (boostStacks <= 0) return;
-    useBoostCharge();
+  async function handleUse() {
+    if (boostStacks <= 0 || busy) return;
+    setBusy(true);
+    const ok = await useBoostCharge();
+    setBusy(false);
+    if (ok === false) { alert("ใช้ไอเทมไม่สำเร็จ ลองใหม่อีกครั้ง"); return; }
     setJustUsed(true);
     setTimeout(() => setJustUsed(false), 1800);
   }
@@ -5033,8 +5309,8 @@ function ProfilePage({ onBack, username, onLogout, onWallet }) {
   const [couponCode, setCouponCode] = useState("");
   const [couponMsg, setCouponMsg] = useState(null); // { ok, text }
 
-  function handleRedeemCoupon() {
-    const result = redeemCoupon(couponCode);
+  async function handleRedeemCoupon() {
+    const result = await redeemCoupon(couponCode);
     if (result.success) {
       setCouponMsg({ ok: true, text: `แลกคูปองสำเร็จ! ได้รับเครดิต +${result.amount.toLocaleString()} B` });
       setCouponCode("");
@@ -5047,11 +5323,12 @@ function ProfilePage({ onBack, username, onLogout, onWallet }) {
   const initial = username ? username[0].toUpperCase() : "?";
   const limitPct = currentLimit > 0 ? Math.min(100, (s.wagered / currentLimit) * 100) : 0;
 
-  function savePassword() {
+  async function savePassword() {
     if (!newPassword) return;
-    changePassword(username, newPassword);
-    setSavedMsg("เปลี่ยนรหัสผ่านสำเร็จ");
-    setNewPassword("");
+    if (newPassword.length < 4) { setSavedMsg("รหัสผ่านต้องมีอย่างน้อย 4 ตัวอักษร"); setTimeout(() => setSavedMsg(""), 2500); return; }
+    const ok = await changePassword(username, newPassword);
+    setSavedMsg(ok ? "เปลี่ยนรหัสผ่านสำเร็จ" : "เปลี่ยนรหัสผ่านไม่สำเร็จ ลองอีกครั้ง");
+    if (ok) setNewPassword("");
     setTimeout(() => setSavedMsg(""), 2500);
   }
 
@@ -5189,15 +5466,38 @@ function FloatingCoins() {
   );
 }
 
-function LoginPage({ users, onLogin, onRegister, onAdmin, initialMode }) {
+function LoginPage({ users, onLogin, onRegister, onAdmin, initialMode, remote, onRemoteLogin, onRemoteRegister }) {
   const [mode, setMode] = useState(initialMode || "login");
   const [username, setUsername] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
 
-  function submit() {
+  async function submit() {
     setError("");
+    if (busy) return;
+    if (remote) {
+      // Accounts live on the server: it checks the password and hands out the username.
+      if (mode === "login") {
+        const name = username.trim();
+        if (!name || !password) { setError("กรอกชื่อผู้ใช้ (เช่น US0001) และรหัสผ่านให้ครบ"); return; }
+        setBusy(true);
+        const r = await onRemoteLogin(name, password);
+        setBusy(false);
+        if (!r.ok) setError(r.error);
+      } else {
+        const phoneClean = phone.trim();
+        if (!phoneClean || !password) { setError("กรอกเบอร์โทรศัพท์และรหัสผ่านให้ครบ"); return; }
+        if (!/^0[0-9]{8,9}$/.test(phoneClean)) { setError("กรอกเบอร์โทรศัพท์ให้ถูกต้อง เช่น 0812345678"); return; }
+        if (password.length < 4) { setError("รหัสผ่านต้องมีอย่างน้อย 4 ตัวอักษร"); return; }
+        setBusy(true);
+        const r = await onRemoteRegister(phoneClean, password);
+        setBusy(false);
+        if (!r.ok) setError(r.error);
+      }
+      return;
+    }
     if (mode === "login") {
       const name = username.trim();
       if (!name || !password) { setError("กรอกชื่อผู้ใช้/เบอร์โทร และรหัสผ่านให้ครบ"); return; }
@@ -5272,7 +5572,7 @@ function LoginPage({ users, onLogin, onRegister, onAdmin, initialMode }) {
 
         {error && <div style={{ color: "#ef5350", fontSize: 12, marginBottom: 12 }}>{error}</div>}
 
-        <button className="primary-btn" onClick={submit}>{mode === "login" ? "เข้าสู่ระบบ" : "สมัครสมาชิกใหม่"}</button>
+        <button className="primary-btn" onClick={submit} disabled={busy} style={busy ? { opacity: 0.6 } : undefined}>{busy ? "กำลังตรวจสอบ..." : mode === "login" ? "เข้าสู่ระบบ" : "สมัครสมาชิกใหม่"}</button>
 
       </div>
 
@@ -5342,8 +5642,48 @@ function markRefunded(ids) {
 }
 async function apiFetch(path, options = {}) {
   const res = await fetch(API_URL + path, { ...options, headers: { "Content-Type": "application/json", ...(options.headers || {}) } });
-  if (!res.ok) throw new Error("HTTP " + res.status);
+  if (!res.ok) {
+    let msg = "HTTP " + res.status;
+    try { const j = await res.json(); if (j && j.error) msg = j.error; } catch (e) {}
+    const err = new Error(msg);
+    err.status = res.status;
+    throw err;
+  }
   return res.json();
+}
+
+// ---------- Member accounts on the server ----------
+// When VITE_API_URL is set, member accounts live on the backend (unique usernames,
+// visible to every admin, same balance on every device). The browser keeps a working
+// copy and syncs it: balance as a DELTA (so admin edits and play never overwrite each
+// other), browser-owned data (boost, wager limit) as a snapshot.
+const MEMBER_TOKEN_STORAGE = "winner69_memberToken";
+const SYNC_STORAGE = "winner69_syncState";
+function readMemberToken() { try { return localStorage.getItem(MEMBER_TOKEN_STORAGE) || ""; } catch (e) { return ""; } }
+function memberFetch(path, options = {}) {
+  return apiFetch(path, { ...options, headers: { ...(options.headers || {}), Authorization: "Bearer " + readMemberToken() } });
+}
+function loadSyncState() {
+  try { const v = JSON.parse(localStorage.getItem(SYNC_STORAGE) || "null"); return v && typeof v === "object" ? v : null; } catch (e) { return null; }
+}
+function saveSyncState(v) {
+  try { if (v) localStorage.setItem(SYNC_STORAGE, JSON.stringify(v)); else localStorage.removeItem(SYNC_STORAGE); } catch (e) {}
+}
+function newOpId() { return "o" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+const round2 = (n) => Math.round(n * 100) / 100;
+function pickMemberData(u) {
+  const x = u || {};
+  return {
+    boost: x.boost || 0, boostActive: !!x.boostActive, boostBetsLeft: x.boostBetsLeft || 0,
+    boostBuyDate: x.boostBuyDate || "", boostBuyCountToday: x.boostBuyCountToday || 0,
+    wagerLimit: x.wagerLimit || 0, redeemedCoupons: Array.isArray(x.redeemedCoupons) ? x.redeemedCoupons : [],
+  };
+}
+function memberFromServer(m) {
+  return {
+    ...pickMemberData(m.data), remote: true, phone: m.phone || "", balance: m.balance || 0,
+    suspended: !!m.suspended, note: m.note || "", joinedAt: m.joinedAt, lastLoginAt: m.lastLoginAt, lastActiveAt: m.lastActiveAt,
+  };
 }
 
 
@@ -5377,7 +5717,10 @@ export default function GiltRowApp() {
   const [users, setUsers] = useState(() => {
     try {
       const saved = JSON.parse(localStorage.getItem("winner69_users") || "null");
-      return saved && typeof saved === "object" ? saved : DEMO_USERS;
+      if (!saved || typeof saved !== "object") return DEMO_USERS;
+      // with a backend, old browser-only test accounts are dropped (the server is the source of truth)
+      if (API_URL) return Object.fromEntries(Object.entries(saved).filter(([, v]) => v && v.remote));
+      return saved;
     } catch (e) { return DEMO_USERS; }
   });
   useEffect(() => {
@@ -5397,6 +5740,7 @@ export default function GiltRowApp() {
       const saved = localStorage.getItem("winner69_currentUser");
       const all = JSON.parse(localStorage.getItem("winner69_users") || "{}");
       // only restore the session if that account still exists and isn't suspended
+      if (API_URL && !(saved && all[saved] && all[saved].remote && readMemberToken())) return null;
       return saved && all[saved] && !all[saved].suspended ? saved : null;
     } catch (e) { return null; }
   });
@@ -5523,7 +5867,9 @@ export default function GiltRowApp() {
   const [muted, setMuted] = useState(false);
   const [adminLog, setAdminLog] = useState([]);
   const [coupons, setCoupons] = useState({}); // { CODE: { amount, createdAt } }
-  const [chatThreads, setChatThreads] = useState({}); // { [username]: [{id, from, text, image, time, read}] }
+  const [chatThreadsLocal, setChatThreads] = useState({}); // { [username]: [{id, from, text, image, time, read}] }
+  // With a backend: raw messages + per-thread read times come from the server; "read" is worked out from them.
+  const [chatMeta, setChatMeta] = useState({}); // { [username]: { userReadAt, adminReadAt } }
 
   const balance = currentUser ? (users[currentUser]?.balance ?? 0) : 0;
   // "boost" is now a charge inventory (2 charges per purchase); pressing
@@ -5543,6 +5889,182 @@ export default function GiltRowApp() {
     [baseEdges, boostActive, boostBonusPerStack]
   );
 
+  // ---- Server-side member sync (only when VITE_API_URL is set) ----
+  // syncState: baseline = the server balance this device last saw (minus "held" winnings),
+  // inflight = a balance change sent but not yet confirmed, held = winnings the server has already
+  // paid but the screen shows only when the game animation ends.
+  const usersRef = useRef(users); usersRef.current = users;
+  const renderCountRef = useRef(0); renderCountRef.current += 1;
+  // wait until React has drawn the latest setUsers, so the next sync reads the new balance
+  const waitRender = async () => {
+    const n = renderCountRef.current;
+    const t0 = Date.now();
+    while (renderCountRef.current === n && Date.now() - t0 < 300) await new Promise((r) => setTimeout(r, 10));
+  };
+  const currentUserRef = useRef(currentUser); currentUserRef.current = currentUser;
+  const syncStateRef = useRef((() => { const st = loadSyncState(); if (st) st.held = 0; return st; })());
+  const syncBusyRef = useRef(false);
+  const runSyncRef = useRef(null);
+  const syncBodyRef = useRef(null);
+  const pollMembersRef = useRef(null);
+  const forceLogout = () => {
+    try { localStorage.removeItem(MEMBER_TOKEN_STORAGE); } catch (e) {}
+    syncStateRef.current = null; saveSyncState(null);
+    setCurrentUser(null); setView("lobby");
+  };
+  // one server conversation at a time (sync, game rounds, boost) so balances never get counted twice
+  const withSyncLock = async (fn) => {
+    const started = Date.now();
+    while (syncBusyRef.current) {
+      if (Date.now() - started > 15000) throw new Error("busy");
+      await new Promise((r) => setTimeout(r, 40));
+    }
+    syncBusyRef.current = true;
+    try { return await fn(); } finally { syncBusyRef.current = false; }
+  };
+  const handleMemberError = (e, name) => {
+    if (e.status === 401 || e.status === 404) forceLogout();
+    else if (e.status === 403) setUsers((prev) => (prev[name] ? { ...prev, [name]: { ...prev[name], suspended: true } } : prev));
+  };
+  // Put a server answer on screen. `extra` = change the screen should show on top of the server balance.
+  const applyServerMember = (name, m, { extra = null, takeData = false } = {}) => {
+    setUsers((prev) => {
+      const cur = prev[name];
+      if (!cur) return prev;
+      const add = extra ? extra(cur) : 0;
+      const next = {
+        ...cur, remote: true, balance: Math.max(0, round2(m.balance - ((syncStateRef.current && syncStateRef.current.held) || 0) + add)),
+        suspended: !!m.suspended, note: m.note || "", phone: m.phone || cur.phone,
+        joinedAt: m.joinedAt, lastLoginAt: m.lastLoginAt, lastActiveAt: m.lastActiveAt,
+      };
+      const d = pickMemberData(m.data);
+      // boost is always the server's; the rest only when an admin changed it or on first load
+      Object.assign(next, takeData ? d : { boost: d.boost, boostActive: d.boostActive, boostBetsLeft: d.boostBetsLeft, boostBuyDate: d.boostBuyDate, boostBuyCountToday: d.boostBuyCountToday });
+      return { ...prev, [name]: next };
+    });
+  };
+  useEffect(() => {
+    if (!API_URL || !currentUser) return;
+    let stopped = false;
+    // the actual sync; callers must hold the lock
+    const body = async () => {
+      if (!readMemberToken()) return;
+      const local = usersRef.current[currentUser];
+      if (!local) return;
+      let st = syncStateRef.current;
+      const adopt = !st || st.user !== currentUser; // no known baseline -> take the server's numbers
+      if (adopt) st = { user: currentUser, baseline: local.balance || 0, dataRev: 0, inflight: null, held: 0 };
+      st.held = st.held || 0;
+      syncStateRef.current = st;
+      let opId = "", delta = 0;
+      if (st.inflight) { opId = st.inflight.opId; delta = st.inflight.delta; } // retry of an unconfirmed send (same id => never applied twice)
+      else if (!adopt) {
+        delta = round2((local.balance || 0) - st.baseline);
+        if (delta !== 0) { opId = newOpId(); st.inflight = { opId, delta }; saveSyncState(st); }
+      }
+      const base = st.baseline;
+      const r = await memberFetch("/api/members/me/sync", {
+        method: "POST",
+        body: JSON.stringify({ opId, delta, dataRev: adopt ? -1 : st.dataRev, data: adopt ? undefined : pickMemberData(local) }),
+      });
+      if (stopped) return;
+      const m = r.member;
+      st.inflight = null; st.baseline = round2(m.balance - st.held); st.dataRev = m.dataRev || 0; saveSyncState(st);
+      // whatever the member played while the request was travelling stays on top of the server balance
+      applyServerMember(currentUser, m, { extra: (cur) => (adopt ? 0 : round2((cur.balance || 0) - (base + delta))), takeData: adopt || !r.dataAccepted });
+      await waitRender();
+    };
+    syncBodyRef.current = body;
+    const run = async () => {
+      if (stopped || syncBusyRef.current || !readMemberToken()) return;
+      try { await withSyncLock(body); }
+      catch (e) { handleMemberError(e, currentUser); } // offline / server waking up: retry on the next tick
+    };
+    runSyncRef.current = run;
+    run();
+    const id = setInterval(() => { if (!document.hidden) run(); }, 3000);
+    const onVisible = () => { if (!document.hidden) run(); };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => { stopped = true; clearInterval(id); document.removeEventListener("visibilitychange", onVisible); runSyncRef.current = null; syncBodyRef.current = null; };
+  }, [currentUser]);
+  // A server action (game round, boost). First pushes any unsent balance change, then calls the server,
+  // then shows the new balance. `hold(r)` = amount of the answer to keep off-screen until releaseHeld().
+  const serverAction = (path, payload, hold) => withSyncLock(async () => {
+    const name = currentUserRef.current;
+    if (!name || !readMemberToken()) throw new Error("not_logged_in");
+    if (syncBodyRef.current) await syncBodyRef.current();
+    const st = syncStateRef.current;
+    let r;
+    try { r = await memberFetch(path, { method: "POST", body: JSON.stringify(payload || {}) }); }
+    catch (e) { handleMemberError(e, name); throw e; }
+    const h = hold && st ? Math.max(0, Number(hold(r)) || 0) : 0;
+    if (st) { st.held = round2((st.held || 0) + h); st.baseline = round2(r.member.balance - st.held); saveSyncState(st); }
+    applyServerMember(name, r.member);
+    await waitRender();
+    if (h > 0) {
+      r.holdId = "h" + Date.now() + Math.random();
+      holdsRef.current[r.holdId] = h;
+      setTimeout(() => releaseHeld(r.holdId), 12000); // safety net if the game screen was closed mid-animation
+    }
+    return r;
+  });
+  const holdsRef = useRef({});
+  const releaseHeld = (holdId) => {
+    const amount = holdId ? holdsRef.current[holdId] : 0;
+    if (!(amount > 0)) return Promise.resolve();
+    delete holdsRef.current[holdId];
+    return withSyncLock(async () => {
+      const st = syncStateRef.current;
+      const name = currentUserRef.current;
+      if (!st || !name) return;
+      const a = Math.min(amount, st.held || 0);
+      st.held = round2((st.held || 0) - a); st.baseline = round2(st.baseline + a); saveSyncState(st);
+      setUsers((prev) => (prev[name] ? { ...prev, [name]: { ...prev[name], balance: round2((prev[name].balance || 0) + a) } } : prev));
+      await waitRender();
+    }).catch(() => {});
+  };
+  // push a change soon after the balance / boost changes instead of waiting for the 3s tick
+  useEffect(() => {
+    if (!API_URL || !currentUser) return;
+    const t = setTimeout(() => { if (runSyncRef.current) runSyncRef.current(); }, 1200);
+    return () => clearTimeout(t);
+  }, [balance, boostStacks, boostActive, boostBetsLeft, currentUser]);
+  // Admin screen: pull every member from the server (so they show up whichever device they used).
+  useEffect(() => {
+    if (!API_URL || view !== "admin") return;
+    let stopped = false;
+    const poll = async () => {
+      const key = readAdminKey();
+      if (!key || stopped) return;
+      try {
+        const r = await apiFetch("/api/admin/members", { headers: { "x-admin-key": key } });
+        if (stopped) return;
+        setUsers((prev) => {
+          const cu = currentUserRef.current; // this browser's own member session is managed by the sync engine
+          const next = {};
+          for (const m of r.members || []) next[m.username] = m.username === cu && prev[m.username] ? prev[m.username] : memberFromServer(m);
+          if (cu && prev[cu] && !next[cu]) next[cu] = prev[cu];
+          return next;
+        });
+      } catch (e) { /* keep the last list */ }
+    };
+    pollMembersRef.current = poll;
+    poll();
+    const id = setInterval(() => { if (!document.hidden) poll(); }, 5000);
+    return () => { stopped = true; clearInterval(id); pollMembersRef.current = null; };
+  }, [view]);
+  const remoteAdminPatch = (username, patch) => {
+    if (!API_URL) return;
+    apiFetch("/api/admin/members/" + encodeURIComponent(username), {
+      method: "PATCH", headers: { "x-admin-key": readAdminKey() }, body: JSON.stringify(patch),
+    })
+      .then(() => { if (pollMembersRef.current) pollMembersRef.current(); })
+      .catch((e) => {
+        if (typeof window !== "undefined") window.alert("บันทึกไปที่เซิร์ฟเวอร์ไม่สำเร็จ (" + e.message + ") — ตรวจว่าเข้าแอดมินด้วยรหัสที่ถูกต้อง แล้วลองอีกครั้ง");
+        if (pollMembersRef.current) pollMembersRef.current();
+      });
+  };
+
   const setBalance = (fnOrValue) => {
     if (!currentUser) return;
     setUsers((u) => {
@@ -5555,12 +6077,46 @@ export default function GiltRowApp() {
     setBaseEdges((e) => ({ ...e, [game]: value }));
     if (adminName) logAdminAction(adminName, `ปรับอัตราการชนะ ${GAME_LABELS[game] || game} เป็น ${value}%`);
   };
-  const setBankInfo = (text, adminName) => {
+  // With a backend the bank account text comes from the server, so every member sees
+  // what the admin saved - whichever device the admin used.
+  useEffect(() => {
+    if (!API_URL) return;
+    let stopped = false;
+    const load = () => apiFetch("/api/settings")
+      .then((r) => {
+        if (stopped) return;
+        if (typeof r.bankInfo === "string") setBankInfoRaw(r.bankInfo);
+        if (r.edges) setBaseEdges((e) => ({ ...DEFAULT_EDGES, ...r.edges }));
+        if (Number.isFinite(r.boostBonus)) setBoostBonusPerStackRaw(r.boostBonus);
+      })
+      .catch(() => {});
+    load();
+    const id = setInterval(() => { if (!document.hidden) load(); }, 30000);
+    const onVisible = () => { if (!document.hidden) load(); };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => { stopped = true; clearInterval(id); document.removeEventListener("visibilitychange", onVisible); };
+  }, []);
+  // win rates / boost floor are used by the server to decide results, so they must be saved there
+  const saveGameSettings = async (edges, boostBonus) => {
+    if (!API_URL) return true;
+    try {
+      const r = await apiFetch("/api/admin/settings", { method: "PUT", headers: { "x-admin-key": readAdminKey() }, body: JSON.stringify({ edges, boostBonus }) });
+      if (r.edges) setBaseEdges({ ...DEFAULT_EDGES, ...r.edges });
+      return true;
+    } catch (e) { return false; }
+  };
+  const setBankInfo = async (text, adminName) => {
+    if (API_URL) {
+      try {
+        await apiFetch("/api/admin/settings", { method: "PUT", headers: { "x-admin-key": readAdminKey() }, body: JSON.stringify({ bankInfo: text }) });
+      } catch (e) { return false; }
+    }
     setBankInfoRaw(text);
     if (adminName) logAdminAction(adminName, `แก้ไขข้อมูลบัญชีสำหรับโอนเงิน`);
+    return true;
   };
 
-  const recordRound = (game, wager, payout) => {
+  const recordRound = (game, wager, payout, serverRound = false) => {
     setStats((s) => {
       const prev = s.byGame[game] || { rounds: 0, wagered: 0, payout: 0 };
       return { byGame: { ...s.byGame, [game]: { rounds: prev.rounds + 1, wagered: prev.wagered + wager, payout: prev.payout + payout } } };
@@ -5573,9 +6129,13 @@ export default function GiltRowApp() {
       if (keys.length > 30) delete next[keys[0]];
       return next;
     });
+    if (currentUser && API_URL) {
+      // server games already counted the boost bet; browser games tell the server
+      if (!serverRound && boostActive) serverAction("/api/members/me/boost/tick").catch(() => {});
+    }
     if (currentUser) {
       // one bet used up while the boost is on; turns off after the last one
-      setUsers((u) => {
+      if (!API_URL) setUsers((u) => {
         const cur = u[currentUser];
         if (!cur || !cur.boostActive) return u;
         const left = (cur.boostBetsLeft || 0) - 1;
@@ -5609,44 +6169,77 @@ export default function GiltRowApp() {
   const toggleMuted = () => setMuted((m) => !m);
   const setWagerLimit = (username, value) => {
     setUsers((u) => ({ ...u, [username]: { ...u[username], wagerLimit: Math.max(0, Math.round(value)) } }));
+    if (username !== currentUser) remoteAdminPatch(username, { data: { wagerLimit: Math.max(0, Math.round(value)) } }); // your own limit travels with the normal sync
   };
   const logAdminAction = (adminName, action) => {
     setAdminLog((l) => [{ id: Date.now() + Math.random(), admin: adminName, action, time: Date.now() }, ...l].slice(0, 100));
   };
   const adminSetMemberBalance = (username, value, adminName, reason) => {
     setUsers((u) => ({ ...u, [username]: { ...u[username], balance: Math.max(0, Math.round(value * 100) / 100) } }));
+    remoteAdminPatch(username, { balanceSet: Math.max(0, Math.round(value * 100) / 100), reason: reason || "" });
     if (adminName) logAdminAction(adminName, `ตั้งยอดเงิน ${username} เป็น ${Math.round(value).toLocaleString()} B${reason ? ` (เหตุผล: ${reason})` : ""}`);
   };
   const adminAdjustMemberBalance = (username, delta, adminName, reason) => {
     setUsers((u) => ({ ...u, [username]: { ...u[username], balance: Math.max(0, Math.round((u[username].balance + delta) * 100) / 100) } }));
+    remoteAdminPatch(username, { balanceDelta: delta, reason: reason || "" });
     if (adminName) logAdminAction(adminName, `${delta >= 0 ? "เติม" : "หัก"}เครดิต ${username} ${Math.abs(delta).toLocaleString()} B${reason ? ` (เหตุผล: ${reason})` : ""}`);
   };
   const adminSetMemberBoost = (username, value, adminName) => {
     setUsers((u) => ({ ...u, [username]: { ...u[username], boost: Math.max(0, Math.round(value)) } }));
+    remoteAdminPatch(username, { data: { boost: Math.max(0, Math.round(value)) } });
     if (adminName) logAdminAction(adminName, `ตั้งบูสต์ ${username} เป็น ${Math.round(value)} สแตก`);
   };
   const adminSetMemberSuspended = (username, suspended, adminName) => {
     setUsers((u) => ({ ...u, [username]: { ...u[username], suspended } }));
+    remoteAdminPatch(username, { suspended: !!suspended });
     if (adminName) logAdminAction(adminName, `${suspended ? "ระงับ" : "ปลดระงับ"}บัญชี ${username}`);
   };
   const adminSetMemberNote = (username, note, adminName) => {
     setUsers((u) => ({ ...u, [username]: { ...u[username], note } }));
+    remoteAdminPatch(username, { note: String(note || "") });
     if (adminName) logAdminAction(adminName, `บันทึกหมายเหตุสำหรับ ${username}`);
   };
   const changePassword = (username, newPassword) => {
+    if (API_URL) {
+      // the password is checked and stored on the server only
+      return memberFetch("/api/members/me/password", { method: "POST", body: JSON.stringify({ newPassword }) }).then(() => true).catch(() => false);
+    }
     setUsers((u) => ({ ...u, [username]: { ...u[username], password: newPassword } }));
+    return Promise.resolve(true);
   };
 
   // ---- Coupon codes: admin creates a CODE -> credit amount; each member
   // can redeem a given code once (tracked per-user in redeemedCoupons). ----
+  const couponApi = (path, options) => apiFetch(path, { ...options, headers: { "x-admin-key": readAdminKey() } })
+    .then((r) => { if (r.coupons) setCoupons(r.coupons); return true; })
+    .catch((e) => { if (typeof window !== "undefined") window.alert("บันทึกคูปองไม่สำเร็จ (" + e.message + ")"); return false; });
+  // admin screen: load the coupon list from the server
+  useEffect(() => {
+    if (!API_URL || view !== "admin") return;
+    let stopped = false;
+    const load = () => { if (readAdminKey()) apiFetch("/api/admin/coupons", { headers: { "x-admin-key": readAdminKey() } }).then((r) => { if (!stopped) setCoupons(r.coupons || {}); }).catch(() => {}); };
+    load();
+    const id = setInterval(() => { if (!document.hidden) load(); }, 15000);
+    return () => { stopped = true; clearInterval(id); };
+  }, [view]);
   const adminCreateCoupon = (code, amount, adminName) => {
     const key = code.trim().toUpperCase();
     if (!key || !(amount > 0)) return;
+    if (API_URL) {
+      couponApi("/api/admin/coupons", { method: "POST", body: JSON.stringify({ code: key, amount }) })
+        .then((ok) => { if (ok && adminName) logAdminAction(adminName, `สร้างคูปอง ${key} มูลค่า ${amount.toLocaleString()} B`); });
+      return;
+    }
     setCoupons((c) => ({ ...c, [key]: { amount, createdAt: Date.now() } }));
     if (adminName) logAdminAction(adminName, `สร้างคูปอง ${key} มูลค่า ${amount.toLocaleString()} B`);
   };
   const adminDeleteCoupon = (code, adminName) => {
     const key = code.trim().toUpperCase();
+    if (API_URL) {
+      couponApi("/api/admin/coupons/" + encodeURIComponent(key), { method: "DELETE" })
+        .then((ok) => { if (ok && adminName) logAdminAction(adminName, `ลบคูปอง ${key}`); });
+      return;
+    }
     setCoupons((c) => {
       const next = { ...c };
       delete next[key];
@@ -5658,6 +6251,21 @@ export default function GiltRowApp() {
     const key = (code || "").trim().toUpperCase();
     if (!currentUser) return { success: false, reason: "กรุณาเข้าสู่ระบบก่อน" };
     if (!key) return { success: false, reason: "กรุณากรอกโค้ดคูปอง" };
+    if (API_URL) {
+      // the server checks the code and adds the credit; the next sync brings the new balance here
+      return memberFetch("/api/members/me/redeem", { method: "POST", body: JSON.stringify({ code: key }) })
+        .then((r) => {
+          setUsers((u) => (u[currentUser] ? { ...u, [currentUser]: { ...u[currentUser], redeemedCoupons: [...(u[currentUser].redeemedCoupons || []), key] } } : u));
+          if (runSyncRef.current) setTimeout(() => runSyncRef.current && runSyncRef.current(), 50);
+          return { success: true, amount: r.amount };
+        })
+        .catch((e) => {
+          if (e.status === 404) return { success: false, reason: "ไม่พบคูปองนี้ หรือคูปองถูกยกเลิกแล้ว" };
+          if (e.status === 409) return { success: false, reason: "คุณใช้คูปองนี้ไปแล้ว" };
+          if (e.status === 429) return { success: false, reason: "ลองบ่อยเกินไป รอสักครู่แล้วลองใหม่" };
+          return { success: false, reason: "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ลองใหม่อีกครั้ง" };
+        });
+    }
     const coupon = coupons[key];
     if (!coupon) return { success: false, reason: "ไม่พบคูปองนี้ หรือคูปองถูกยกเลิกแล้ว" };
     const already = users[currentUser]?.redeemedCoupons || [];
@@ -5676,8 +6284,99 @@ export default function GiltRowApp() {
   // ---- Support chat: one thread per member, image attachments supported
   // (sent as data URLs - fine for this in-memory demo, would need real
   // upload storage in a production backend). ----
+  const chatThreads = useMemo(() => {
+    if (!API_URL) return chatThreadsLocal;
+    const out = {};
+    for (const [name, list] of Object.entries(chatThreadsLocal)) {
+      const meta = chatMeta[name] || {};
+      out[name] = list.map((m) => ({
+        ...m,
+        read: m.pending ? false : m.from === "user" ? m.time <= (meta.adminReadAt || 0) : m.time <= (meta.userReadAt || 0),
+      }));
+    }
+    return out;
+  }, [chatThreadsLocal, chatMeta]);
+  const mergeChat = (messages) => {
+    if (!messages || messages.length === 0) return;
+    setChatThreads((t) => {
+      const next = { ...t };
+      for (const m of messages) {
+        const list = next[m.username] ? [...next[m.username]] : [];
+        const i = list.findIndex((x) => x.id === m.id);
+        const item = { id: m.id, from: m.from, text: m.text || "", time: m.time, seq: m.seq, hasImage: !!m.hasImage, image: m.image || (i >= 0 ? list[i].image : null) || null };
+        if (i >= 0) list[i] = item; else list.push(item);
+        list.sort((a, b) => a.time - b.time);
+        next[m.username] = list.slice(-200);
+      }
+      return next;
+    });
+  };
+  const chatSinceRef = useRef({ member: 0, admin: 0 });
+  const chatPollRef = useRef({ member: null, admin: null });
+  useEffect(() => { chatSinceRef.current.member = 0; }, [currentUser]);
+  // member: new messages from the admin
+  useEffect(() => {
+    if (!API_URL || !currentUser) return;
+    let stopped = false;
+    const poll = async () => {
+      if (stopped || !readMemberToken()) return;
+      try {
+        const r = await memberFetch("/api/members/me/chat?since=" + chatSinceRef.current.member);
+        if (stopped) return;
+        mergeChat((r.messages || []).map((m) => ({ ...m, username: currentUser })));
+        setChatMeta((c) => ({ ...c, [currentUser]: r.meta }));
+        const top = Math.max(0, ...(r.messages || []).map((m) => m.seq));
+        if (top > chatSinceRef.current.member) chatSinceRef.current.member = top;
+      } catch (e) {}
+    };
+    chatPollRef.current.member = poll;
+    poll();
+    const id = setInterval(() => { if (!document.hidden) poll(); }, view === "chat" ? 3000 : 8000);
+    return () => { stopped = true; clearInterval(id); chatPollRef.current.member = null; };
+  }, [currentUser, view]);
+  // admin: every member's messages
+  useEffect(() => {
+    if (!API_URL || view !== "admin") return;
+    let stopped = false;
+    const poll = async () => {
+      const key = readAdminKey();
+      if (stopped || !key) return;
+      try {
+        const r = await apiFetch("/api/admin/chats?since=" + chatSinceRef.current.admin, { headers: { "x-admin-key": key } });
+        if (stopped) return;
+        mergeChat(r.messages || []);
+        setChatMeta((c) => ({ ...c, ...(r.threads || {}) }));
+        const top = Math.max(0, ...(r.messages || []).map((m) => m.seq));
+        if (top > chatSinceRef.current.admin) chatSinceRef.current.admin = top;
+      } catch (e) {}
+    };
+    chatPollRef.current.admin = poll;
+    poll();
+    const id = setInterval(() => { if (!document.hidden) poll(); }, 4000);
+    return () => { stopped = true; clearInterval(id); chatPollRef.current.admin = null; };
+  }, [view]);
+  // send: show the message straight away, then hand it to the server (same id, so a resend can't duplicate it)
+  const sendChatRemote = async (username, from, text, image) => {
+    const msgId = "c" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    const img = image ? await compressImage(image) : null;
+    setChatThreads((t) => ({ ...t, [username]: [...(t[username] || []), { id: msgId, from, text: text?.trim() || "", image: img, time: Date.now(), pending: true }] }));
+    const body = JSON.stringify({ id: msgId, text: text?.trim() || "", image: img });
+    try {
+      const r = from === "user"
+        ? await memberFetch("/api/members/me/chat", { method: "POST", body })
+        : await apiFetch("/api/admin/chats/" + encodeURIComponent(username), { method: "POST", headers: { "x-admin-key": readAdminKey() }, body });
+      setChatThreads((t) => ({ ...t, [username]: (t[username] || []).map((m) => (m.id === msgId ? { ...m, pending: false, time: r.message.time, seq: r.message.seq } : m)) }));
+      setChatMeta((c) => ({ ...c, [username]: r.meta }));
+      return true;
+    } catch (e) {
+      setChatThreads((t) => ({ ...t, [username]: (t[username] || []).filter((m) => m.id !== msgId) }));
+      if (typeof window !== "undefined") window.alert("ส่งข้อความไม่สำเร็จ ลองใหม่อีกครั้ง");
+      return false;
+    }
+  };
   const sendUserChatMessage = (text, image) => {
     if (!currentUser) return;
+    if (API_URL) { if (!text?.trim() && !image) return; sendChatRemote(currentUser, "user", text, image); return; }
     if (!text?.trim() && !image) return;
     setChatThreads((t) => ({
       ...t,
@@ -5690,6 +6389,10 @@ export default function GiltRowApp() {
   const sendAdminChatMessage = (username, text, image, adminName) => {
     if (!username) return;
     if (!text?.trim() && !image) return;
+    if (API_URL) {
+      sendChatRemote(username, "admin", text, image).then((ok) => { if (ok && adminName) logAdminAction(adminName, `ตอบแชทสมาชิก ${username}`); });
+      return;
+    }
     setChatThreads((t) => ({
       ...t,
       [username]: [
@@ -5700,6 +6403,17 @@ export default function GiltRowApp() {
     if (adminName) logAdminAction(adminName, `ตอบแชทสมาชิก ${username}`);
   };
   const markChatRead = (username, from) => {
+    if (API_URL) {
+      // from === "user": the admin opened a member's messages; from === "admin": the member opened the admin's replies
+      if (!username) return;
+      const now = Date.now();
+      setChatMeta((c) => ({ ...c, [username]: { ...(c[username] || {}), [from === "user" ? "adminReadAt" : "userReadAt"]: now } }));
+      const req = from === "user"
+        ? apiFetch("/api/admin/chats/" + encodeURIComponent(username) + "/read", { method: "POST", headers: { "x-admin-key": readAdminKey() } })
+        : memberFetch("/api/members/me/chat/read", { method: "POST" });
+      req.then((r) => { if (r && r.meta) setChatMeta((c) => ({ ...c, [username]: r.meta })); }).catch(() => {});
+      return;
+    }
     setChatThreads((t) => ({
       ...t,
       [username]: (t[username] || []).map((m) => (m.from === from ? { ...m, read: true } : m)),
@@ -5724,6 +6438,7 @@ export default function GiltRowApp() {
     if (!currentUser) return;
     const price = nextBoostPrice(currentUser);
     if (balance < price) return;
+    if (API_URL) return serverAction("/api/members/me/boost/buy").then(() => true).catch(() => false);
     const today = new Date().toDateString();
     setBalance((b) => b - price);
     setUsers((u) => ({
@@ -5738,6 +6453,7 @@ export default function GiltRowApp() {
   };
   const useBoostCharge = () => {
     if (!currentUser) return;
+    if (API_URL) return serverAction("/api/members/me/boost/use").then(() => true).catch(() => false);
     setUsers((u) => {
       const cur = u[currentUser];
       if (!cur || (cur.boost || 0) <= 0) return u;
@@ -5758,6 +6474,17 @@ export default function GiltRowApp() {
   };
   const notifyWithdraw = (amount, account) => {
     if (!currentUser) return;
+    if (API_URL) {
+      // the server takes the credit and files the request in one step
+      const id = "w" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+      const time = Date.now();
+      return serverAction("/api/withdraw-requests", { id, amount, account: account || "", time, deviceId: DEVICE_ID })
+        .then(() => {
+          setNotifications((n) => [{ id, username: currentUser, amount, account: account || "", time, deviceId: DEVICE_ID, read: false, status: "pending", synced: true }, ...n].slice(0, 50));
+          return true;
+        })
+        .catch((e) => (e && e.message === "insufficient_balance" ? "insufficient" : false));
+    }
     const item = {
       id: "w" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
       username: currentUser, amount, account: account || "", time: Date.now(), deviceId: DEVICE_ID,
@@ -5844,7 +6571,7 @@ export default function GiltRowApp() {
 
   // A rejected request returns the held credit to the member - once per request.
   useEffect(() => {
-    if (!currentUser) return;
+    if (!currentUser || API_URL) return; // with a backend the SERVER refunds the member's account
     const done = readRefunded();
     const due = notifications.filter((n) => n.username === currentUser && n.status === "rejected" && !done.includes(n.id) && (!n.deviceId || n.deviceId === DEVICE_ID));
     if (due.length === 0) return;
@@ -5958,7 +6685,7 @@ export default function GiltRowApp() {
 
   // An approved deposit adds its credit to the member - once per request, on the requesting device.
   useEffect(() => {
-    if (!currentUser) return;
+    if (!currentUser || API_URL) return; // with a backend the SERVER credits the member's account
     const done = readList(CREDITED_STORAGE);
     const due = depositRequests.filter((d) => d.username === currentUser && d.status === "approved" && !done.includes(d.id) && (!d.deviceId || d.deviceId === DEVICE_ID));
     if (due.length === 0) return;
@@ -6003,7 +6730,36 @@ export default function GiltRowApp() {
     setCurrentUser(name);
     setView("lobby");
   }
-  function handleLogout() { setCurrentUser(null); setView("lobby"); }
+  function startRemoteSession(r) {
+    const m = r.member;
+    try { localStorage.setItem(MEMBER_TOKEN_STORAGE, r.token); } catch (e) {}
+    syncStateRef.current = { user: m.username, baseline: m.balance, dataRev: m.dataRev || 0, inflight: null };
+    saveSyncState(syncStateRef.current);
+    setUsers((u) => ({ ...u, [m.username]: memberFromServer(m) }));
+    setCurrentUser(m.username);
+    setView("lobby");
+  }
+  function remoteErrorText(e, fallback) {
+    if (e.status === 401) return "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง";
+    if (e.status === 403) return "บัญชีนี้ถูกระงับการใช้งานชั่วคราว กรุณาติดต่อเจ้าหน้าที่";
+    if (e.status === 429) return "ลองบ่อยเกินไป รอสักครู่แล้วลองใหม่";
+    if (e.status === 400) return e.message || fallback;
+    return "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ (เซิร์ฟเวอร์อาจกำลังตื่น) รอสักครู่แล้วลองใหม่";
+  }
+  async function remoteLogin(name, password) {
+    try { startRemoteSession(await apiFetch("/api/members/login", { method: "POST", body: JSON.stringify({ username: name, password }) })); return { ok: true }; }
+    catch (e) { return { ok: false, error: remoteErrorText(e, "เข้าสู่ระบบไม่สำเร็จ") }; }
+  }
+  async function remoteRegister(phone, password) {
+    try { startRemoteSession(await apiFetch("/api/members/register", { method: "POST", body: JSON.stringify({ phone, password }) })); return { ok: true }; }
+    catch (e) { return { ok: false, error: remoteErrorText(e, "สมัครสมาชิกไม่สำเร็จ") }; }
+  }
+  function handleLogout() {
+    if (!API_URL) { setCurrentUser(null); setView("lobby"); return; }
+    // push any unsent balance change first (but never wait more than 1.5s)
+    const flush = runSyncRef.current ? runSyncRef.current() : Promise.resolve();
+    Promise.race([Promise.resolve(flush).catch(() => {}), new Promise((res) => setTimeout(res, 1500))]).then(() => forceLogout());
+  }
 
   const ctx = {
     balance, setBalance, edges, baseEdges, setEdge, stats, dailyStats, recordRound, users,
@@ -6016,7 +6772,7 @@ export default function GiltRowApp() {
     coupons, adminCreateCoupon, adminDeleteCoupon, redeemCoupon,
     chatThreads, sendUserChatMessage, sendAdminChatMessage, markChatRead,
     depositRequests, notifyDeposit, approveDeposit, rejectDeposit,
-    bankInfo, setBankInfo,
+    bankInfo, setBankInfo, saveGameSettings, serverAction, releaseHeld,
   };
   const back = () => setView("lobby");
   function requireAuth(action) {
@@ -6032,7 +6788,7 @@ export default function GiltRowApp() {
   const openChatGated = requireAuth(() => setView("chat"));
 
   let content;
-  if (view === "login") content = <LoginPage users={users} initialMode={loginMode} onLogin={handleLogin} onRegister={handleRegister} onAdmin={() => setView("admin")} />;
+  if (view === "login") content = <LoginPage users={users} initialMode={loginMode} onLogin={handleLogin} onRegister={handleRegister} onAdmin={() => setView("admin")} remote={!!API_URL} onRemoteLogin={remoteLogin} onRemoteRegister={remoteRegister} />;
   else if (view === "lobby") content = <Lobby username={currentUser} onLogout={currentUser ? handleLogout : undefined} onProfile={openProfileGated} onShop={openShopGated} onLeaderboard={() => setView("leaderboard")} onOpenGame={openGameGated} onWallet={openWalletGated} onAdmin={() => setView("admin")} onChat={openChatGated} />;
   else if (view === "wallet") content = <WalletPage onBack={back} />;
   else if (view === "admin") content = <AdminPanel onBack={back} />;

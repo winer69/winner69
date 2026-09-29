@@ -29,8 +29,11 @@ export default function PlushieParadise({
   onRound,
   onBigWin,
   muted: mutedProp,
+  server,        // optional { call(path, body) -> Promise }: the backend decides each grab
 } = {}) {
   const rootRef = useRef(null);
+  const serverRef = useRef(server);
+  serverRef.current = server;
   const onBalanceDeltaRef = useRef(onBalanceDelta);
   const onRoundRef = useRef(onRound);
   const onBigWinRef = useRef(onBigWin);
@@ -479,7 +482,14 @@ async function runGrabSequence(targetX){
   // same pattern. Falls back to a 50% catch rate when played standalone
   // with no winRate prop supplied.
   const catchChance = typeof winRateProp === 'number' ? winRateProp : 50;
-  const success = species ? (Math.random() * 100 < catchChance) : false;
+  // With a backend: the server takes the bet and decides the grab (and any bonus/jackpot).
+  let serverGrab = null;
+  if (serverRef.current) {
+    try { serverGrab = await serverRef.current.call('/api/games/play/plushieparadise', { bet, speciesId: species ? species.id : null }); }
+    catch (e) { serverGrab = { success: false, reward: 0, failed: true }; }
+    if (serverGrab.failed) { balance += bet; animateCoins(balance); } // nothing was charged
+  }
+  const success = serverGrab ? !!serverGrab.success : species ? (Math.random() * 100 < catchChance) : false;
   sound.grab();
 
   if(success && plushie){
@@ -511,10 +521,14 @@ async function runGrabSequence(targetX){
     // of a flat species value that ignored the bet entirely.
     const betUnit = bet / 10;
     let reward = Math.round(species.reward * betUnit);
-    const isJackpot = Math.random() < 0.04;
-    const isBonus = !isJackpot && Math.random() < 0.12;
+    const isJackpot = serverGrab ? !!serverGrab.isJackpot : Math.random() < 0.04;
+    const isBonus = serverGrab ? !!serverGrab.isBonus : !isJackpot && Math.random() < 0.12;
 
-    if(isJackpot){
+    if(serverGrab){
+      reward = serverGrab.reward;
+      if(isJackpot){ showJackpot(true); sound.jackpot(); await sleep(2200); showJackpot(false); }
+      else if(isBonus){ showBonus(Math.round(bet * 5)); sound.bonus(); await sleep(1400); showBonus(null); }
+    } else if(isJackpot){
       reward = Math.round(species.reward * betUnit * 5);
       showJackpot(true);
       sound.jackpot();

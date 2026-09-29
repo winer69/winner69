@@ -49,8 +49,11 @@ export default function NeonFortuneSlot({
   onRound,
   onBigWin,
   muted,
+  server,        // optional { call(path, body) -> Promise }: the backend decides every spin
 } = {}){
   const rootRef = useRef(null);
+  const serverRef = useRef(server);
+  serverRef.current = server;
 
   // Refs keep the long-lived engine effect (mounted once) reading the
   // latest callback props without needing to restart the whole game.
@@ -118,13 +121,21 @@ export default function NeonFortuneSlot({
     };
 
     /* weighted reel strips (5 reels), circular */
+    // Seeded shuffle - must stay identical to nfStrips() in backend/src/games.js,
+    // so the reels can stop exactly on the positions the server picks.
+    function seededRandom(seed){
+      let a = seed >>> 0;
+      return function(){ a = (a + 0x6d2b79f5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+    }
+    let stripSeed = 9001;
     function buildStrip(weights){
+      const rnd = seededRandom(stripSeed++);
       const strip=[];
       for(const sym in weights){
         for(let i=0;i<weights[sym];i++) strip.push(sym);
       }
       for(let i=strip.length-1;i>0;i--){
-        const j=Math.floor(Math.random()*(i+1));
+        const j=Math.floor(rnd()*(i+1));
         const tmp=strip[i]; strip[i]=strip[j]; strip[j]=tmp;
       }
       return strip;
@@ -1057,7 +1068,9 @@ export default function NeonFortuneSlot({
       announce((tier==='epic'?'EPIC WIN':tier==='mega'?'MEGA WIN':'BIG WIN')+' '+formatNum(amount));
     }
 
+    let lastServerSpin = null;
     function maybeJackpot(lineWins){
+      if(serverRef.current) return !!(lastServerSpin && lastServerSpin.jackpot);
       const bigLine = lineWins.find(function(lw){ return lw.count===5 && SYMBOLS[lw.symbol].tier==='high'; });
       if(bigLine && Math.random()<0.08){
         return true;
@@ -1147,6 +1160,7 @@ export default function NeonFortuneSlot({
     function doSpin(isFreeSpin){
       if(disposed) return;
       if(state.isSpinning) return;
+      if(serverRef.current) return doServerSpin(isFreeSpin);
       if(!isFreeSpin){
         if(state.balance < state.bet) { announce('Insufficient balance'); return; }
         state.balance -= state.bet;
@@ -1177,6 +1191,46 @@ export default function NeonFortuneSlot({
         const betTotal = state.bet;
         const result = calculateWins(currentGrid, betTotal);
         finishSpin(result, betTotal, isFreeSpin);
+      });
+    }
+
+    // Backend version of doSpin: the server takes the bet, picks the reel stops,
+    // pays the win (and keeps the free spins); this only animates its answer.
+    function doServerSpin(isFreeSpin){
+      if(!isFreeSpin){
+        if(state.balance < state.bet) { announce('Insufficient balance'); return; }
+        state.balance -= state.bet;
+        updateBalanceDisplay();
+      } else {
+        state.freeSpinsLeft--;
+        el.fsLeft.textContent = state.freeSpinsLeft;
+      }
+      state.isSpinning=true;
+      el.spinBtn.classList.add('spinning');
+      el.spinBtn.classList.remove('pulse');
+      updateSpinAvailability();
+      clearHighlights();
+      hideWinDisplay();
+      serverRef.current.call('/api/games/neonfortune/spin', { bet: state.bet }).then(function(r){
+        if(disposed) return;
+        lastServerSpin = r;
+        if(r.isFree && !isFreeSpin){ state.balance += state.bet; updateBalanceDisplay(); } // the server used a waiting free spin
+        currentGrid = r.grid;
+        el.cabinet.classList.remove('lit-win');
+        el.cabinet.classList.add('lit-spin');
+        animateReelsToResult(currentGrid, r.stopIdx, function(){
+          el.cabinet.classList.remove('lit-spin');
+          finishSpin(calculateWins(currentGrid, r.bet), r.bet, isFreeSpin);
+        });
+      }).catch(function(e){
+        if(disposed) return;
+        if(!isFreeSpin){ state.balance += state.bet; updateBalanceDisplay(); }
+        state.isSpinning=false;
+        el.spinBtn.classList.remove('spinning');
+        state.autoSpinsLeft=0;
+        announce(e && e.message === 'insufficient_balance' ? 'Insufficient balance' : 'Connection problem - try again');
+        if(isFreeSpin){ state.freeSpinsLeft=0; endFreeSpins(); }
+        updateSpinAvailability();
       });
     }
 
@@ -1215,6 +1269,7 @@ export default function NeonFortuneSlot({
         }
         if(!jackpotHit){
           state.balance += totalWin;
+          if(serverRef.current) state.balance = Math.round(state.balance*100)/100;
           if(hasExternalBalance) onBalanceDeltaRef.current(totalWin);
           updateBalanceDisplay();
           saveState();
@@ -1438,6 +1493,14 @@ export default function NeonFortuneSlot({
     updateBalanceDisplay();
     updateBetDisplay();
     updateSpinAvailability();
+
+    if(serverRef.current){
+      serverRef.current.call('/api/games/neonfortune/state', {}).then(function(r){
+        if(disposed || !r || !(r.freeSpinsLeft > 0) || state.isSpinning || state.isBonus) return;
+        state.bet = r.bet || state.bet;
+        startFreeSpins(r.freeSpinsLeft);
+      }).catch(function(){});
+    }
 
     const idleIntervalId = setInterval(function(){
       if(disposed || state.isSpinning || idleFrozen) return;

@@ -220,7 +220,11 @@ export default function StockTradingSimulator({
   onBalanceDelta,
   onRound,
   onBigWin,
+  server,        // optional { call(path, body) -> Promise }: holdings and sale prices live on the backend
 } = {}) {
+  const serverRef = useRef(server);
+  serverRef.current = server;
+  const [tradeBusy, setTradeBusy] = useState(false);
   const hasExternalBalance = typeof onBalanceDelta === "function";
   const winRateScale = typeof winRate === "number" ? Math.max(0, winRate / 100) : 1;
 
@@ -235,6 +239,13 @@ export default function StockTradingSimulator({
     return loaded;
   });
   const [, forceTick] = useState(0); // drives the 1s countdown re-render
+  // with a backend, the shares you own are the server's record (not this browser's)
+  useEffect(() => {
+    if (!serverRef.current) return;
+    serverRef.current.call("/api/games/stock/state", {})
+      .then((r) => setState((prev) => ({ ...prev, holdings: { ...(r.holdings || {}) } })))
+      .catch(() => {});
+  }, []);
 
   const [tradeOpen, setTradeOpen] = useState(false);
   const [tradeStockId, setTradeStockId] = useState(null);
@@ -331,9 +342,42 @@ export default function StockTradingSimulator({
     setDetailStockId(null);
   }
 
+  function executeServerTrade() {
+    const stock = state.stocks[tradeStockId];
+    if (!stock || tradeBusy) return;
+    const isBuy = tradeType === "buy";
+    setTradeBusy(true);
+    const body = isBuy ? { stockId: tradeStockId, qty, price: stock.price } : { stockId: tradeStockId, qty };
+    serverRef.current.call(isBuy ? "/api/games/stock/buy" : "/api/games/stock/sell", body)
+      .then((r) => {
+        const tx = {
+          id: Date.now(), stockId: tradeStockId, symbol: stock.symbol, type: isBuy ? "buy" : "sell",
+          quantity: qty, price: stock.price, total: isBuy ? r.total : r.receive, timestamp: Date.now(),
+        };
+        setState((prev) => {
+          const next = { ...prev, holdings: { ...(r.holdings || {}) }, transactions: [...prev.transactions, tx] };
+          next.balance = round2(isBuy ? prev.balance - r.total : prev.balance + r.receive);
+          const st = computeTradeStatus(prev.lastTradeKey);
+          if (st.key) next.lastTradeKey = st.key;
+          return next;
+        });
+        setLastTx(tx);
+        if (!isBuy) {
+          if (onRound) onRound(r.costBasis, r.receive);
+          if (onBigWin && r.costBasis > 0 && r.receive / r.costBasis >= 1.5) onBigWin(r.receive / r.costBasis, "jackpot");
+        }
+        setTradeStep("success");
+      })
+      .catch((e) => {
+        window.alert(e && e.message === "insufficient_balance" ? "เครดิตไม่พอ" : e && e.message === "no_holding" ? "ไม่พบหุ้นที่ถืออยู่ในระบบ" : "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ลองใหม่อีกครั้ง");
+      })
+      .finally(() => setTradeBusy(false));
+  }
+
   function executeTrade() {
     const s = state.stocks[tradeStockId];
     if (!canTradeNow || qty <= 0) return;
+    if (serverRef.current) { executeServerTrade(); return; }
 
     let sideEffect = null; // captured inside setState, acted on after (onBalanceDelta/onRound/onBigWin)
 

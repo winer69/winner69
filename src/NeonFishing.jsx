@@ -289,7 +289,12 @@ export default function PlushieParadiseNeonFishing({
   onRound,
   onBigWin,
   muted,
+  server,        // optional { call(path, body) -> Promise }: the backend takes the bet and decides each catch
 } = {}) {
+  const serverRef = useRef(server);
+  serverRef.current = server;
+  const castPendingRef = useRef(false);
+  const resolvingRef = useRef(false);
   const hasExternalBalance = typeof onBalanceDelta === "function";
   const winRateScale = typeof winRate === "number" ? Math.max(0, winRate / 100) : 1;
   const roundWagerRef = useRef(CONFIG.bet); // wager captured at cast time, reported with the payout at resolveCatch
@@ -428,8 +433,25 @@ export default function PlushieParadiseNeonFishing({
       flashMessage("💸 เครดิตไม่พอ", "bad", 1.4);
       return;
     }
-    roundWagerRef.current = bet;
-    spendCoins(bet);
+    if (serverRef.current && !castPendingRef.current) {
+      // the server takes the bet first; the line only goes out once it has
+      castPendingRef.current = true;
+      const wager = bet;
+      serverRef.current.call("/api/games/fishing/cast", { bet: wager })
+        .then(() => { castPendingRef.current = false; startCast(wager); })
+        .catch((e) => {
+          castPendingRef.current = false;
+          flashMessage(e && e.message === "insufficient_balance" ? "💸 เครดิตไม่พอ" : "⚠️ เชื่อมต่อไม่ได้ ลองใหม่", "bad", 1.6);
+        });
+      return;
+    }
+    if (castPendingRef.current) return;
+    startCast(bet);
+  }, [flashMessage, setState, coins, bet, spendCoins]);
+
+  const startCast = useCallback((wager) => {
+    roundWagerRef.current = wager;
+    spendCoins(wager);
     const { w, h } = sizeRef.current;
     const rodTipX = w * rodXRef.current;
     const rodTipY = h * 0.14;
@@ -443,7 +465,7 @@ export default function PlushieParadiseNeonFishing({
     setState("CASTING");
     audioRef.current && audioRef.current.cast();
     flashMessage("", "neutral", 0);
-  }, [flashMessage, setState, coins, bet, spendCoins]);
+  }, [flashMessage, setState, spendCoins]);
 
   const handleReelPress = useCallback(() => {
     const s = stateRef.current;
@@ -469,13 +491,16 @@ export default function PlushieParadiseNeonFishing({
   }, [handleCast, handleReelPress]);
 
   const resolveCatch = useCallback(
-    (success) => {
+    (success, serverPayout, fromServer) => {
+      if (serverRef.current && !success && !fromServer) {
+        serverRef.current.call("/api/games/fishing/escape", {}).catch(() => {});
+      }
       const fish = hookedFishRef.current;
       const { w, h } = sizeRef.current;
       const wagerForRound = roundWagerRef.current;
       if (success && fish) {
         const mult = Math.min(CONFIG.maxMultiplier, multiplier);
-        const payout = Math.round(fish.type.reward * (bet / CONFIG.bet || 1) * mult);
+        const payout = typeof serverPayout === "number" ? serverPayout : Math.round(fish.type.reward * (bet / CONFIG.bet || 1) * mult);
         addCoins(payout);
         setCombo((c) => {
           const nc = c + 1;
@@ -600,6 +625,17 @@ export default function PlushieParadiseNeonFishing({
         bonusCoinsRef.current = bonusCoinsRef.current.filter((bc) => {
           const dx = bc.x - hookRef.current.x;
           const dy = bc.y - hookRef.current.y;
+          if (Math.sqrt(dx * dx + dy * dy) < 26 && serverRef.current) {
+            // the server checks and pays the bonus coin
+            const bx = bc.x, by = bc.y;
+            serverRef.current.call("/api/games/fishing/bonus", { amount: bc.amount }).then((res) => {
+              addCoins(res.amount);
+              spawnCoinFly(particlesRef.current, bx, by, sizeRef.current.w - 70, 28, res.amount);
+              audioRef.current && audioRef.current.coin();
+              flashMessage(`🪙 BONUS +${res.amount}`, "good", 1);
+            }).catch(() => {});
+            return false;
+          }
           if (Math.sqrt(dx * dx + dy * dy) < 26) {
             const scaledAmount = Math.max(1, Math.round(bc.amount * winRateScale));
             addCoins(scaledAmount);
@@ -683,8 +719,17 @@ export default function PlushieParadiseNeonFishing({
           // skill, but whether that successful reel actually lands the
           // fish is now the admin-controlled probability, matching every
           // other game's model (see DiceGame in the main app).
-          resolveCatch(Math.random() < winRateScale);
-        } else if (progress <= 0 || r.timeLeft <= 0) {
+          if (serverRef.current) {
+            if (!resolvingRef.current) {
+              resolvingRef.current = true;
+              const fishId = hookedFishRef.current ? hookedFishRef.current.type.id : null;
+              serverRef.current.call("/api/games/fishing/catch", { fishId })
+                .then((res) => resolveCatch(!!res.success, res.payout, true))
+                .catch(() => resolveCatch(false, 0, true))
+                .finally(() => { resolvingRef.current = false; });
+            }
+          } else resolveCatch(Math.random() < winRateScale);
+        } else if (!resolvingRef.current && (progress <= 0 || r.timeLeft <= 0)) {
           resolveCatch(false);
         }
       }
