@@ -4,7 +4,7 @@
 import crypto from "node:crypto";
 
 export const DEFAULT_EDGES = { dice: 99, limbo: 97, mines: 97, hilo: 97, keno: 97, slot: 97, jungle: 95, classicslots: 96, hoohey: 96, horserace: 94, roulette: 97.3, fortune: 95, dragontiger: 96.5, neonfortune: 97, plushieparadise: 92, neonfishing: 94, stocktrading: 96 };
-export const DEFAULT_BOOST_BONUS = 40;
+export const DEFAULT_BOOST_BONUS = 120; // RTP % while a boost bet is active (can be above 100 = player-favoured)
 const BOOST_COST = 50;
 const BOOST_BETS_PER_USE = 3;
 const MINES_SIZE = 25;
@@ -51,9 +51,16 @@ export function cleanGameSettings(body) {
   }
   if (body.boostBonus !== undefined) {
     const n = Number(body.boostBonus);
-    if (Number.isFinite(n)) out.boostBonus = Math.max(10, Math.min(100, Math.round(n)));
+    if (Number.isFinite(n)) out.boostBonus = Math.max(10, Math.min(200, Math.round(n)));
   }
   return out;
+}
+// The admin value per game is the RTP (% of bets returned to players on average).
+// Payouts follow each game's own rules and never change; the RTP only changes how
+// often a bet wins:  chance of winning = RTP / (average payout multiple of a win).
+function winChance(rtp, avgWinMult) {
+  if (!(avgWinMult > 0)) return 0;
+  return Math.max(0, Math.min(0.995, rtp / 100 / avgWinMult));
 }
 function edgeFor(db, m, game) {
   const { edges, boostBonus } = gameSettings(db);
@@ -97,7 +104,7 @@ function hiloOdds(s) {
 function minesMult(safe, mineCount, edgeF) {
   let mult = 1;
   for (let i = 0; i < safe; i++) { const left = MINES_SIZE - i; mult *= left / (left - mineCount); }
-  return r2(mult * edgeF);
+  return r2(mult * edgeF); // edgeF is 1: fair multiplier
 }
 
 export function registerGames(app, { readDb, writeDb, findMember, memberAuth, rateLimit, publicMember }) {
@@ -122,9 +129,9 @@ export function registerGames(app, { readDb, writeDb, findMember, memberAuth, ra
     if (!Number.isFinite(target) || target < 1 || target > 99) return { error: "Invalid target" };
     const edge = edgeFor(db, m, "dice");
     const chance = Math.max(1, Math.min(96, mode === "over" ? 100 - target : target));
-    const multiplier = r2(edge / chance);
+    const multiplier = r2(99 / chance); // fixed rule: 99 / win-range %
     const t = takeBet(m, b.bet); if (t.error) return t;
-    const won = rand() * 100 < edge;
+    const won = rand() < winChance(edge, multiplier);
     const raw = won
       ? (mode === "over" ? target + rand() * (100 - target) : rand() * target)
       : (mode === "over" ? rand() * target : target + rand() * (100 - target));
@@ -139,7 +146,7 @@ export function registerGames(app, { readDb, writeDb, findMember, memberAuth, ra
     if (!Number.isFinite(target) || target < 1.01 || target > 1_000_000) return { error: "Invalid target" };
     const edge = edgeFor(db, m, "limbo");
     const t = takeBet(m, b.bet); if (t.error) return t;
-    const won0 = rand() * 100 < edge;
+    const won0 = rand() < winChance(edge, target);
     const rolled = won0 ? r2(target + rand() * target * 4) : r2(1 + rand() * Math.max(0.01, target - 1.01));
     const won = rolled >= target;
     const payout = won ? r2(t.bet * target) : 0;
@@ -164,7 +171,9 @@ export function registerGames(app, { readDb, writeDb, findMember, memberAuth, ra
     for (const c of remaining) { if (c.rank > cur.rank) higher++; else if (c.rank < cur.rank) lower++; }
     const total = remaining.length || 1;
     const edge = edgeFor(db, m, "hilo");
-    const won0 = rand() * 100 < edge;
+    const natural = Math.max(0.02, (direction === "higher" ? higher : lower) / total);
+    const won0 = rand() < (s.guessed ? natural : Math.min(0.995, natural * edge / 100));
+    s.guessed = true;
     const up = () => Math.min(14, cur.rank + 1 + randInt(Math.max(1, 14 - cur.rank)));
     const down = () => Math.max(2, cur.rank - 1 - randInt(Math.max(1, cur.rank - 2)));
     const nextRank = direction === "higher" ? (won0 ? up() : down()) : (won0 ? down() : up());
@@ -174,7 +183,7 @@ export function registerGames(app, { readDb, writeDb, findMember, memberAuth, ra
     const won = direction === "higher" ? card.rank > cur.rank : card.rank < cur.rank;
     if (won) {
       const prob = Math.max(0.02, (direction === "higher" ? higher : lower) / total);
-      s.mult = r2(s.mult * r2((edge / 100) / prob));
+      s.mult = r2(s.mult * r2(1 / prob));
       s.current = card;
       return { outcome: "win", card, multiplier: s.mult, odds: hiloOdds(s) };
     }
@@ -205,7 +214,10 @@ export function registerGames(app, { readDb, writeDb, findMember, memberAuth, ra
     const tile = Math.floor(Number(b.tile));
     if (!Number.isFinite(tile) || tile < 0 || tile >= MINES_SIZE || s.revealed.includes(tile)) return { error: "Invalid tile" };
     const edge = edgeFor(db, m, "mines");
-    if (rand() * 100 >= edge) {
+    const left = MINES_SIZE - s.revealed.length;
+    const natural = (left - s.mineCount) / left;
+    const survive = s.revealed.length === 0 ? Math.min(0.995, natural * edge / 100) : natural;
+    if (rand() >= survive) {
       const others = Array.from({ length: MINES_SIZE }, (_, x) => x).filter((x) => !s.revealed.includes(x) && x !== tile);
       for (let i = others.length - 1; i > 0; i--) { const j = randInt(i + 1); [others[i], others[j]] = [others[j], others[i]]; }
       const mines = [tile, ...others.slice(0, Math.max(0, s.mineCount - 1))];
@@ -215,17 +227,17 @@ export function registerGames(app, { readDb, writeDb, findMember, memberAuth, ra
     }
     s.revealed.push(tile);
     if (s.revealed.length === MINES_SIZE - s.mineCount) {
-      const payout = r2(s.bet * minesMult(s.revealed.length, s.mineCount, edge / 100));
+      const payout = r2(s.bet * minesMult(s.revealed.length, s.mineCount, 1));
       settle(db, m, "mines", s.bet, payout);
       m.session = null;
       return { hit: false, finished: true, bet: s.bet, payout };
     }
-    return { hit: false, finished: false, multiplier: minesMult(s.revealed.length, s.mineCount, edge / 100) };
+    return { hit: false, finished: false, multiplier: minesMult(s.revealed.length, s.mineCount, 1) };
   });
   route("/api/games/mines/cashout", (db, m) => {
     const s = m.session;
     if (!s || s.game !== "mines" || s.revealed.length === 0) return { error: "no_round", status: 409 };
-    const payout = r2(s.bet * minesMult(s.revealed.length, s.mineCount, edgeFor(db, m, "mines") / 100));
+    const payout = r2(s.bet * minesMult(s.revealed.length, s.mineCount, 1));
     settle(db, m, "mines", s.bet, payout);
     m.session = null;
     return { bet: s.bet, payout };
@@ -256,13 +268,14 @@ export function registerGames(app, { readDb, writeDb, findMember, memberAuth, ra
     const table = KENO_PAY[picks.length];
     const paying = table.map((x, h) => (x > 0 ? h : -1)).filter((h) => h >= 0);
     const losing = table.map((x, h) => (x === 0 ? h : -1)).filter((h) => h >= 0);
-    const won0 = rand() * 100 < edge;
+    const avg = paying.reduce((a, h) => a + table[h], 0) / (paying.length || 1);
+    const won0 = rand() < winChance(edge, avg);
     const targetHits = won0 && paying.length ? pickOne(paying) : losing.length ? pickOne(losing) : 0;
     const hitPool = shuffled(picks).slice(0, Math.min(targetHits, picks.length));
     const missPool = shuffled(Array.from({ length: 40 }, (_, i) => i + 1).filter((n) => !picks.includes(n))).slice(0, 10 - hitPool.length);
     const drawn = shuffled([...hitPool, ...missPool]);
     const hits = picks.filter((n) => drawn.includes(n)).length;
-    const mult = r2((table[hits] ?? 0) * (edge / 97));
+    const mult = table[hits] ?? 0;
     return { drawn, hits, mult, payout: r2(bet * mult) };
   });
 
@@ -276,10 +289,16 @@ export function registerGames(app, { readDb, writeDb, findMember, memberAuth, ra
     const syms = SLOT_SYMS[game].map(([id, weight, pay3, pay2]) => ({ id, weight, pay3, pay2 }));
     const pool = syms.flatMap((x) => Array(x.weight).fill(x));
     const spin = () => pool[randInt(pool.length)];
+    const baseOf = ([a, b2, c]) => (a.id === b2.id && b2.id === c.id ? a.pay3 : a.id === b2.id ? a.pay2 : b2.id === c.id ? b2.pay2 : a.id === c.id ? a.pay2 : 0);
+    // average payout of the "win" layout (a pair, sometimes three of a kind), measured once
+    let sum = 0; const N = 200000;
+    for (let i = 0; i < N; i++) { const a = spin(); const c = rand() < 0.15 ? a : spin(); sum += baseOf([a, a, c]); }
+    const avgWin = sum / N;
+    console.log(`[games] ${game}: average win ${avgWin.toFixed(2)}x`);
     oneShot(game, (db, m, b, bet) => {
       const edge = edgeOf(db, m, game);
       let finals;
-      if (rand() * 100 < edge) {
+      if (rand() < winChance(edge, avgWin)) {
         const a = spin(); const c = rand() < 0.15 ? a : spin();
         finals = shuffled([a, a, c]);
       } else {
@@ -293,7 +312,7 @@ export function registerGames(app, { readDb, writeDb, findMember, memberAuth, ra
       else if (a.id === b2.id) base = a.pay2;
       else if (b2.id === c.id) base = b2.pay2;
       else if (a.id === c.id) base = a.pay2;
-      const mult = r2(base * (edge / SLOT_SCALE[game]));
+      const mult = base;
       return { reels: finals.map((x) => x.id), mult, payout: r2(bet * mult) };
     });
   }
@@ -302,8 +321,12 @@ export function registerGames(app, { readDb, writeDb, findMember, memberAuth, ra
   const JUNGLE = [["WILD", 50], ["SCATTER", 0], ["MASK", 20], ["STATUE", 15], ["A", 10], ["K", 8], ["Q", 5], ["J", 3], ["10", 2]].map(([id, mult]) => ({ id, mult }));
   const jRow = (row) => row.every((x) => x.id === row[0].id || x.id === "WILD") && row[0].mult > 0;
   const jGrid = () => Array.from({ length: 5 }, () => Array.from({ length: 5 }, () => pickOne(JUNGLE)));
+  const jPay = (grid) => grid.reduce((a, row) => a + (jRow(row) ? row[0].mult / 10 : 0), 0);
+  let jSum = 0, jN = 0;
+  for (let i = 0; i < 400000 && jN < 3000; i++) { const g = jGrid(); if (g.some(jRow)) { jSum += jPay(g); jN++; } }
+  const jAvg = jN ? jSum / jN : 3;
   oneShot("jungle", (db, m, b, bet) => {
-    const won = rand() * 100 < edgeOf(db, m, "jungle");
+    const won = rand() < winChance(edgeOf(db, m, "jungle"), jAvg);
     let grid = null;
     for (let i = 0; i < 3000 && !grid; i++) { const g = jGrid(); if (g.some(jRow) === won) grid = g; }
     if (!grid) {
@@ -322,10 +345,10 @@ export function registerGames(app, { readDb, writeDb, findMember, memberAuth, ra
     if (!(picked >= 0 && picked <= 5)) return { error: "Invalid pick" };
     const edge = edgeOf(db, m, "hoohey");
     let dice;
-    if (rand() * 100 < edge) { const g = randInt(3); dice = [0, 1, 2].map((i) => (i === g ? picked + 1 : 1 + randInt(6))); }
+    if (rand() < winChance(edge, 84 / 36)) { const g = randInt(3); dice = [0, 1, 2].map((i) => (i === g ? picked + 1 : 1 + randInt(6))); }
     else dice = [0, 0, 0].map(() => { let v; do { v = 1 + randInt(6); } while (v === picked + 1); return v; });
     const matches = dice.filter((d) => d === picked + 1).length;
-    const mult = r2([0, 2, 3, 4][matches] * (edge / 100));
+    const mult = [0, 2, 3, 4][matches];
     return { dice, matches, mult, payout: matches > 0 ? r2(bet * mult) : 0 };
   });
 
@@ -335,11 +358,11 @@ export function registerGames(app, { readDb, writeDb, findMember, memberAuth, ra
     const picked = Math.floor(Number(b.picked));
     if (!HORSE_ODDS[picked]) return { error: "Invalid horse" };
     const edge = edgeOf(db, m, "horserace");
-    const winner = rand() * 100 < edge ? picked : pickOne([1, 2, 3, 4, 5, 6].filter((h) => h !== picked));
+    const winner = rand() < winChance(edge, HORSE_ODDS[picked]) ? picked : pickOne([1, 2, 3, 4, 5, 6].filter((h) => h !== picked));
     const durations = {};
     for (const h of [1, 2, 3, 4, 5, 6]) durations[h] = h === winner ? 2.6 + rand() * 0.3 : 3.1 + rand() * 1.2;
     const won = winner === picked;
-    const mult = won ? r2(HORSE_ODDS[picked] * (edge / 100)) : 0;
+    const mult = won ? HORSE_ODDS[picked] : 0;
     return { winner, durations, won, mult, payout: won ? r2(bet * mult) : 0 };
   });
 
@@ -359,9 +382,9 @@ export function registerGames(app, { readDb, writeDb, findMember, memberAuth, ra
     const all = Array.from({ length: 37 }, (_, i) => i);
     const wins = all.filter((n) => rWin(n, betType, straightNum));
     const loses = all.filter((n) => !rWin(n, betType, straightNum));
-    const number = pickOne(rand() * 100 < edge && wins.length ? wins : loses.length ? loses : all);
+    const number = pickOne(rand() < winChance(edge, RMULT[betType]) && wins.length ? wins : loses.length ? loses : all);
     const won = rWin(number, betType, straightNum);
-    const mult = won ? r2(RMULT[betType] * (edge / 100)) : 0;
+    const mult = won ? RMULT[betType] : 0;
     return { number, won, mult, payout: won ? r2(bet * mult) : 0 };
   });
 
@@ -376,10 +399,15 @@ export function registerGames(app, { readDb, writeDb, findMember, memberAuth, ra
     if (queue.length > 0) { bet = queue.shift(); wager = 0; }       // a free spin uses the bet that won it
     else { const t = takeBet(m, b.bet); if (t.error) return t; bet = t.bet; wager = t.bet; }
     const edge = edgeOf(db, m, "fortune");
-    const seg = rand() * 100 < edge ? weighted(FSEG.filter((x) => x.mult > 0)) : weighted(FSEG.filter((x) => x.mult === 0));
+    const paying = FSEG.filter((x) => x.mult > 0), nonPay = FSEG.filter((x) => x.mult === 0);
+    const avgWin = paying.reduce((a, x) => a + x.mult * x.weight, 0) / paying.reduce((a, x) => a + x.weight, 0);
+    const freeShare = nonPay.filter((x) => x.free).reduce((a, x) => a + x.weight, 0) / nonPay.reduce((a, x) => a + x.weight, 0);
+    const R = edge / 100;
+    const pWin = Math.max(0, Math.min(0.995, (R * (1 - freeShare)) / (avgWin - freeShare * R)));
+    const seg = rand() < pWin ? weighted(FSEG.filter((x) => x.mult > 0)) : weighted(FSEG.filter((x) => x.mult === 0));
     let payout = 0;
     if (seg.free) queue.push(bet);
-    else payout = r2(bet * r2(seg.mult * (edge / 100)));
+    else payout = r2(bet * seg.mult);
     settle(db, m, "fortune", wager, payout);
     return { segment: seg.i, payout, bet, wager, freeSpins: queue.length };
   });
@@ -393,7 +421,7 @@ export function registerGames(app, { readDb, writeDb, findMember, memberAuth, ra
     const betType = ["dragon", "tiger", "tie"].includes(b.betType) ? b.betType : null;
     if (!betType) return { error: "Invalid bet type" };
     const edge = edgeOf(db, m, "dragontiger");
-    const won0 = rand() * 100 < edge;
+    const won0 = rand() < winChance(edge, betType === "tie" ? 9 : 2);
     const rr = () => 2 + randInt(13);
     let rd, rt;
     if (betType === "tie") { if (won0) { rd = rt = rr(); } else { do { rd = rr(); rt = rr(); } while (rd === rt); } }
@@ -405,7 +433,7 @@ export function registerGames(app, { readDb, writeDb, findMember, memberAuth, ra
     const dragon = { rank: rd, suit: pickOne(SUITS) }, tiger = { rank: rt, suit: pickOne(SUITS) };
     const outcome = rd === rt ? "tie" : rd > rt ? "dragon" : "tiger";
     let payout = 0;
-    if (betType === outcome) payout = r2(bet * r2((outcome === "tie" ? 9 : 2) * (edge / 100)));
+    if (betType === outcome) payout = r2(bet * (outcome === "tie" ? 9 : 2));
     else if (outcome === "tie") payout = r2(bet * 0.5);
     return { dragon, tiger, outcome, payout };
   });
@@ -431,7 +459,8 @@ export function registerGames(app, { readDb, writeDb, findMember, memberAuth, ra
     return { grid, stopIdx };
   }
   function nfWins(grid, bet) {
-    const perLine = bet / 20; const lineWins = []; let total = 0;
+    // line pays are x4 of the old table so a win is worth more than the bet (keep in sync with NeonFortuneSlot.jsx)
+    const perLine = bet / 5; const lineWins = []; let total = 0;
     NF_LINES.forEach((pattern) => {
       const seq = pattern.map((row, reel) => grid[reel][row]);
       let eff = null, broke = false;
@@ -447,6 +476,21 @@ export function registerGames(app, { readDb, writeDb, findMember, memberAuth, ra
     if (scatters >= 3 && NF_PAY.SCATTER[Math.min(scatters, 5)]) total += NF_PAY.SCATTER[Math.min(scatters, 5)] * bet;
     return { total, lineWins, scatters };
   }
+  // average payout multiple of a winning Neon Fortune spin (incl. the 8% jackpot chance), measured once
+  const NF_AVG_WIN = (() => {
+    let sum = 0, n = 0;
+    for (let i = 0; i < 200000 && n < 4000; i++) {
+      const c = nfSpinGrid(); const w = nfWins(c.grid, 1);
+      if (w.total <= 0) continue;
+      let x = w.total;
+      if (w.total >= 10 && w.lineWins.some((l) => l.count === 5 && NF_HIGH.has(l.symbol))) x = 0.92 * w.total + 0.08 * (w.total * 10 + 100);
+      if (w.scatters >= 3) x += (w.scatters === 3 ? 8 : w.scatters === 4 ? 12 : 20) * 0.9; // free spins are worth about one bet each
+      sum += x; n++;
+    }
+    const avg = n ? sum / n : 2;
+    console.log(`[games] neonfortune: average win ${avg.toFixed(2)}x`);
+    return avg;
+  })();
   route("/api/games/neonfortune/state", (db, m) => ({ freeSpinsLeft: (m.nf && m.nf.freeSpinsLeft) || 0, bet: (m.nf && m.nf.bet) || 0 }));
   route("/api/games/neonfortune/spin", (db, m, b) => {
     m.nf = m.nf || { freeSpinsLeft: 0, bet: 0 };
@@ -457,7 +501,7 @@ export function registerGames(app, { readDb, writeDb, findMember, memberAuth, ra
       if (!(want >= 1 && want <= 5000)) return { error: "Invalid bet" };
       const t = takeBet(m, want); if (t.error) return t; bet = wager = t.bet;
     }
-    const won = rand() * 100 < edgeFor(db, m, "neonfortune");
+    const won = rand() < winChance(edgeFor(db, m, "neonfortune"), NF_AVG_WIN);
     let res = null;
     for (let i = 0; i < 500 && !res; i++) { const c = nfSpinGrid(); if ((nfWins(c.grid, bet).total > 0) === won) res = c; }
     if (!res) res = nfSpinGrid();
@@ -483,7 +527,9 @@ export function registerGames(app, { readDb, writeDb, findMember, memberAuth, ra
   oneShot("plushieparadise", (db, m, b, bet) => {
     const base = b.speciesId ? PLUSHIE_REWARD[b.speciesId] : 0;
     if (b.speciesId && !base) return { error: "Unknown plushie" };
-    const success = !!base && rand() * 100 < edgeOf(db, m, "plushieparadise");
+    const b10 = base / 10;
+    const avgWin = 0.04 * 5 * b10 + 0.96 * 0.12 * (b10 + 5) + 0.96 * 0.88 * b10;
+    const success = !!base && rand() < winChance(edgeOf(db, m, "plushieparadise"), avgWin);
     if (!success) return { success: false, reward: 0, payout: 0 };
     const unit = bet / 10;
     let reward = Math.round(base * unit), isJackpot = false, isBonus = false;
@@ -507,9 +553,10 @@ export function registerGames(app, { readDb, writeDb, findMember, memberAuth, ra
     if (!f || !f.active) return { error: "no_round", status: 409 };
     const reward = FISH_REWARD[b.fishId];
     if (!reward) return { error: "Unknown fish" };
-    const success = rand() * 100 < edgeFor(db, m, "neonfishing");
+    const combo = Math.min(5, 1 + Math.floor(f.combo / 3));
+    const success = rand() < winChance(edgeFor(db, m, "neonfishing"), (reward / 10) * combo);
     let payout = 0;
-    if (success) { payout = Math.round(reward * (f.bet / 10) * Math.min(5, 1 + Math.floor(f.combo / 3))); f.combo += 1; }
+    if (success) { payout = Math.round(reward * (f.bet / 10) * combo); f.combo += 1; }
     else f.combo = 0;
     f.active = false;
     settle(db, m, "neonfishing", f.bet, payout);
@@ -527,7 +574,7 @@ export function registerGames(app, { readDb, writeDb, findMember, memberAuth, ra
     const amount = Number(b.amount);
     if (!f || !f.active || ![10, 25, 50, 100].includes(amount) || (f.bonus || 0) >= 5) return { error: "no_bonus", status: 409 };
     f.bonus = (f.bonus || 0) + 1;
-    const credited = Math.max(1, Math.round(amount * edgeFor(db, m, "neonfishing") / 100));
+    const credited = amount; // bonus coins pay their face value
     m.balance = r2(m.balance + credited);
     return { amount: credited };
   });
@@ -552,7 +599,8 @@ export function registerGames(app, { readDb, writeDb, findMember, memberAuth, ra
     const h = holdingsOf(m); const ex = h[id];
     if (!ex || !(qty >= 1) || qty > ex.quantity) return { error: "no_holding", status: 409 };
     const costBasis = r2(ex.averagePrice * qty);
-    const won = rand() < edgeFor(db, m, "stocktrading") / 100;
+    const pUp = Math.max(0, Math.min(1, (edgeFor(db, m, "stocktrading") / 100 - 0.89) / 0.22));
+    const won = rand() < pUp;
     const move = 0.02 + rand() * 0.18;
     const receive = r2(won ? costBasis * (1 + move) : costBasis * Math.max(0.05, 1 - move));
     if (ex.quantity - qty <= 0) delete h[id]; else h[id] = { ...ex, quantity: ex.quantity - qty };
