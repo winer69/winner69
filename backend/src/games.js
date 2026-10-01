@@ -39,19 +39,19 @@ export function gameSettings(db) {
   const boostBonus = Number.isFinite(st.boostBonus) ? st.boostBonus : DEFAULT_BOOST_BONUS;
   return { edges, boostBonus };
 }
-// Admin input -> clean values (10%-100% like the admin sliders)
+// Admin input -> clean values (20%-100% like the admin RTP picker)
 export function cleanGameSettings(body) {
   const out = {};
   if (body.edges && typeof body.edges === "object") {
     out.edges = {};
     for (const [g, v] of Object.entries(body.edges)) {
       const n = Number(v);
-      if (g in DEFAULT_EDGES && Number.isFinite(n)) out.edges[g] = Math.max(10, Math.min(100, Math.round(n * 10) / 10));
+      if (g in DEFAULT_EDGES && Number.isFinite(n)) out.edges[g] = Math.max(20, Math.min(100, Math.round(n * 10) / 10));
     }
   }
   if (body.boostBonus !== undefined) {
     const n = Number(body.boostBonus);
-    if (Number.isFinite(n)) out.boostBonus = Math.max(10, Math.min(200, Math.round(n)));
+    if (Number.isFinite(n)) out.boostBonus = Math.max(20, Math.min(200, Math.round(n)));
   }
   return out;
 }
