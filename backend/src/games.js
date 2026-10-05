@@ -2,8 +2,11 @@
 // so a member can't fake a win from the browser. The rules are the same as the ones the
 // games used to run in the browser (admin-set win rate per game, boost floor, same payouts).
 import crypto from "node:crypto";
+import { CASCADE_GAMES } from "./slotThemes.js";
+import { ntCleanBets, ntPick, ntPayout } from "./namtao.js";
+import { EXTRA_GAMES, extraState } from "./extraGames.js";
 
-export const DEFAULT_EDGES = { dice: 99, limbo: 97, mines: 97, hilo: 97, keno: 97, slot: 97, jungle: 95, classicslots: 96, hoohey: 96, horserace: 94, roulette: 97.3, fortune: 95, dragontiger: 96.5, neonfortune: 97, plushieparadise: 92, neonfishing: 94, stocktrading: 96 };
+export const DEFAULT_EDGES = { dice: 99, limbo: 97, mines: 97, hilo: 97, keno: 97, slot: 97, jungle: 95, classicslots: 96, hoohey: 96, horserace: 94, roulette: 97.3, fortune: 95, dragontiger: 96.5, neonfortune: 97, plushieparadise: 92, neonfishing: 94, stocktrading: 96, goldendragon: 96.5, inferno7s: 96, fruitcanopy: 96, alohatotem: 96, coppergulch: 96, fishshooter: 95 };
 export const DEFAULT_BOOST_BONUS = 120; // RTP % while a boost bet is active (can be above 100 = player-favoured)
 const BOOST_COST = 50;
 const BOOST_BETS_PER_USE = 3;
@@ -491,6 +494,69 @@ export function registerGames(app, { readDb, writeDb, findMember, memberAuth, ra
     console.log(`[games] neonfortune: average win ${avg.toFixed(2)}x`);
     return avg;
   })();
+  // ---- Imported games (Inferno 7s, Fruit Canopy, Aloha Totem, Copper Gulch, ยิงปลา):
+  // handlers in extraGames.js decide everything; here they get the member's wallet.
+  for (const [game, def] of Object.entries(EXTRA_GAMES)) {
+    route(`/api/games/x/${game}/state`, (db, m) => ({ state: extraState(game, (m.xg || {})[game]) }));
+    for (const [action, handler] of Object.entries(def.actions)) {
+      route(`/api/games/x/${game}/${action}`, (db, m, b) => {
+        m.xg = m.xg || {};
+        const st = m.xg[game] || (m.xg[game] = {});
+        const charge = (amount) => { const a = r2(amount); if (!(a > 0) || a > 10_000_000) return "Invalid bet"; if (a > m.balance) return "insufficient_balance"; m.balance = r2(m.balance - a); return null; };
+        const out = handler(st, b, { rng: rand, rtp: edgeFor(db, m, def.edge), charge });
+        if (out.error) return out;
+        settle(db, m, def.edge, out.wager, out.payout);
+        return out;
+      });
+    }
+  }
+
+  // ---- น้ำเต้าปูปลา (NamTaoPuPla): many spots per roll, rules shared with the browser (namtao.js)
+  route("/api/games/namtao/roll", (db, m, b) => {
+    const slip = ntCleanBets(b.bets);
+    if (slip.error) return slip;
+    const t = takeBet(m, slip.total); if (t.error) return t;
+    const res = ntPick(rand, slip.bets, edgeFor(db, m, "hoohey"));
+    const payout = r2(ntPayout(res, slip.bets));
+    settle(db, m, "hoohey", slip.total, payout);
+    return { res, payout, staked: slip.total };
+  });
+
+  // ---- Cascade slots (มังกรทองนำโชค / ขุมทรัพย์ราชันย์ / 777 คลาสสิก / ป่ามรกต)
+  // Engine + paytables are shared with the browser (cascadeSlot.js, slotThemes.js).
+  const cascadeState = (m, id) => {
+    m.cascade = m.cascade || {};
+    if (!m.cascade[id]) {
+      m.cascade[id] = { freeSpinsLeft: 0, bet: 0 };
+      if (id === "goldendragon" && m.gd) { m.cascade[id] = { freeSpinsLeft: m.gd.freeSpinsLeft || 0, bet: m.gd.bet || 0 }; delete m.gd; }
+    }
+    return m.cascade[id];
+  };
+  const cascadeSpin = (id) => (db, m, b) => {
+    const game = CASCADE_GAMES[id];
+    const st = cascadeState(m, id);
+    let bet, wager, isFree = false;
+    if (st.freeSpinsLeft > 0) { isFree = true; bet = st.bet; wager = 0; st.freeSpinsLeft -= 1; }
+    else {
+      const want = Math.floor(Number(b.bet));
+      if (!(want >= 1 && want <= 5000)) return { error: "Invalid bet" };
+      const t = takeBet(m, want); if (t.error) return t; bet = wager = t.bet;
+    }
+    const result = game.play(rand, bet, edgeFor(db, m, game.edge), isFree);
+    if (result.freeSpins > 0) { if (!isFree) st.bet = bet; st.freeSpinsLeft += result.freeSpins; }
+    const payout = r2(result.total);
+    settle(db, m, game.edge, wager, payout);
+    return { result, payout, wager, isFree, bet, freeSpinsLeft: st.freeSpinsLeft };
+  };
+  const cascadeStateRoute = (id) => (db, m) => { const st = cascadeState(m, id); return { freeSpinsLeft: st.freeSpinsLeft, bet: st.bet }; };
+  for (const id of Object.keys(CASCADE_GAMES)) {
+    route(`/api/games/cascade/${id}/state`, cascadeStateRoute(id));
+    route(`/api/games/cascade/${id}/spin`, cascadeSpin(id));
+  }
+  // old paths from v16, kept so an already-open browser tab keeps working
+  route("/api/games/goldendragon/state", cascadeStateRoute("goldendragon"));
+  route("/api/games/goldendragon/spin", cascadeSpin("goldendragon"));
+
   route("/api/games/neonfortune/state", (db, m) => ({ freeSpinsLeft: (m.nf && m.nf.freeSpinsLeft) || 0, bet: (m.nf && m.nf.bet) || 0 }));
   route("/api/games/neonfortune/spin", (db, m, b) => {
     m.nf = m.nf || { freeSpinsLeft: 0, bet: 0 };
