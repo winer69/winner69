@@ -134,7 +134,7 @@ function LtTicket({ t, big, fresh, onClick }) {
     <button onClick={onClick} className={`lt-tk${fresh ? " lt-tk-in" : ""}`} style={{ background: st.tint[0], fontSize: big ? 18 : 16 }}
       aria-label={`ใบหวย ${TYPE_LABEL[t.type]} เลข ${t.number}`}>
       <div className="lt-tk-stub">
-        <LtLogo size={34} />
+        <LtLogo size={26} />
         <span>{TYPE_LABEL[t.type]}</span>
         <small>No.{t.serial.slice(-3)}</small>
       </div>
@@ -147,7 +147,7 @@ function LtTicket({ t, big, fresh, onClick }) {
           {t.number.split("").map((d, i) => <span key={i} style={{ color: st.ink }}>{d}</span>)}
           {stamp
             ? <div className="lt-tk-stamp" style={{ color: stamp.c, borderColor: stamp.c }}>{stamp.t}</div>
-            : <div className="lt-tk-seal" aria-hidden="true"><LtLogo size={46} /></div>}
+            : <div className="lt-tk-seal" aria-hidden="true"><LtLogo size={34} /></div>}
         </div>
         <div className="lt-tk-foot">
           <div>
@@ -209,17 +209,36 @@ export function LotteryPage({ onBack, api, balance, topBar }) {
 
   // every number of every bill becomes one paper ticket in the vault
   const tickets = useMemo(() => bills.flatMap((b) => b.lines.map((l, i) => ({
-    id: `${b.id}-${i}`, billId: b.id, status: b.status === "won" ? (l.win > 0 ? "won" : "lost") : b.status,
+    id: `${b.id}-${i}`, billId: b.id, line: i, hidden: (b.hidden || []).includes(i), status: b.status === "won" ? (l.win > 0 ? "won" : "lost") : b.status,
     type: l.type, number: l.number, amount: l.amount, win: l.win || 0, rate: rates[l.type] || 0,
     serial: ltSerial(`${b.id}-${i}`), roundTitle: b.round ? b.round.title : "งวดที่ถูกลบ",
     drawAt: b.round ? b.round.drawAt : b.time, result: b.round ? b.round.result : null, time: b.time,
-  }))), [bills, rates]);
+  }))).filter((t) => t.status === "pending" || !t.hidden), [bills, rates]);
   const groups = useMemo(() => {
     const g = new Map();
     tickets.forEach((t) => { const k = t.roundTitle; if (!g.has(k)) g.set(k, { title: k, drawAt: t.drawAt, result: t.result, list: [] }); g.get(k).list.push(t); });
     return [...g.values()];
   }, [tickets]);
   const pendingCount = tickets.filter((t) => t.status === "pending").length;
+  const drawnCount = tickets.length - pendingCount;
+  const [confirmDel, setConfirmDel] = useState("");
+  async function removeTickets(body, key) {
+    if (confirmDel !== key) { setConfirmDel(key); setTimeout(() => setConfirmDel((k) => (k === key ? "" : k)), 3000); return; }
+    setConfirmDel("");
+    try {
+      await api.memberPost("/api/lottery/my-tickets/hide", body);
+      setBills((bs) => bs.map((b) => {
+        if (b.status === "pending") return b;
+        const all = b.lines.map((_, i) => i);
+        const hit = body.all || (body.ids && body.ids.includes(b.id)) || body.id === b.id;
+        if (!hit) return b;
+        const add = body.line !== undefined && body.id === b.id ? [body.line] : all;
+        return { ...b, hidden: [...new Set([...(b.hidden || []), ...add])] };
+      }));
+      setOpened(null); flash("ลบใบหวยแล้ว");
+      loadTickets();
+    } catch (e) { flash("ลบไม่สำเร็จ ลองใหม่อีกครั้ง", "err"); }
+  }
 
   const flash = (msg, kind = "ok") => { setToast({ msg, kind, k: Date.now() }); setTimeout(() => setToast(null), 2200); };
   const press = (d) => { if (!rolling) setDigits((p) => (p.length < nDigits ? p + d : p)); };
@@ -408,6 +427,11 @@ export function LotteryPage({ onBack, api, balance, topBar }) {
                 <div><small>ใบหวยทั้งหมด</small><b>{tickets.length} ใบ</b></div>
                 <div><small>ยอดซื้อรวม</small><b>{ltBaht(tickets.reduce((s, t) => s + t.amount, 0))} บาท</b></div>
               </div>
+              {drawnCount > 0 && (
+                <button className={`lt-del-all${confirmDel === "all" ? " sure" : ""}`} onClick={() => removeTickets({ all: true }, "all")}>
+                  {confirmDel === "all" ? `แตะอีกครั้งเพื่อลบ ${drawnCount} ใบ` : `🗑 ลบใบที่ออกผลแล้วทั้งหมด (${drawnCount})`}
+                </button>
+              )}
               {tickets.length === 0 ? (
                 <div className="lt-panel lt-empty-vault">
                   <LtLogo size={64} />
@@ -416,7 +440,15 @@ export function LotteryPage({ onBack, api, balance, topBar }) {
                 </div>
               ) : groups.map((g) => (
                 <div key={g.title} className="lt-group">
-                  <h3>{g.title} <small>ออกผล {fmtTime(g.drawAt)}</small></h3>
+                  <h3>
+                    <span>{g.title} <small>ออกผล {fmtTime(g.drawAt)}</small></span>
+                    {g.list.some((t) => t.status !== "pending") && (
+                      <button className={`lt-del${confirmDel === "g:" + g.title ? " sure" : ""}`}
+                        onClick={() => removeTickets({ ids: [...new Set(g.list.filter((t) => t.status !== "pending").map((t) => t.billId))] }, "g:" + g.title)}>
+                        {confirmDel === "g:" + g.title ? "ยืนยันลบ" : "🗑 ลบงวดนี้"}
+                      </button>
+                    )}
+                  </h3>
                   {g.result && (
                     <div className="lt-result">
                       <span>3 ตัวบน <b>{g.result.top3}</b></span>
@@ -454,6 +486,12 @@ export function LotteryPage({ onBack, api, balance, topBar }) {
                 <div><dt>เลขที่บิล</dt><dd>{opened.billId}</dd></div>
                 <div><dt>ซื้อเมื่อ</dt><dd>{new Date(opened.time).toLocaleString("th-TH")}</dd></div>
               </dl>
+              {opened.status !== "pending" && (
+                <button className={`lt-del-one${confirmDel === "t:" + opened.id ? " sure" : ""}`}
+                  onClick={() => removeTickets({ id: opened.billId, line: opened.line }, "t:" + opened.id)}>
+                  {confirmDel === "t:" + opened.id ? "แตะอีกครั้งเพื่อยืนยันการลบ" : "🗑 ลบใบหวยนี้"}
+                </button>
+              )}
               <button className="lt-primary" onClick={() => setOpened(null)}>ปิด</button>
             </div>
           </div>
@@ -550,23 +588,27 @@ const LT_CSS = `
 .lt-vault-sum b{font-family:'Kanit','Prompt',sans-serif;font-size:20px;color:${C.gold}}
 .lt-empty-vault{text-align:center}
 .lt-empty-vault p{color:${C.mute}}
-.lt-group h3{font-family:'Kanit','Prompt',sans-serif;font-weight:500;font-size:15px;color:${C.gold};margin:4px 2px 8px}
+.lt-group h3{font-family:'Kanit','Prompt',sans-serif;font-weight:500;font-size:15px;color:${C.gold};margin:4px 2px 8px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.lt-del{flex-shrink:0;border:1px solid ${C.goldDeep};background:rgba(0,0,0,.35);color:${C.mute};font-family:'Prompt',sans-serif;font-size:12px;padding:5px 10px;border-radius:999px}
+.lt-del.sure,.lt-del-all.sure,.lt-del-one.sure{background:#b3141c;color:#fff;border-color:#ff8a80}
+.lt-del-all{width:100%;margin:0 0 12px;border:1px dashed ${C.goldDeep};background:rgba(0,0,0,.3);color:${C.mute};font-family:'Prompt',sans-serif;font-size:13px;padding:9px;border-radius:12px}
+.lt-del-one{width:100%;margin-top:4px;border:1px solid #ff8a80;background:transparent;color:#ff8a80;font-family:'Kanit','Prompt',sans-serif;font-size:15px;padding:11px;border-radius:14px}
 .lt-group h3 small{font-size:12px;color:${C.mute};font-weight:400;margin-left:6px}
 .lt-result{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;margin:0 2px 10px;padding:8px 12px;border-radius:12px;background:rgba(0,0,0,.3);border:1px solid ${C.goldDeep};font-size:13px;color:${C.mute}}
 .lt-result b{font-family:'Kanit','Prompt',sans-serif;font-size:18px;letter-spacing:2px;color:${C.gold};margin-left:4px}
 .lt-first{font-size:12px}
-.lt-stack{display:flex;flex-direction:column;gap:12px;margin-bottom:16px}
+.lt-stack{display:flex;flex-direction:column;gap:9px;margin-bottom:14px}
 .lt-tk{position:relative;display:flex;width:100%;text-align:left;border:2px solid ${C.goldDeep};padding:0;border-radius:14px;overflow:hidden;color:${C.paperInk};box-shadow:0 0 0 1px #FFE08A inset,0 12px 22px -12px rgba(0,0,0,.9)}
-.lt-tk::before,.lt-tk::after{content:'';position:absolute;left:64px;width:16px;height:16px;border-radius:50%;background:${C.bg};border:2px solid ${C.goldDeep};z-index:2}
+.lt-tk::before,.lt-tk::after{content:'';position:absolute;left:52px;width:16px;height:16px;border-radius:50%;background:${C.bg};border:2px solid ${C.goldDeep};z-index:2}
 .lt-tk::before{top:-10px}.lt-tk::after{bottom:-10px}
-.lt-tk-stub{width:72px;flex-shrink:0;color:#FFE08A;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border-right:2px dashed rgba(255,224,138,.8);padding:10px 4px;background:linear-gradient(180deg,${C.red},${C.redDeep})}
-.lt-tk-stub span{writing-mode:vertical-rl;transform:rotate(180deg);font-family:'Kanit','Prompt',sans-serif;font-weight:600;font-size:.95em}
+.lt-tk-stub{width:60px;flex-shrink:0;color:#FFE08A;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-right:2px dashed rgba(255,224,138,.8);padding:5px 3px;background:linear-gradient(180deg,${C.red},${C.redDeep})}
+.lt-tk-stub span{font-family:'Kanit','Prompt',sans-serif;font-weight:600;font-size:.72em;line-height:1.1;text-align:center}
 .lt-tk-stub small{font-size:.65em;color:#FFD9C2}
-.lt-tk-main{flex:1;min-width:0;padding:10px 14px 10px 18px;position:relative}
-.lt-tk-head{display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:.8em;border-bottom:1px solid rgba(184,134,43,.5);padding-bottom:6px}
+.lt-tk-main{flex:1;min-width:0;padding:6px 12px 6px 16px;position:relative}
+.lt-tk-head{display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:.8em;border-bottom:1px solid rgba(184,134,43,.5);padding-bottom:4px}
 .lt-tk-head span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lt-tk-digits{position:relative;display:flex;gap:8px;margin:10px 0;align-items:center}
-.lt-tk-digits span{width:2.6em;height:3em;background:#fff;border:2px solid ${C.goldDeep};border-radius:10px;display:grid;place-items:center;font-family:'Kanit','Prompt',sans-serif;font-weight:800;font-size:1.6em;line-height:1;box-shadow:inset 0 -3px 0 rgba(184,134,43,.25)}
+.lt-tk-digits{position:relative;display:flex;gap:6px;margin:6px 0;align-items:center}
+.lt-tk-digits span{width:2.1em;height:2.2em;background:#fff;border:2px solid ${C.goldDeep};border-radius:10px;display:grid;place-items:center;font-family:'Kanit','Prompt',sans-serif;font-weight:800;font-size:1.35em;line-height:1;box-shadow:inset 0 -3px 0 rgba(184,134,43,.25)}
 .lt-tk-seal{margin-left:auto;opacity:.9;transform:rotate(-12deg)}
 .lt-tk-stamp{margin-left:auto;flex-shrink:0;white-space:nowrap;transform:rotate(-12deg);padding:2px 8px;border:2.5px solid;border-radius:8px;font-family:'Kanit','Prompt',sans-serif;font-weight:800;font-size:.8em;background:rgba(255,255,255,.75);letter-spacing:.04em}
 .lt-tk-foot{display:flex;justify-content:space-between;align-items:flex-end;font-size:.78em;gap:8px}
@@ -799,6 +841,7 @@ export function useLotteryApi(deps) {
   return useMemo(() => ({
     get: (path) => deps.apiFetch(path),
     member: (path) => deps.memberFetch(path),
+    memberPost: (path, body) => deps.memberFetch(path, { method: "POST", body: JSON.stringify(body || {}) }),
     action: (path, body) => deps.serverAction(path, body),
     admin: (path, opts = {}) => deps.apiFetch(path, { ...opts, headers: { ...(opts.headers || {}), "x-admin-key": deps.readAdminKey() } }),
   }), []); // eslint-disable-line react-hooks/exhaustive-deps

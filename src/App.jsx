@@ -1129,6 +1129,21 @@ function GlobalStyle() {
       .tabbar-badge { flex:0 0 auto; min-width:22px; height:22px; padding:0 6px; border-radius:999px; display:grid; place-items:center;
         background:#f6c453; color:#2a0a0c; font-size:12px; font-weight:800; line-height:1; }
       @media (max-width:400px){ .tabbar-inner { gap:4px; padding-left:6px; padding-right:6px; } .tabbar-item { font-size:12.5px; height:42px; border-radius:10px; } .tabbar-badge { min-width:19px; height:19px; font-size:11px; } }
+      /* tab bar on every page + full-screen games */
+      .gr-app.has-nav { padding-bottom:calc(80px + env(safe-area-inset-bottom, 0px)); }
+      .gr-app.in-game { padding-left:8px; padding-right:8px; padding-top:10px; }
+      .gr-app.in-game .top-header { margin-bottom:8px; }
+      .gr-app.in-game .game-wrap > .panel, .gr-app.in-game .game-wrap > div[style*="max-width"] { max-width:560px !important; }
+      .gr-app.fs-game { height:100vh; height:100dvh; min-height:0; overflow:hidden; display:flex; flex-direction:column; padding:8px 0 0; }
+      .gr-app.fs-game.has-nav { padding-bottom:calc(62px + env(safe-area-inset-bottom, 0px)); }
+      .gr-app.fs-game > .game-wrap { flex:1 1 auto; min-height:0; width:100%; }
+      .gr-app.fs-game .top-header { width:100%; padding:0 10px; margin-bottom:6px; }
+      @media (max-width:400px){ .gr-app.fs-game.has-nav { padding-bottom:calc(58px + env(safe-area-inset-bottom, 0px)); } }
+      /* lottery: its own ซื้อหวย / ช่องเก็บหวย switch floats just above the main tab bar */
+      .gr-app.has-nav .lt-nav { bottom:calc(70px + env(safe-area-inset-bottom, 0px)); left:50%; right:auto; transform:translateX(-50%); width:min(440px, calc(100% - 24px)); border:2px solid #c8962b; border-radius:16px; box-shadow:0 8px 20px rgba(0,0,0,.6); padding:4px; gap:4px; }
+      .gr-app.has-nav .lt-nav button { height:40px; font-size:14.5px; }
+      .gr-app.has-nav .lt { padding-bottom:84px; }
+      .gr-app.has-nav .lt-toast { bottom:150px; }
       /* gentle warm ambience behind every game screen */
       .gr-app .game-wrap::before { background:
           radial-gradient(480px 320px at 12% 8%, rgba(255,90,60,0.12), transparent 60%),
@@ -3394,7 +3409,7 @@ function ExtraGame({ onBack, gameId, Comp }) {
   return (
     <div className="game-wrap">
       <TopBar onBack={onBack} />
-      <div className="xg-box" style={{ position: "relative", width: "100%", maxWidth: 480, height: "calc(100dvh - 150px)", minHeight: 420, transform: "translateZ(0)", overflow: "hidden", borderRadius: 14, background: "#000" }}>
+      <div className="xg-box" style={{ position: "relative", width: "100%", flex: "1 1 auto", minHeight: 0, transform: "translateZ(0)", overflow: "hidden", background: "#000" }}>
         <Comp host={host} />
       </div>
     </div>
@@ -4327,6 +4342,9 @@ const ICONS = {
 ICONS.lottery = <span style={{ fontSize: 44, lineHeight: 1 }}>🎟️</span>;
 
 
+// games laid out to fill the whole screen; landscape ones also hide the bottom tab bar
+const FULLSCREEN_GAMES = new Set(["inferno7s", "fruitcanopy", "alohatotem", "coppergulch", "fishshooter"]);
+const LANDSCAPE_GAMES = new Set(["fishshooter"]);
 const PLAYABLE = { goldendragon: "goldendragon", lottery: "lottery", dice: "dice", limbo: "limbo", mines: "mines", keno: "keno", hilo: "hilo", giltreels: "slot", jungle: "jungle", classicslots: "classicslots", hoohey: "hoohey", horserace: "horserace", roulette: "roulette", fortune: "fortune", dragontiger: "dragontiger", neonfortune: "neonfortune", plushieparadise: "plushieparadise", neonfishing: "neonfishing", stocktrading: "stocktrading", inferno7s: "inferno7s", fruitcanopy: "fruitcanopy", alohatotem: "alohatotem", coppergulch: "coppergulch", fishshooter: "fishshooter" };
 const GAMES = [
   { id: "fishshooter", name: "ยิงปลา Ocean Royale", cat: "originals", icon: "fishing", grad: ["#0277bd", "#ffc83a"], base: 2640, tag: "ใหม่", img: IMG_FISHSHOOTER },
@@ -4488,11 +4506,11 @@ function WithdrawTicker({ notifications, wins }) {
 // dropped - per "keep all existing functionality working" - they've moved
 // into the header's ⚙️ settings menu (LobbyHeader) and the hero carousel's
 // shop slide instead of taking two of the five primary slots.
-function BottomNav({ active, onShop, onProfile, onChat, onLottery }) {
+function BottomNav({ active, onShop, onProfile, onChat, onLottery, onHome }) {
   const { chatThreads, currentUser } = useApp();
   const unreadFromAdmin = currentUser ? (chatThreads[currentUser] || []).filter((m) => m.from === "admin" && !m.read).length : 0;
   const items = [
-    { id: "home", label: "หน้าหลัก", onClick: () => window.scrollTo({ top: 0, behavior: "smooth" }) },
+    { id: "home", label: "หน้าหลัก", onClick: onHome || (() => window.scrollTo({ top: 0, behavior: "smooth" })) },
     { id: "chat", label: "แชท", onClick: onChat, badge: unreadFromAdmin },
     { id: "shop", label: "ไอเทมบูสต์", onClick: onShop },
     { id: "lottery", label: "หวย", onClick: onLottery || (() => window.scrollTo({ top: 0, behavior: "smooth" })) },
@@ -6714,9 +6732,15 @@ export default function GiltRowApp() {
   else if (view === "dragontiger") content = <DragonTigerGame onBack={back} />;
   else if (view === "lottery") content = <LotteryScreen onBack={back} />;
 
+  // bottom tab bar on every page (the lobby draws its own); not on login/admin or landscape games
+  const inGame = Object.values(PLAYABLE).includes(view) && view !== "lottery";
+  const fsGame = FULLSCREEN_GAMES.has(view);
+  const showNav = !["login", "admin", "lobby"].includes(view) && !LANDSCAPE_GAMES.has(view);
+  const navActive = { chat: "chat", shop: "shop", lottery: "lottery", profile: "profile" }[view] || "";
+  const appClass = "gr-app" + (inGame ? " in-game" : "") + (fsGame ? " fs-game" : "") + (showNav ? " has-nav" : "");
   return (
     <AppCtx.Provider value={ctx}>
-      <div className="gr-app">
+      <div className={appClass}>
         <GlobalStyle />
         <Confetti trigger={confettiKey} count={winTier === "mega" ? 140 : winTier === "big" ? 90 : 60} />
         <BigWinFlash trigger={confettiKey} tier={winTier} />
@@ -6728,6 +6752,16 @@ export default function GiltRowApp() {
           onGoRegister={() => { setShowAuthGate(false); setLoginMode("register"); setView("login"); }}
         />
         {content}
+        {showNav && (
+          <BottomNav
+            active={navActive}
+            onHome={back}
+            onLottery={() => openGameGated(PLAYABLE.lottery)}
+            onShop={openShopGated}
+            onProfile={openProfileGated}
+            onChat={openChatGated}
+          />
+        )}
       </div>
     </AppCtx.Provider>
   );
