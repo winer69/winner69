@@ -826,8 +826,8 @@ export default function PlushieParadiseNeonFishing({
       bgGrad.addColorStop(0, "#2a1a05");
       bgGrad.addColorStop(1, "#120a10");
     } else {
-      bgGrad.addColorStop(0, "#160a2e");
-      bgGrad.addColorStop(1, "#0a0614");
+      bgGrad.addColorStop(0, "#3a0a0e");
+      bgGrad.addColorStop(1, "#0d0304");
     }
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, w, h);
@@ -837,7 +837,7 @@ export default function PlushieParadiseNeonFishing({
       const bx = (i / 5) * w + Math.sin(t * 0.2 + i) * 20;
       ctx.save();
       ctx.globalAlpha = 0.10;
-      ctx.fillStyle = i % 2 ? "#ff4fd8" : "#00e5ff";
+      ctx.fillStyle = i % 2 ? "#ff5a4e" : "#ffc93c";
       ctx.beginPath();
       ctx.ellipse(bx, h * 0.18, 60, 90, 0, 0, Math.PI * 2);
       ctx.fill();
@@ -969,10 +969,10 @@ export default function PlushieParadiseNeonFishing({
     // rod (drawn last, over water edge)
     ctx.save();
     const bendX = hookRef.current.active ? clamp((hookRef.current.x - rodBaseX) * 0.04, -10, 10) : 0;
-    ctx.strokeStyle = "#d8c4ff";
+    ctx.strokeStyle = "#ffe9b8";
     ctx.lineWidth = 4;
     ctx.lineCap = "round";
-    ctx.shadowColor = "#a35bff";
+    ctx.shadowColor = "#ffb02e";
     ctx.shadowBlur = 8;
     ctx.beginPath();
     ctx.moveTo(rodBaseX, rodBaseY);
@@ -1083,16 +1083,16 @@ export default function PlushieParadiseNeonFishing({
     <div className="ppf-root">
       <style>{`
         .ppf-root {
-          --pink: #ff4fd8;
-          --purple: #a35bff;
-          --cyan: #00e5ff;
+          --pink: #ff664f;
+          --purple: #ff5b60;
+          --cyan: #f9b806;
           --gold: #ffd700;
           width: 100%;
           max-width: 980px;
           margin: 0 auto;
           font-family: 'Trebuchet MS', ui-rounded, 'Baloo 2', sans-serif;
           color: #fff;
-          background: radial-gradient(circle at 50% 0%, #2a1450 0%, #0a0616 70%);
+          background: radial-gradient(circle at 50% 0%, #501419 0%, #160607 70%);
           border-radius: 22px;
           padding: 14px;
           box-sizing: border-box;
@@ -1143,7 +1143,7 @@ export default function PlushieParadiseNeonFishing({
           display: flex; flex-direction: column; gap: 8px;
         }
         .ppf-panel {
-          background: linear-gradient(160deg, #1c0f38, #0d0620);
+          background: linear-gradient(160deg, #380f12, #1e0809);
           border: 1px solid #a35bff55;
           border-radius: 12px; padding: 8px;
           box-shadow: inset 0 0 12px #00000066;
@@ -1187,7 +1187,7 @@ export default function PlushieParadiseNeonFishing({
           white-space: nowrap;
         }
         @keyframes ppf-pop { from { transform: translate(-50%,-50%) scale(0.6); opacity:0; } to { transform: translate(-50%,-50%) scale(1); opacity:1; } }
-        .ppf-banner.good { color: #baffed; text-shadow: 0 0 14px #00ffd0; }
+        .ppf-banner.good { color: #baffed; text-shadow: 0 0 14px #f9b806; }
         .ppf-banner.bad { color: #ffb3b3; text-shadow: 0 0 14px #ff4d4d; }
         .ppf-banner.epic { color: #fff6cc; text-shadow: 0 0 20px #ffe066, 0 0 40px #ffd700; font-size: clamp(18px,4vw,28px); }
         .ppf-jackpot-flash {
@@ -1202,11 +1202,11 @@ export default function PlushieParadiseNeonFishing({
           padding: 4px 8px;
         }
         .ppf-reelbar-label { font-size: 9px; letter-spacing: 1px; color: var(--pink); margin-bottom: 3px; }
-        .ppf-reelbar-track { height: 8px; border-radius: 6px; background: #1a0f30; overflow: hidden; }
+        .ppf-reelbar-track { height: 8px; border-radius: 6px; background: #300f12; overflow: hidden; }
         .ppf-reelbar-fill { height: 100%; background: linear-gradient(90deg, var(--pink), var(--gold)); transition: width 0.05s linear; }
         .ppf-controls {
           display: flex; align-items: center; justify-content: space-between; gap: 10px;
-          background: linear-gradient(160deg, #1c0f38, #0d0620);
+          background: linear-gradient(160deg, #380f12, #1e0809);
           border: 1px solid #a35bff55; border-radius: 14px; padding: 10px;
         }
         .ppf-dir-btns { display: flex; gap: 8px; }
@@ -1219,15 +1219,15 @@ export default function PlushieParadiseNeonFishing({
         .ppf-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #00000055; }
         .ppf-dir {
           width: 46px; height: 46px; font-size: 18px;
-          background: linear-gradient(160deg, #3a2170, #1a0f30); color: var(--cyan);
+          background: linear-gradient(160deg, #702124, #300f12); color: var(--cyan);
         }
         .ppf-cast {
           flex: 1; height: 52px; font-size: 15px; letter-spacing: 1px;
-          background: linear-gradient(160deg, var(--pink), #a3186f); color: #fff;
+          background: linear-gradient(160deg, var(--pink), #a32b18); color: #fff;
         }
         .ppf-reel {
           flex: 1; height: 52px; font-size: 15px; letter-spacing: 1px;
-          background: linear-gradient(160deg, var(--cyan), #0a7fa3); color: #04222b;
+          background: linear-gradient(160deg, var(--cyan), #a30f0a); color: #26090c;
         }
         .ppf-btn:disabled { opacity: 0.35; cursor: not-allowed; box-shadow: none; }
         .ppf-bet-box {
@@ -1235,11 +1235,11 @@ export default function PlushieParadiseNeonFishing({
         }
         .ppf-bet-adj {
           width: 26px; height: 26px; border-radius: 8px; font-size: 14px;
-          background: #2a1a50; color: var(--gold);
+          background: #501a1c; color: var(--gold);
         }
         .ppf-sound-btn {
           width: 36px; height: 36px; border-radius: 10px; font-size: 15px;
-          background: #2a1a50; color: var(--gold);
+          background: #501a1c; color: var(--gold);
         }
         .ppf-bottom-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
         @media (max-width: 720px) {
@@ -1251,15 +1251,15 @@ export default function PlushieParadiseNeonFishing({
         .ppf-mobile-bar { display: none; }
         .ppf-mobile-chip {
           flex: 0 0 auto; font-size: 10px; padding: 4px 8px; border-radius: 10px;
-          background: #1c0f38; border: 1px solid #a35bff55; white-space: nowrap;
+          background: #380f12; border: 1px solid #a35bff55; white-space: nowrap;
         }
       `}</style>
 
       <div className="ppf-led-border" />
 
       <div className="ppf-marquee">
-        <div className="ppf-title">🎣 PLUSHIE PARADISE</div>
-        <div className="ppf-subtitle">NEON FISHING</div>
+        <div className="ppf-title">🎣 NEON FISHING</div>
+        <div className="ppf-subtitle">ตกปลาเรียกทรัพย์</div>
       </div>
 
       <div className="ppf-stage">
@@ -1275,7 +1275,7 @@ export default function PlushieParadiseNeonFishing({
           </div>
           <div className="ppf-panel">
             <div className="ppf-panel-title">COMBO</div>
-            <div className="ppf-mini-stat"><span>🔥 Streak</span><span style={{ color: "#ff4fd8" }}>{combo}</span></div>
+            <div className="ppf-mini-stat"><span>🔥 Streak</span><span style={{ color: "#ff7a4e" }}>{combo}</span></div>
           </div>
           {goldenMode && (
             <div className="ppf-panel" style={{ borderColor: "#ffd700", boxShadow: "0 0 12px #ffd70088" }}>

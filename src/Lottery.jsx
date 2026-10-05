@@ -1,8 +1,7 @@
 // หวยไทย / หวยลาว / หวยด่วน - member page + admin panel.
 // Everything that touches credits happens on the server (backend/src/lottery.js);
 // these screens only show data and send requests. Needs VITE_API_URL.
-import { useEffect, useMemo, useState } from "react";
-import LOTTERY_COVER from "./assets/lottery-cover.jpg";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const TYPE_ORDER = ["top3", "tod3", "top2", "bottom2", "runTop", "runBottom"];
 const TYPE_LABEL = { top3: "3 ตัวบน", tod3: "3 ตัวโต๊ด", top2: "2 ตัวบน", bottom2: "2 ตัวล่าง", runTop: "วิ่งบน", runBottom: "วิ่งล่าง" };
@@ -85,251 +84,515 @@ const TYPE_HINT = { top3: "ตรง 3 ตัวท้ายรางวัล�
 const AMOUNT_CHIPS = [5, 10, 20, 50, 100, 500];
 
 // =====================================================================
-// Member page
+// Member page - "ซื้อหวย / ช่องเก็บหวย" (paper-ticket design). Data and money still go
+// through the server (rounds, rates, blocked numbers, results set by the admin).
 // =====================================================================
+const LT_C = {
+  bg: "#1E0609", panel: "#350B12", panel2: "#4A111B", line: "#6E2A20",
+  gold: "#F2C14E", goldDeep: "#B8862B", red: "#C8102E", redDeep: "#8E0B20",
+  text: "#FBEBD0", mute: "#C9A98A", paperInk: "#3B0A10",
+};
+const LT_TYPE_STYLE = {
+  top2: { tint: ["#FFF4DC", "#F2C2A0"], ink: "#C8102E" },
+  bottom2: { tint: ["#FFF1E4", "#E7B4A4"], ink: "#7A1020" },
+  top3: { tint: ["#FFF8E6", "#EBD08E"], ink: "#A87418" },
+  tod3: { tint: ["#FFF3DA", "#E9BE7E"], ink: "#9E2B0E" },
+  runTop: { tint: ["#F4FFE9", "#BFE3A0"], ink: "#2E7D32" },
+  runBottom: { tint: ["#EAF6FF", "#A8CBEB"], ink: "#1F4FBF" },
+};
+const LT_TYPE_ORDER = ["top2", "bottom2", "top3", "tod3", "runTop", "runBottom"];
+const LT_QUICK = [10, 20, 50, 100];
+const LT_STAMP = { pending: { t: "รอผล", c: "#1565c0" }, won: { t: "ถูกรางวัล", c: "#2e7d32" }, lost: { t: "ไม่ถูก", c: "#6d6d6d" }, cancelled: { t: "ยกเลิก", c: "#6d4c41" } };
+const ltSerial = (seed) => { let h = 2166136261; for (const ch of String(seed)) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return String((h >>> 0) % 1e7).padStart(7, "0"); };
+const ltBaht = (n) => Number(n || 0).toLocaleString("th-TH", { maximumFractionDigits: 2 });
+
+function LtLogo({ size = 40 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden="true">
+      <defs>
+        <linearGradient id="lt-wg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#FFE08A" /><stop offset="0.5" stopColor="#F2C14E" /><stop offset="1" stopColor="#B8862B" /></linearGradient>
+      </defs>
+      <circle cx="32" cy="32" r="30" fill="url(#lt-wg)" />
+      <circle cx="32" cy="32" r="30" fill="none" stroke="#7A1020" strokeWidth="2" strokeDasharray="5 4" />
+      <circle cx="32" cy="32" r="22" fill="#C8102E" stroke="#FFE08A" strokeWidth="2" />
+      <text x="32" y="33" textAnchor="middle" fontFamily="Kanit, Prompt, sans-serif" fontWeight="700" fontSize="20" fill="#FFE08A">W</text>
+      <text x="32" y="47" textAnchor="middle" fontFamily="Kanit, Prompt, sans-serif" fontWeight="700" fontSize="10" fill="#fff">69</text>
+    </svg>
+  );
+}
+function LtWordmark({ size = 20, color = LT_C.gold }) {
+  return <span className="lt-wordmark" style={{ fontSize: size, color }}>WINNER<b>69</b></span>;
+}
+
+// one paper ticket = one number of a bill
+function LtTicket({ t, big, fresh, onClick }) {
+  const st = LT_TYPE_STYLE[t.type] || LT_TYPE_STYLE.top2;
+  const pattern = `repeating-radial-gradient(circle at 10% 115%, ${st.tint[0]} 0 3px, ${st.tint[1]}70 3px 4px),
+    repeating-radial-gradient(circle at 95% -25%, transparent 0 5px, ${st.tint[1]}55 5px 6px)`;
+  const stamp = LT_STAMP[t.status];
+  return (
+    <button onClick={onClick} className={`lt-tk${fresh ? " lt-tk-in" : ""}`} style={{ background: st.tint[0], fontSize: big ? 18 : 16 }}
+      aria-label={`ใบหวย ${TYPE_LABEL[t.type]} เลข ${t.number}`}>
+      <div className="lt-tk-stub">
+        <LtLogo size={34} />
+        <span>{TYPE_LABEL[t.type]}</span>
+        <small>No.{t.serial.slice(-3)}</small>
+      </div>
+      <div className="lt-tk-main" style={{ backgroundImage: pattern }}>
+        <div className="lt-tk-head">
+          <LtWordmark size={17} color={LT_C.redDeep} />
+          <span>{t.roundTitle}</span>
+        </div>
+        <div className="lt-tk-digits">
+          {t.number.split("").map((d, i) => <span key={i} style={{ color: st.ink }}>{d}</span>)}
+          {stamp
+            ? <div className="lt-tk-stamp" style={{ color: stamp.c, borderColor: stamp.c }}>{stamp.t}</div>
+            : <div className="lt-tk-seal" aria-hidden="true"><LtLogo size={46} /></div>}
+        </div>
+        <div className="lt-tk-foot">
+          <div>
+            <div>ราคา <b>{ltBaht(t.amount)}</b> บาท</div>
+            {t.win > 0
+              ? <div className="lt-tk-win" style={{ color: "#2e7d32" }}>ได้รับ {ltBaht(t.win)} บาท</div>
+              : <div className="lt-tk-win">ถูกรับ {ltBaht(t.amount * (t.rate || 0))} บาท{t.half ? " (จ่ายครึ่ง)" : ""}</div>}
+          </div>
+          <div className="lt-tk-code">
+            <div className="lt-bars">
+              {(t.serial + t.number).split("").map((d, i) => <i key={i} style={{ width: (Number(d) % 3) + 1, marginRight: (Number(d) % 2) + 1 }} />)}
+            </div>
+            <small>{t.serial}</small>
+          </div>
+        </div>
+      </div>
+    </button>
+  );
+}
+
 export function LotteryPage({ onBack, api, balance, topBar }) {
   const now = useNow();
-  const [tab, setTab] = useState("bet");
+  const [tab, setTab] = useState("buy");
   const [data, setData] = useState(null);
-  const [tickets, setTickets] = useState([]);
+  const [bills, setBills] = useState([]);
   const [loadError, setLoadError] = useState("");
   const [roundId, setRoundId] = useState(null);
-  const [type, setType] = useState("top2");
-  const [number, setNumber] = useState("");
+  const [typeId, setTypeId] = useState("top2");
+  const [digits, setDigits] = useState("");
   const [amount, setAmount] = useState(10);
   const [reverse, setReverse] = useState(false);
-  const [lines, setLines] = useState([]);
-  const [msg, setMsg] = useState(null);
+  const [cart, setCart] = useState([]);
+  const [toast, setToast] = useState(null);
+  const [freshIds, setFreshIds] = useState([]);
+  const [opened, setOpened] = useState(null);
+  const [rolling, setRolling] = useState(false);
   const [sending, setSending] = useState(false);
+  const rollTimer = useRef(null);
 
   const load = () => api.get("/api/lottery/rounds")
     .then((r) => { setData(r); setLoadError(""); setRoundId((cur) => (cur && r.open.some((x) => x.id === cur) ? cur : r.open[0]?.id || null)); })
     .catch(() => setLoadError("โหลดข้อมูลหวยไม่ได้ ลองใหม่อีกครั้ง"));
-  const loadTickets = () => api.member("/api/lottery/my-tickets").then((r) => setTickets(r.tickets || [])).catch(() => {});
+  const loadTickets = () => api.member("/api/lottery/my-tickets").then((r) => setBills(r.tickets || [])).catch(() => {});
   useEffect(() => {
     load(); loadTickets();
     const t = setInterval(() => { if (!document.hidden) { load(); loadTickets(); } }, 15000);
     return () => clearInterval(t);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => () => clearInterval(rollTimer.current), []);
 
   const round = data?.open.find((r) => r.id === roundId) || null;
   const rates = data?.rates || {};
-  const types = TYPE_ORDER.filter((t) => rates[t] > 0);
-  useEffect(() => { if (types.length && !types.includes(type)) setType(types[0]); }, [types.join(",")]); // eslint-disable-line react-hooks/exhaustive-deps
-  const total = lines.reduce((a, l) => a + l.amount, 0);
+  const types = LT_TYPE_ORDER.filter((t) => rates[t] > 0);
+  useEffect(() => { if (types.length && !types.includes(typeId)) setTypeId(types[0]); }, [types.join(",")]); // eslint-disable-line react-hooks/exhaustive-deps
+  const nDigits = TYPE_DIGITS[typeId] || 2;
+  const canReverse = nDigits > 1 && typeId !== "tod3";
+  const cartTotal = cart.reduce((s, c) => s + c.amount, 0);
   const closesIn = round ? round.closeAt - now : 0;
-  const digits = TYPE_DIGITS[type];
-  const canReverse = digits > 1 && type !== "tod3";
-  const amt = Math.floor(Number(amount)) || 0;
-  const previewNums = number.length === digits ? (reverse && canReverse ? permutations(number) : [number]) : [];
-  const winIfHit = amt * (rates[type] || 0);
 
-  function press(k) {
-    setMsg(null);
-    if (k === "del") setNumber((n) => n.slice(0, -1));
-    else if (k === "clr") setNumber("");
-    else setNumber((n) => (n.length < digits ? n + k : n));
+  // every number of every bill becomes one paper ticket in the vault
+  const tickets = useMemo(() => bills.flatMap((b) => b.lines.map((l, i) => ({
+    id: `${b.id}-${i}`, billId: b.id, status: b.status === "won" ? (l.win > 0 ? "won" : "lost") : b.status,
+    type: l.type, number: l.number, amount: l.amount, win: l.win || 0, rate: rates[l.type] || 0,
+    serial: ltSerial(`${b.id}-${i}`), roundTitle: b.round ? b.round.title : "งวดที่ถูกลบ",
+    drawAt: b.round ? b.round.drawAt : b.time, result: b.round ? b.round.result : null, time: b.time,
+  }))), [bills, rates]);
+  const groups = useMemo(() => {
+    const g = new Map();
+    tickets.forEach((t) => { const k = t.roundTitle; if (!g.has(k)) g.set(k, { title: k, drawAt: t.drawAt, result: t.result, list: [] }); g.get(k).list.push(t); });
+    return [...g.values()];
+  }, [tickets]);
+  const pendingCount = tickets.filter((t) => t.status === "pending").length;
+
+  const flash = (msg, kind = "ok") => { setToast({ msg, kind, k: Date.now() }); setTimeout(() => setToast(null), 2200); };
+  const press = (d) => { if (!rolling) setDigits((p) => (p.length < nDigits ? p + d : p)); };
+  const backspace = () => setDigits((p) => p.slice(0, -1));
+  const randomDigits = (n) => Array.from({ length: n }, () => Math.floor(Math.random() * 10)).join("");
+  function randomize() {
+    if (rolling) return;
+    setRolling(true);
+    let ticks = 0;
+    rollTimer.current = setInterval(() => {
+      ticks += 1;
+      setDigits(randomDigits(nDigits));
+      if (ticks >= 12) { clearInterval(rollTimer.current); setRolling(false); }
+    }, 55);
   }
-  function addLines() {
-    setMsg(null);
-    if (!new RegExp(`^[0-9]{${digits}}$`).test(number)) { setMsg({ bad: true, text: `กรอกเลขให้ครบ ${digits} หลัก` }); return; }
-    if (!(amt >= 1) || (data && amt > data.maxPerLine)) { setMsg({ bad: true, text: `จำนวนเงินต่อเลข 1 - ${fmt(data?.maxPerLine)} B` }); return; }
-    const nums = reverse && canReverse ? permutations(number) : [number];
-    const blocked = round?.blocked?.[type] || [];
-    const ok = nums.filter((x) => !blocked.includes(x));
-    if (ok.length < nums.length) setMsg({ bad: true, text: `เลข ${nums.filter((x) => blocked.includes(x)).join(", ")} ปิดรับ (เลขอั้น)` });
-    else setMsg({ bad: false, text: `ใส่ลงโพยแล้ว ${ok.length} เลข` });
-    setLines((ls) => [...ls, ...ok.map((x) => ({ key: Math.random().toString(36).slice(2), type, number: x, amount: amt }))].slice(0, 200));
-    setNumber("");
+  const changeType = (id) => { if (rolling) return; setTypeId(id); setDigits((p) => p.slice(0, TYPE_DIGITS[id])); };
+
+  function addToCart() {
+    if (rolling) return;
+    if (!round) return flash("ยังไม่มีงวดที่เปิดรับ", "err");
+    if (digits.length !== nDigits) return flash(`ใส่เลขให้ครบ ${nDigits} หลัก`, "err");
+    if (!amount || amount < 1) return flash("ใส่จำนวนเงินอย่างน้อย 1 บาท", "err");
+    if (data && amount > data.maxPerLine) return flash(`สูงสุดเลขละ ${ltBaht(data.maxPerLine)} บาท`, "err");
+    const nums = reverse && canReverse ? permutations(digits) : [digits];
+    const blocked = round.blocked?.[typeId] || [];
+    const ok = nums.filter((n) => !blocked.includes(n));
+    if (!ok.length) return flash(`เลข ${nums.join(", ")} ปิดรับ (เลขอั้น)`, "err");
+    setCart((c) => [...c, ...ok.map((n) => ({ key: Math.random().toString(36).slice(2), typeId, number: n, amount }))].slice(0, 200));
+    flash(ok.length < nums.length ? `เพิ่ม ${ok.length} รายการ (ข้ามเลขอั้น ${nums.length - ok.length})` : `เพิ่ม ${ok.length} รายการลงโพยแล้ว`);
+    setDigits("");
   }
-  async function submit() {
-    if (!round || !lines.length || sending) return;
-    if (total > balance) { setMsg({ bad: true, text: "เครดิตไม่พอ" }); return; }
-    setSending(true); setMsg(null);
+
+  async function buy() {
+    if (!cart.length || sending) return;
+    if (!round) return flash("ยังไม่มีงวดที่เปิดรับ", "err");
+    if (closesIn <= 0) return flash("งวดนี้ปิดรับแล้ว", "err");
+    if (cartTotal > balance) return flash(`เครดิตไม่พอ ขาดอีก ${ltBaht(cartTotal - balance)} บาท`, "err");
+    setSending(true);
     try {
       const id = "t" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-      await api.action("/api/lottery/tickets", { id, roundId: round.id, lines: lines.map(({ type: t, number: n, amount: a }) => ({ type: t, number: n, amount: a })) });
-      setLines([]);
-      setMsg({ bad: false, text: `✅ ส่งโพยแล้ว ${fmt(total)} B — ดูได้ที่แท็บ "โพยของฉัน"` });
-      loadTickets();
+      await api.action("/api/lottery/tickets", { id, roundId: round.id, lines: cart.map((c) => ({ type: c.typeId, number: c.number, amount: c.amount })) });
+      const n = cart.length;
+      setCart([]);
+      setFreshIds(Array.from({ length: n }, (_, i) => `${id}-${i}`));
+      setTimeout(() => setFreshIds([]), 1600);
+      await loadTickets();
+      setTab("vault");
+      flash(`ซื้อแล้ว ${n} ใบ เก็บไว้ในช่องเก็บหวย`);
     } catch (e) {
-      setMsg({ bad: true, text: ERR[e && e.message] || "ส่งโพยไม่สำเร็จ ลองใหม่อีกครั้ง" });
+      flash(ERR[e && e.message] || "ซื้อไม่สำเร็จ ลองใหม่อีกครั้ง", "err");
       load();
     } finally { setSending(false); }
   }
 
   useEffect(() => {
+    if (tab !== "buy") return undefined;
     const onKey = (e) => {
-      if (tab !== "bet" || !round) return;
-      const tag = (e.target && e.target.tagName) || "";
-      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      if (e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
       if (/^[0-9]$/.test(e.key)) press(e.key);
-      else if (e.key === "Backspace") press("del");
-      else if (e.key === "Enter") addLines();
+      else if (e.key === "Backspace") backspace();
+      else if (e.key === "Enter") addToCart();
+      else if (e.key.toLowerCase() === "r") randomize();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   });
 
   return (
-    <div className="game-wrap lotto" data-wm="🎟️">
-      <LottoStyle />
+    <div className="game-wrap" data-wm="🎟️">
       {topBar}
-      <div className="panel" style={{ maxWidth: 520, marginBottom: 12, padding: 0, overflow: "hidden" }}>
-        <img src={LOTTERY_COVER} alt="หวยไทย หวยลาว" style={{ display: "block", width: "100%", aspectRatio: "2 / 1", objectFit: "cover", objectPosition: "center 14%" }} />
-        <div style={{ padding: 12 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
-            <div style={{ fontSize: 12, opacity: 0.75 }}>เครดิตเสมือน (B) · หวยไทย/ลาวออกผลตามงวดจริง · หวยด่วนสุ่มผลอัตโนมัติ</div>
-            <div style={{ fontWeight: 800 }}>เครดิต <span style={{ color: "var(--gold2, #e8c766)" }}>{fmt(balance)} B</span></div>
-          </div>
-          <div className="seg">
-            {[["bet", "🎯 แทงหวย"], ["tickets", `🧾 โพยของฉัน${tickets.filter((t) => t.status === "pending").length ? ` (${tickets.filter((t) => t.status === "pending").length})` : ""}`], ["results", "🏆 ผลรางวัล"]].map(([k, l]) => (
-              <button key={k} className={tab === k ? "on" : ""} onClick={() => setTab(k)}>{l}</button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {loadError && <div className="panel" style={{ maxWidth: 520, color: "var(--red, #ef5350)" }}>{loadError}</div>}
-
-      {tab === "bet" && (
-        <div className="panel" style={{ maxWidth: 520 }}>
-          {!data ? <div>กำลังโหลด…</div> : data.open.length === 0 ? (
-            <div style={{ opacity: 0.8, textAlign: "center", padding: 20 }}>ยังไม่มีงวดที่เปิดรับตอนนี้ {data.waiting.length > 0 && `(รอออกผล ${data.waiting.length} งวด)`}</div>
-          ) : (<>
-            <div className="step" style={{ marginTop: 0 }}><b>1</b> เลือกงวด</div>
-            <div className="grid-2">
-              {data.open.map((r) => (
-                <button key={r.id} className={`pick${r.id === roundId ? " on" : ""}`} onClick={() => { setRoundId(r.id); setLines([]); setMsg(null); }}>
-                  <div className="sub" style={{ marginTop: 0 }}>{ROUND_TYPE[r.type]}</div>
-                  <div className="big">{r.title}</div>
-                  <div className="sub">⏱ ปิดรับใน <b style={{ color: r.closeAt - now < 3600000 ? "var(--red, #ef5350)" : undefined }}>{countdown(r.closeAt - now)}</b></div>
-                </button>
-              ))}
+      <div className="lt">
+        <style>{LT_CSS}</style>
+        <header className="lt-top">
+          <div className="lt-brand">
+            <LtLogo size={46} />
+            <div>
+              <LtWordmark size={24} />
+              <div className="lt-brand-sub">{round ? `${ROUND_TYPE[round.type] || ""} · ${round.title}` : "หวยไทย · หวยลาว · หวยด่วน"}</div>
             </div>
+          </div>
+          <div className="lt-wallet"><small>เครดิต</small><b>{ltBaht(balance)}</b></div>
+        </header>
 
-            {round && (<>
-              <div className="step"><b>2</b> เลือกประเภท <span style={{ fontSize: 12, fontWeight: 400, opacity: 0.7 }}>(แทง 1 B ได้กี่ B)</span></div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 8 }}>
-                {types.map((t) => (
-                  <button key={t} className={`pick${t === type ? " on" : ""}`} onClick={() => { setType(t); setNumber(""); setMsg(null); }}>
-                    <div className="big">{TYPE_LABEL[t]}</div>
-                    <div style={{ fontWeight: 800, color: "var(--gold2, #e8c766)" }}>จ่าย ×{fmt(rates[t])}</div>
-                    <div className="sub">{TYPE_HINT[t]}</div>
-                  </button>
-                ))}
+        <main className="lt-body">
+          {loadError && <div className="lt-panel lt-err">{loadError}</div>}
+          {tab === "buy" ? (
+            !data ? <div className="lt-panel lt-empty">กำลังโหลด…</div> : data.open.length === 0 ? (
+              <div className="lt-panel lt-empty-vault">
+                <LtLogo size={64} />
+                <p>ยังไม่มีงวดที่เปิดรับตอนนี้{data.waiting.length > 0 ? ` (รอออกผล ${data.waiting.length} งวด)` : ""}</p>
+                <button className="lt-primary" onClick={() => setTab("vault")}>ดูช่องเก็บหวย</button>
               </div>
-
-              <div className="step"><b>3</b> กดเลข {digits} หลัก</div>
-              <div className="digits">
-                {Array.from({ length: digits }).map((_, i) => (
-                  <div key={i} className={`digit${number[i] ? " fill" : ""}`}>{number[i] || "–"}</div>
-                ))}
-              </div>
-              <div className="keypad">
-                {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((k) => <button key={k} onClick={() => press(k)}>{k}</button>)}
-                <button onClick={() => press("clr")} style={{ fontSize: 14 }}>ล้าง</button>
-                <button onClick={() => press("0")}>0</button>
-                <button onClick={() => press("del")} style={{ fontSize: 16 }}>⌫</button>
-              </div>
-              {canReverse && (
-                <label style={{ display: "flex", gap: 8, alignItems: "center", fontSize: 13, marginTop: 10, cursor: "pointer" }}>
-                  <input type="checkbox" checked={reverse} onChange={(e) => setReverse(e.target.checked)} style={{ width: 18, height: 18 }} />
-                  กลับเลข (ใส่ทุกแบบที่สลับตำแหน่ง{previewNums.length > 1 ? ` = ${previewNums.length} เลข: ${previewNums.join(", ")}` : ""})
-                </label>
-              )}
-
-              <div className="step"><b>4</b> แทงเลขละกี่บาท</div>
-              <div className="chips">
-                {AMOUNT_CHIPS.map((a) => <button key={a} className={amt === a ? "on" : ""} onClick={() => setAmount(a)}>{a}</button>)}
-              </div>
-              <input className="field-input" type="number" inputMode="numeric" min={1} placeholder="หรือพิมพ์จำนวนเอง" value={amount} onChange={(e) => setAmount(e.target.value)} style={{ marginTop: 8 }} />
-              {amt > 0 && rates[type] > 0 && (
-                <div style={{ fontSize: 13, marginTop: 8, opacity: 0.9 }}>
-                  ถ้าถูก {TYPE_LABEL[type]} ได้ <b style={{ color: "var(--teal, #35d0a0)" }}>{fmt(winIfHit)} B</b> ต่อเลข
-                  {(round.half?.[type] || []).includes(number) && <span style={{ ...badge("#8d6e00"), marginLeft: 6 }}>เลขนี้จ่ายครึ่ง</span>}
-                </div>
-              )}
-              {(round.half?.[type] || []).length > 0 && <div style={{ fontSize: 12, marginTop: 6, opacity: 0.8 }}>🔸 จ่ายครึ่ง: {round.half[type].join(", ")}</div>}
-              {(round.blocked?.[type] || []).length > 0 && <div style={{ fontSize: 12, marginTop: 4, opacity: 0.8 }}>⛔ ปิดรับ (เลขอั้น): {round.blocked[type].join(", ")}</div>}
-              <button className="primary-btn" style={{ marginTop: 12 }} disabled={number.length !== digits || amt < 1} onClick={addLines}>
-                ➕ ใส่ลงโพย {number.length === digits ? `(${previewNums.length} เลข × ${fmt(amt)} B)` : ""}
-              </button>
-              {msg && <div style={{ marginTop: 10, fontSize: 13, textAlign: "center", color: msg.bad ? "var(--red, #ef5350)" : "var(--teal, #35d0a0)" }}>{msg.text}</div>}
-
-              <div className="step"><b>5</b> ตรวจโพยแล้วกดส่ง</div>
-              {lines.length === 0 ? (
-                <div style={{ ...box, textAlign: "center", opacity: 0.65, fontSize: 13 }}>ยังไม่มีเลขในโพย — กดเลขแล้วกด "ใส่ลงโพย"</div>
-              ) : (
-                <div style={box}>
-                  {lines.map((l) => (
-                    <div key={l.key} style={{ display: "grid", gridTemplateColumns: "1fr auto auto", gap: 8, alignItems: "center", padding: "6px 0", borderBottom: "1px dashed rgba(255,255,255,0.08)" }}>
-                      <span style={{ minWidth: 0 }}>
-                        <span style={{ fontSize: 12, opacity: 0.75 }}>{TYPE_LABEL[l.type]}</span>{" "}
-                        <b style={{ letterSpacing: 2, fontSize: 17 }}>{l.number}</b>
-                        {(round.half?.[l.type] || []).includes(l.number) && <span style={{ ...badge("#8d6e00"), marginLeft: 6 }}>จ่ายครึ่ง</span>}
-                        <div style={{ fontSize: 11, opacity: 0.6 }}>ถ้าถูกได้ {fmt(l.amount * (rates[l.type] || 0))} B</div>
-                      </span>
-                      <b>{fmt(l.amount)} B</b>
-                      <button className="chip-btn" style={{ padding: "4px 9px" }} onClick={() => setLines((ls) => ls.filter((x) => x.key !== l.key))} aria-label="ลบ">✕</button>
-                    </div>
+            ) : (<>
+              <section className="lt-panel">
+                {data.open.length > 1 && (
+                  <div className="lt-rounds">
+                    {data.open.map((r) => (
+                      <button key={r.id} className={`lt-round${r.id === roundId ? " on" : ""}`} onClick={() => { setRoundId(r.id); setCart([]); }}>
+                        <small>{ROUND_TYPE[r.type]}</small><b>{r.title}</b>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {round && (
+                  <div className="lt-close">
+                    งวด <b>{round.title}</b> · ปิดรับใน <b className={closesIn < 3600000 ? "hot" : ""}>{countdown(closesIn)}</b>
+                  </div>
+                )}
+                <div className="lt-types">
+                  {types.map((t) => (
+                    <button key={t} onClick={() => changeType(t)} className={`lt-type${t === typeId ? " on" : ""}`}>
+                      <span>{TYPE_LABEL[t]}</span>
+                      <small>บาทละ {ltBaht(rates[t])}</small>
+                    </button>
                   ))}
-                  <button className="chip-btn" style={{ marginTop: 8, width: "100%" }} onClick={() => setLines([])}>🗑 ล้างโพยทั้งหมด</button>
                 </div>
-              )}
-              <div className="sticky-bar">
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 6 }}>
-                  <span>{lines.length} เลข · เครดิตคงเหลือ {fmt(balance)} B</span>
-                  <b>รวม {fmt(total)} B</b>
+
+                <div className="lt-slots" aria-live="polite">
+                  {Array.from({ length: nDigits }).map((_, i) => (
+                    <div key={i} className={`lt-slot${i === digits.length && !rolling ? " cur" : ""}${digits[i] ? " filled" : ""}${rolling ? " rolling" : ""}`}>{digits[i] || ""}</div>
+                  ))}
                 </div>
-                <button className="primary-btn" disabled={!lines.length || sending || closesIn <= 0 || total > balance} onClick={submit}>
-                  {sending ? "กำลังส่งโพย…" : closesIn <= 0 ? "งวดนี้ปิดรับแล้ว" : total > balance ? "เครดิตไม่พอ" : `✅ ส่งโพย ${fmt(total)} B`}
-                </button>
-              </div>
-            </>)}
-          </>)}
-        </div>
-      )}
+                <button className="lt-random" onClick={randomize} disabled={rolling}>{rolling ? "กำลังสุ่ม..." : `สุ่มเลข ${TYPE_LABEL[typeId]}`}</button>
 
-      {tab === "tickets" && (
-        <div className="panel" style={{ maxWidth: 520 }}>
-          {tickets.length === 0 ? <div style={{ opacity: 0.8 }}>ยังไม่มีโพย</div> : tickets.map((t) => (
-            <div key={t.id} style={box}>
-              <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
-                <b style={{ minWidth: 0 }}>{t.round ? t.round.title : "งวดที่ถูกลบ"}</b>
-                <span style={{ ...badge(t.status === "won" ? "#2e7d32" : t.status === "lost" ? "#555" : t.status === "cancelled" ? "#6d4c41" : "#1565c0"), flexShrink: 0 }}>{STATUS_LABEL[t.status]}</span>
-              </div>
-              <div style={{ fontSize: 12, opacity: 0.7 }}>{fmtTime(t.time)} · แทง {fmt(t.total)} B{t.payout > 0 && <> · <b style={{ color: "var(--teal, #35d0a0)" }}>ได้ {fmt(t.payout)} B</b></>}</div>
-              {t.round?.result && <div style={{ fontSize: 13, marginTop: 4 }}><ResultBalls result={t.round.result} /></div>}
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
-                {t.lines.map((l, i) => (
-                  <span key={i} style={{ fontSize: 12, padding: "3px 8px", borderRadius: 8, background: l.win > 0 ? "rgba(53,208,160,0.15)" : "rgba(255,255,255,0.05)", color: l.win > 0 ? "var(--teal, #35d0a0)" : undefined }}>
-                    {TYPE_LABEL[l.type]} <b>{l.number}</b> × {fmt(l.amount)}{l.win > 0 ? ` ✓ +${fmt(l.win)}` : ""}
-                  </span>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+                <div className="lt-pad">
+                  {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((n) => <button key={n} onClick={() => press(n)}>{n}</button>)}
+                  <button className="soft" onClick={() => setDigits("")}>ล้าง</button>
+                  <button onClick={() => press("0")}>0</button>
+                  <button className="soft" onClick={backspace} aria-label="ลบ">⌫</button>
+                </div>
 
-      {tab === "results" && (
-        <div className="panel" style={{ maxWidth: 520 }}>
-          {data?.waiting?.length > 0 && data.waiting.map((r) => (
-            <div key={r.id} style={box}><b>{r.title}</b> <span style={badge("#1565c0")}>รอออกผล {fmtTime(r.drawAt)}</span></div>
-          ))}
-          {!data?.settled?.length ? <div style={{ opacity: 0.8 }}>ยังไม่มีผลรางวัล</div> : data.settled.map((r) => (
-            <div key={r.id} style={box}>
-              <div style={{ fontSize: 11, opacity: 0.8 }}>{ROUND_TYPE[r.type]} · {fmtTime(r.drawAt)}</div>
-              <div style={{ fontWeight: 700, marginBottom: 4 }}>{r.title}</div>
-              <ResultBalls result={r.result} />
+                <div className="lt-amount-row">
+                  <label htmlFor="lt-amt">ราคาต่อเลข</label>
+                  <div className="lt-amt-box">
+                    <input id="lt-amt" type="number" min="1" inputMode="numeric" value={amount} onChange={(e) => setAmount(Math.max(0, parseInt(e.target.value || "0", 10)))} />
+                    <span>บาท</span>
+                  </div>
+                </div>
+                <div className="lt-chips">
+                  {LT_QUICK.map((q) => <button key={q} className={amount === q ? "on" : ""} onClick={() => setAmount(q)} aria-label={`${q} บาท`}>{q}</button>)}
+                </div>
+
+                {canReverse && (
+                  <label className="lt-rev">
+                    <input type="checkbox" checked={reverse} onChange={(e) => setReverse(e.target.checked)} />
+                    <span>กลับเลข (ซื้อทุกตำแหน่งของเลขชุดนี้)</span>
+                  </label>
+                )}
+                {round && (round.blocked?.[typeId] || []).length > 0 && <div className="lt-note">⛔ เลขอั้น (ปิดรับ): {round.blocked[typeId].join(", ")}</div>}
+                {round && (round.half?.[typeId] || []).length > 0 && <div className="lt-note">🔸 จ่ายครึ่ง: {round.half[typeId].join(", ")}</div>}
+
+                <button className="lt-primary" onClick={addToCart}>เพิ่มลงโพย</button>
+              </section>
+
+              <section className="lt-panel">
+                <div className="lt-row-between">
+                  <h2>โพยของฉัน</h2>
+                  {cart.length > 0 && <button className="lt-link" onClick={() => setCart([])}>ล้างโพย</button>}
+                </div>
+                {cart.length === 0 ? (
+                  <p className="lt-empty">ยังไม่มีเลขในโพย เลือกประเภท กดเลข แล้วเพิ่มลงโพย</p>
+                ) : (
+                  <ul className="lt-cart">
+                    {cart.map((c) => (
+                      <li key={c.key}>
+                        <span className="lt-tag">{TYPE_LABEL[c.typeId]}</span>
+                        <b className="lt-num">{c.number}</b>
+                        {(round?.half?.[c.typeId] || []).includes(c.number) && <span className="lt-half">จ่ายครึ่ง</span>}
+                        <span className="lt-amt">{ltBaht(c.amount)} ฿</span>
+                        <button className="lt-x" aria-label="ลบรายการ" onClick={() => setCart((x) => x.filter((y) => y.key !== c.key))}>×</button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {cart.length > 0 && (
+                  <div className="lt-checkout">
+                    <div><small>{cart.length} รายการ</small><b>{ltBaht(cartTotal)} บาท</b></div>
+                    <button className="lt-gold" onClick={buy} disabled={sending || closesIn <= 0}>{sending ? "กำลังซื้อ…" : closesIn <= 0 ? "ปิดรับแล้ว" : "ยืนยันซื้อ"}</button>
+                  </div>
+                )}
+              </section>
+            </>)
+          ) : (
+            <section>
+              <div className="lt-vault-sum">
+                <div><small>ใบหวยทั้งหมด</small><b>{tickets.length} ใบ</b></div>
+                <div><small>ยอดซื้อรวม</small><b>{ltBaht(tickets.reduce((s, t) => s + t.amount, 0))} บาท</b></div>
+              </div>
+              {tickets.length === 0 ? (
+                <div className="lt-panel lt-empty-vault">
+                  <LtLogo size={64} />
+                  <p>ช่องเก็บหวยยังว่าง ซื้อเลขแรกแล้วใบหวยจะมาอยู่ที่นี่</p>
+                  <button className="lt-primary" onClick={() => setTab("buy")}>ไปซื้อหวย</button>
+                </div>
+              ) : groups.map((g) => (
+                <div key={g.title} className="lt-group">
+                  <h3>{g.title} <small>ออกผล {fmtTime(g.drawAt)}</small></h3>
+                  {g.result && (
+                    <div className="lt-result">
+                      <span>3 ตัวบน <b>{g.result.top3}</b></span>
+                      <span>2 ตัวล่าง <b>{g.result.bottom2}</b></span>
+                      {g.result.firstPrize && <span className="lt-first">รางวัลที่ 1 {g.result.firstPrize}</span>}
+                    </div>
+                  )}
+                  <div className="lt-stack">
+                    {g.list.map((t) => <LtTicket key={t.id} t={t} fresh={freshIds.includes(t.id)} onClick={() => setOpened(t)} />)}
+                  </div>
+                </div>
+              ))}
+            </section>
+          )}
+        </main>
+
+        <nav className="lt-nav">
+          <button className={tab === "buy" ? "on" : ""} onClick={() => setTab("buy")}>
+            ซื้อหวย{cart.length > 0 && <em>{cart.length}</em>}
+          </button>
+          <button className={tab === "vault" ? "on" : ""} onClick={() => setTab("vault")}>
+            ช่องเก็บหวย{pendingCount > 0 && <em>{pendingCount}</em>}
+          </button>
+        </nav>
+
+        {opened && (
+          <div className="lt-overlay" onClick={() => setOpened(null)}>
+            <div className="lt-sheet" onClick={(e) => e.stopPropagation()}>
+              <LtTicket t={opened} big />
+              <dl>
+                <div><dt>ประเภท</dt><dd>{TYPE_LABEL[opened.type]}</dd></div>
+                <div><dt>เลข</dt><dd>{opened.number}</dd></div>
+                <div><dt>งวด</dt><dd>{opened.roundTitle}</dd></div>
+                <div><dt>สถานะ</dt><dd>{(LT_STAMP[opened.status] || {}).t || opened.status}{opened.win > 0 ? ` · ได้ ${ltBaht(opened.win)} บาท` : ""}</dd></div>
+                <div><dt>เลขที่บิล</dt><dd>{opened.billId}</dd></div>
+                <div><dt>ซื้อเมื่อ</dt><dd>{new Date(opened.time).toLocaleString("th-TH")}</dd></div>
+              </dl>
+              <button className="lt-primary" onClick={() => setOpened(null)}>ปิด</button>
             </div>
-          ))}
-        </div>
-      )}
+          </div>
+        )}
+
+        {toast && <div key={toast.k} className={`lt-toast ${toast.kind}`} role="status">{toast.msg}</div>}
+      </div>
     </div>
   );
 }
+
+const LT_GOLD = "linear-gradient(180deg,#FFE08A 0%,#F2C14E 45%,#B8862B 100%)";
+const C = LT_C;
+const LT_CSS = `
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700;800&display=swap');
+.lt{width:100%;max-width:440px;margin:0 auto;color:${C.text};position:relative;padding-bottom:76px;border-radius:20px;overflow:hidden;
+  font-family:'Sarabun','Leelawadee UI','Thonburi',sans-serif;background-color:${C.bg};
+  background-image:radial-gradient(ellipse at 50% -10%, rgba(200,16,46,.55), transparent 60%),
+    linear-gradient(45deg, rgba(242,193,78,.05) 25%, transparent 25%, transparent 75%, rgba(242,193,78,.05) 75%),
+    linear-gradient(45deg, rgba(242,193,78,.05) 25%, transparent 25%, transparent 75%, rgba(242,193,78,.05) 75%);
+  background-size:100% 420px, 28px 28px, 28px 28px;background-position:0 0, 0 0, 14px 14px;background-repeat:no-repeat, repeat, repeat}
+.lt *{box-sizing:border-box}
+.lt button{font-family:inherit;cursor:pointer}
+.lt button:focus-visible,.lt input:focus-visible{outline:3px solid ${C.gold};outline-offset:2px}
+.lt-wordmark{font-family:'Kanit','Prompt',sans-serif;font-weight:800;letter-spacing:.04em;line-height:1;font-style:italic}
+.lt-wordmark b{color:${C.red};-webkit-text-stroke:1px ${C.gold};margin-left:1px}
+.lt-top{padding:18px 18px 46px;display:flex;justify-content:space-between;align-items:center;gap:10px;
+  border-bottom:2px solid ${C.goldDeep};border-radius:0 0 28px 28px;background:linear-gradient(180deg,${C.red},${C.redDeep})}
+.lt-brand{display:flex;gap:10px;align-items:center;min-width:0}
+.lt-brand .lt-wordmark{background:${LT_GOLD};-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 rgba(0,0,0,.35))}
+.lt-brand .lt-wordmark b{-webkit-text-fill-color:#fff;-webkit-text-stroke:0}
+.lt-brand-sub{font-size:13px;color:#FFD9C2;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
+.lt-wallet{background:rgba(0,0,0,.28);border:1px solid ${C.gold};border-radius:14px;padding:6px 14px;text-align:right;flex-shrink:0}
+.lt-wallet small{display:block;font-size:12px;color:${C.mute}}
+.lt-wallet b{font-family:'Kanit','Prompt',sans-serif;font-size:20px;color:${C.gold}}
+.lt-body{padding:0 14px;margin-top:-30px;display:flex;flex-direction:column;gap:14px}
+.lt-panel{background:${C.panel};border-radius:20px;padding:16px;border:1px solid ${C.goldDeep};box-shadow:inset 0 1px 0 rgba(255,224,138,.15),0 12px 24px -16px rgba(0,0,0,.8)}
+.lt-err{color:#ffb4a8}
+.lt h2{font-family:'Kanit','Prompt',sans-serif;font-size:18px;font-weight:600;margin:0;color:${C.gold}}
+.lt-rounds{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px}
+.lt-round{flex:0 0 auto;min-width:130px;text-align:left;border:1px solid ${C.line};background:${C.panel2};border-radius:12px;padding:8px 10px;color:${C.text};display:flex;flex-direction:column}
+.lt-round small{font-size:11px;color:${C.mute}} .lt-round b{font-family:'Kanit','Prompt',sans-serif;font-weight:600}
+.lt-round.on{border:2px solid ${C.gold};background:linear-gradient(180deg,${C.red},${C.redDeep})}
+.lt-close{font-size:13px;color:${C.mute};margin-bottom:12px} .lt-close b{color:${C.text}} .lt-close b.hot{color:#ff8a7a}
+.lt-types{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.lt-type{border:1px solid ${C.line};background:${C.panel2};border-radius:14px;padding:10px;display:flex;flex-direction:column;align-items:flex-start;color:${C.text}}
+.lt-type span{font-family:'Kanit','Prompt',sans-serif;font-weight:600;font-size:17px}
+.lt-type small{font-size:12px;color:${C.mute}}
+.lt-type.on{background:linear-gradient(180deg,${C.red},${C.redDeep});border:2px solid ${C.gold};box-shadow:0 0 0 3px rgba(242,193,78,.18)}
+.lt-type.on small{color:#FFD9C2}
+.lt-slots{display:flex;justify-content:center;gap:12px;margin:22px 0 18px}
+.lt-slot{width:62px;height:76px;border:2px solid ${C.line};border-radius:14px;display:grid;place-items:center;
+  font-family:'Kanit','Prompt',sans-serif;font-weight:700;font-size:42px;background:#14040A;color:${C.gold};box-shadow:inset 0 4px 10px rgba(0,0,0,.6)}
+.lt-slot.cur{border-style:dashed;border-color:${C.gold}}
+.lt-slot.filled{border-color:${C.gold};text-shadow:0 0 12px rgba(242,193,78,.6)}
+.lt-slot.rolling{animation:lt-spin .11s linear infinite}
+@keyframes lt-spin{0%{transform:translateY(-3px);filter:blur(1px)}50%{transform:translateY(3px);filter:blur(1.5px)}100%{transform:translateY(-3px);filter:blur(1px)}}
+.lt-random{display:block;margin:0 auto 16px;padding:9px 22px;border-radius:999px;border:1.5px solid ${C.gold};background:rgba(242,193,78,.08);color:${C.gold};font-family:'Kanit','Prompt',sans-serif;font-weight:600;font-size:15px}
+.lt-random:active{background:${LT_GOLD};color:${C.paperInk}}
+.lt-random:disabled{opacity:.7;cursor:default}
+.lt-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.lt-pad button{height:52px;border:1px solid ${C.line};border-radius:14px;background:${C.panel2};font-family:'Kanit','Prompt',sans-serif;font-size:22px;color:${C.text}}
+.lt-pad button:active{background:${C.red};border-color:${C.gold}}
+.lt-pad .soft{font-size:16px;color:${C.mute};background:transparent}
+.lt-amount-row{display:flex;justify-content:space-between;align-items:center;margin-top:18px}
+.lt-amount-row label{font-weight:600}
+.lt-amt-box{display:flex;align-items:center;gap:6px;border:1px solid ${C.goldDeep};border-radius:12px;padding:4px 10px;background:#14040A}
+.lt-amt-box input{width:80px;border:none;font-family:'Kanit','Prompt',sans-serif;font-size:20px;text-align:right;background:transparent;color:${C.gold};outline:none}
+.lt-chips{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.lt-chips button{height:44px;border:1px solid ${C.line};border-radius:12px;background:${C.panel2};color:${C.text};font-family:'Kanit','Prompt',sans-serif;font-weight:600;font-size:17px}
+.lt-chips button.on{background:${LT_GOLD};border-color:${C.gold};color:${C.paperInk};box-shadow:0 2px 0 #7A5410}
+.lt-rev{display:flex;gap:8px;align-items:center;margin:16px 0 4px;font-size:14px;color:${C.mute}}
+.lt-rev input{width:18px;height:18px;accent-color:${C.gold}}
+.lt-note{font-size:12.5px;color:${C.mute};margin-top:8px}
+.lt-primary{width:100%;margin-top:14px;border:1px solid ${C.gold};border-radius:14px;background:linear-gradient(180deg,${C.red},${C.redDeep});color:#fff;padding:13px;font-family:'Kanit','Prompt',sans-serif;font-size:17px;font-weight:600}
+.lt-gold{border:none;border-radius:14px;background:${LT_GOLD};color:${C.paperInk};padding:12px 22px;font-family:'Kanit','Prompt',sans-serif;font-size:17px;font-weight:700;box-shadow:0 3px 0 #7A5410}
+.lt-gold:disabled{opacity:.6;cursor:default}
+.lt-row-between{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.lt-link{border:none;background:none;color:${C.mute};text-decoration:underline}
+.lt-empty{color:${C.mute};font-size:14px;margin:4px 0 0}
+.lt-cart{list-style:none;margin:0;padding:0}
+.lt-cart li{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid ${C.line}}
+.lt-tag{font-size:12px;padding:3px 8px;border-radius:8px;font-weight:600;background:${C.red};color:#fff;white-space:nowrap}
+.lt-num{font-family:'Kanit','Prompt',sans-serif;font-size:22px;letter-spacing:2px;flex:1;color:${C.gold}}
+.lt-half{font-size:11px;padding:2px 6px;border-radius:6px;background:#8d6e00;color:#fff}
+.lt-amt{font-weight:600;white-space:nowrap}
+.lt-x{border:none;background:${C.panel2};width:28px;height:28px;border-radius:50%;color:${C.mute};font-size:18px;line-height:1}
+.lt-checkout{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:2px dashed ${C.line}}
+.lt-checkout small{display:block;color:${C.mute};font-size:13px}
+.lt-checkout b{font-family:'Kanit','Prompt',sans-serif;font-size:22px;color:${C.gold}}
+.lt-vault-sum{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.lt-vault-sum div{background:${C.panel};border:1px solid ${C.goldDeep};border-radius:16px;padding:10px 14px}
+.lt-vault-sum small{display:block;color:${C.mute};font-size:13px}
+.lt-vault-sum b{font-family:'Kanit','Prompt',sans-serif;font-size:20px;color:${C.gold}}
+.lt-empty-vault{text-align:center}
+.lt-empty-vault p{color:${C.mute}}
+.lt-group h3{font-family:'Kanit','Prompt',sans-serif;font-weight:500;font-size:15px;color:${C.gold};margin:4px 2px 8px}
+.lt-group h3 small{font-size:12px;color:${C.mute};font-weight:400;margin-left:6px}
+.lt-result{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;margin:0 2px 10px;padding:8px 12px;border-radius:12px;background:rgba(0,0,0,.3);border:1px solid ${C.goldDeep};font-size:13px;color:${C.mute}}
+.lt-result b{font-family:'Kanit','Prompt',sans-serif;font-size:18px;letter-spacing:2px;color:${C.gold};margin-left:4px}
+.lt-first{font-size:12px}
+.lt-stack{display:flex;flex-direction:column;gap:12px;margin-bottom:16px}
+.lt-tk{position:relative;display:flex;width:100%;text-align:left;border:2px solid ${C.goldDeep};padding:0;border-radius:14px;overflow:hidden;color:${C.paperInk};box-shadow:0 0 0 1px #FFE08A inset,0 12px 22px -12px rgba(0,0,0,.9)}
+.lt-tk::before,.lt-tk::after{content:'';position:absolute;left:64px;width:16px;height:16px;border-radius:50%;background:${C.bg};border:2px solid ${C.goldDeep};z-index:2}
+.lt-tk::before{top:-10px}.lt-tk::after{bottom:-10px}
+.lt-tk-stub{width:72px;flex-shrink:0;color:#FFE08A;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border-right:2px dashed rgba(255,224,138,.8);padding:10px 4px;background:linear-gradient(180deg,${C.red},${C.redDeep})}
+.lt-tk-stub span{writing-mode:vertical-rl;transform:rotate(180deg);font-family:'Kanit','Prompt',sans-serif;font-weight:600;font-size:.95em}
+.lt-tk-stub small{font-size:.65em;color:#FFD9C2}
+.lt-tk-main{flex:1;min-width:0;padding:10px 14px 10px 18px;position:relative}
+.lt-tk-head{display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:.8em;border-bottom:1px solid rgba(184,134,43,.5);padding-bottom:6px}
+.lt-tk-head span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lt-tk-digits{position:relative;display:flex;gap:8px;margin:10px 0;align-items:center}
+.lt-tk-digits span{width:2.6em;height:3em;background:#fff;border:2px solid ${C.goldDeep};border-radius:10px;display:grid;place-items:center;font-family:'Kanit','Prompt',sans-serif;font-weight:800;font-size:1.6em;line-height:1;box-shadow:inset 0 -3px 0 rgba(184,134,43,.25)}
+.lt-tk-seal{margin-left:auto;opacity:.9;transform:rotate(-12deg)}
+.lt-tk-stamp{margin-left:auto;flex-shrink:0;white-space:nowrap;transform:rotate(-12deg);padding:2px 8px;border:2.5px solid;border-radius:8px;font-family:'Kanit','Prompt',sans-serif;font-weight:800;font-size:.8em;background:rgba(255,255,255,.75);letter-spacing:.04em}
+.lt-tk-foot{display:flex;justify-content:space-between;align-items:flex-end;font-size:.78em;gap:8px}
+.lt-tk-win{color:${C.red};font-weight:600}
+.lt-tk-code{text-align:right}
+.lt-bars{display:flex;height:22px;justify-content:flex-end}
+.lt-bars i{display:block;background:${C.paperInk};height:100%}
+.lt-tk-code small{letter-spacing:2px;font-size:.85em}
+.lt-tk-in{animation:lt-drop .7s cubic-bezier(.2,.9,.3,1.3) both}
+@keyframes lt-drop{from{opacity:0;transform:translateY(-24px) rotate(-2deg)}to{opacity:1;transform:none}}
+.lt-nav{position:fixed;bottom:0;left:0;right:0;z-index:40;background:linear-gradient(180deg,#8f0c1a 0%,#6e0814 55%,#4a0610 100%);border-top:2px solid #c8962b;box-shadow:0 -6px 20px rgba(0,0,0,.55);
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px max(10px, calc(50% - 220px)) calc(8px + env(safe-area-inset-bottom,0px))}
+.lt-nav button{position:relative;border:none;background:transparent;display:flex;align-items:center;justify-content:center;gap:8px;height:48px;border-radius:12px;
+  font-family:'Prompt','Kanit',sans-serif;font-weight:700;font-size:16px;color:#e7c3b8}
+.lt-nav button.on{color:#f6c453;background:rgba(255,255,255,.10)}
+.lt-nav em{background:#f6c453;color:#2a0a0c;font-style:normal;font-size:12px;min-width:24px;height:24px;border-radius:999px;display:grid;place-items:center;padding:0 6px;font-weight:800}
+.lt-overlay{position:fixed;inset:0;background:rgba(10,0,3,.7);display:flex;align-items:flex-end;justify-content:center;z-index:60}
+.lt-sheet{background:${C.bg};width:100%;max-width:440px;border-radius:24px 24px 0 0;border-top:2px solid ${C.gold};padding:20px 16px calc(20px + env(safe-area-inset-bottom,0px));max-height:90vh;overflow-y:auto}
+.lt-sheet dl{background:${C.panel};border:1px solid ${C.goldDeep};border-radius:16px;padding:6px 14px;margin:14px 0}
+.lt-sheet dl div{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid ${C.line}}
+.lt-sheet dl div:last-child{border:none}
+.lt-sheet dt{color:${C.mute}}.lt-sheet dd{margin:0;font-weight:600;color:${C.gold};text-align:right}
+.lt-toast{position:fixed;left:50%;transform:translateX(-50%);bottom:84px;background:${LT_GOLD};color:${C.paperInk};padding:10px 18px;border-radius:999px;font-size:14px;font-weight:600;z-index:70;white-space:nowrap;box-shadow:0 6px 16px rgba(0,0,0,.5)}
+.lt-toast.err{background:#fff;color:${C.red};border:2px solid ${C.red}}
+@media (prefers-reduced-motion:reduce){.lt-tk-in{animation:none}.lt-slot.rolling{animation:none}}
+`;
 
 // =====================================================================
 // Admin panel
