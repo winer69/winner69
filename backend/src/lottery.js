@@ -195,9 +195,37 @@ export function registerLottery(app, { readDb, writeDb, audit, id, findMember, m
 
   app.get("/api/lottery/my-tickets", memberAuth, rateLimit(120, 60_000), (req, res) => {
     const db = withTick();
-    const mine = tickets(db).filter((t) => t.username === req.memberName).slice(-100).reverse();
+    // tickets the member removed from the vault stay in the records (admin, statistics) but are not listed
+    const fullyHidden = (t) => t.status !== "pending" && Array.isArray(t.hidden) && t.hidden.length >= t.lines.length;
+    const mine = tickets(db).filter((t) => t.username === req.memberName && !fullyHidden(t)).slice(-100).reverse();
     const byId = Object.fromEntries(rounds(db).map((r) => [r.id, r]));
     res.json({ tickets: mine.map((t) => ({ ...t, round: byId[t.roundId] ? publicRound(byId[t.roundId]) : null })) });
+  });
+
+  // remove drawn tickets from the member's vault: { id, line } one ticket, { id } a whole bill,
+  // { ids: [...] } several bills, { all: true } everything already drawn. Pending tickets cannot be removed.
+  app.post("/api/lottery/my-tickets/hide", memberAuth, rateLimit(60, 60_000), (req, res) => {
+    const db = withTick();
+    const b = req.body || {};
+    const mine = tickets(db).filter((t) => t.username === req.memberName);
+    let changed = 0;
+    const hide = (t, idx) => {
+      if (t.status === "pending") return;
+      const set = new Set(Array.isArray(t.hidden) ? t.hidden : []);
+      for (const i of idx) if (Number.isInteger(i) && i >= 0 && i < t.lines.length && !set.has(i)) { set.add(i); changed++; }
+      t.hidden = [...set].sort((x, y) => x - y);
+    };
+    const allLines = (t) => t.lines.map((_, i) => i);
+    if (b.all === true) mine.forEach((t) => hide(t, allLines(t)));
+    else if (Array.isArray(b.ids)) { const ids = new Set(b.ids.slice(0, 500).map(String)); mine.filter((t) => ids.has(t.id)).forEach((t) => hide(t, allLines(t))); }
+    else {
+      const t = mine.find((x) => x.id === String(b.id || ""));
+      if (!t) return res.status(404).json({ error: "ticket_not_found" });
+      if (t.status === "pending") return res.status(409).json({ error: "not_drawn_yet" });
+      hide(t, b.line === undefined ? allLines(t) : [Math.floor(Number(b.line))]);
+    }
+    if (changed) writeDb(db);
+    res.json({ ok: true, removed: changed });
   });
 
   // ---------------- admin ----------------
