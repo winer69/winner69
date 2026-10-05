@@ -57,6 +57,18 @@ src/
   PlushieParadise.jsx      Plushie Paradise claw machine (own component)
   NeonFishing.jsx          Neon Fishing arcade game (own component)
   StockTradingSimulator.jsx  Stock Trading mock market game (own component)
+  CascadeSlot.jsx          PG-style cascade slot used by มังกรทองนำโชค, ขุมทรัพย์ราชันย์,
+                           777 คลาสสิก and ป่ามรกต; rules/paytables in
+                           backend/src/slotThemes.js + backend/src/cascadeSlot.js (shared)
+  NamTaoPuPla.jsx          น้ำเต้าปูปลา (bowl + board with pair bets); rules shared with
+                           backend/src/namtao.js
+  Lottery.jsx              หวย: ซื้อหวย / ช่องเก็บหวย (paper tickets) + admin panel
+  slotArt.jsx              symbol artwork + colours for each cascade slot
+  Inferno7s.jsx, FruitCanopySlots.jsx, AlohaTotem.jsx, CopperGulchSlots.jsx, FishShooter.jsx
+                           imported games; they get a `host` prop (src/extraHost.js) and ask
+                           the server for every result: /api/games/x/<game>/<action>
+                           (backend/src/extraGames.js + backend/src/extraSlots.js, shared)
+  assets/                  game covers
 ```
 
 The four separate game files are self-contained React components that
@@ -65,6 +77,17 @@ system (see the `*Game` wrapper components inside `App.jsx`, e.g.
 `NeonFortuneGame`, `PlushieParadiseGame`, `NeonFishingGame`, `StockTradingGame`).
 
 ## What's in the demo
+
+- **Imported games (v22):** Inferno 7s, Fruit Canopy, Aloha Totem, Copper Gulch
+  and ยิงปลา Ocean Royale. The server decides every spin / every fish kill and pays
+  from the shared wallet; admin RTP (เมนู เกม) controls each one. Free spins and
+  respins are kept on the server, so a member who leaves mid-feature continues
+  where they left off. Fish: every shot is paid when fired; a fish touched by a
+  shot dies with probability RTP / (fish value x fish touched), so a shot is worth
+  the RTP no matter what the browser reports. In WINNER 69 mode the free-coin,
+  lucky-shell, package, shop, reset, jackpot and PK-contest features of the
+  original fish game are off, the torpedo costs one bet, and Copper Gulch's
+  feature buy is hidden.
 
 - **18 games total** (14 "original" games built directly in `App.jsx` + the
   4 standalone components above). Every game's win/lose outcome is decided
