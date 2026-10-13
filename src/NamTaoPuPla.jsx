@@ -327,7 +327,7 @@ const CSS = `@import url('https://fonts.googleapis.com/css2?family=Chonburi&fami
   --bg1:#b3121b; --bg2:#4a0507; --bg3:#1e0102;
   --gold:#f5c542; --gold-hi:#fff3b0; --gold-lo:#a8741a; --bronze:#6b3d0a;
   --ink:#b71c1c; --ink-dark:#6d0f0f; --paper:#f1dcae; --text:#fff6dd;
-  position:relative;isolation:isolate;height:calc(100vh - 70px);height:calc(100dvh - 70px);min-height:600px;border-radius:18px;overflow-x:hidden;overflow-y:auto;
+  position:relative;isolation:isolate;height:100%;flex:1 1 auto;min-height:0;border-radius:18px;overflow-x:hidden;overflow-y:auto;
   padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark;background:var(--bg3);font-family:'Kanit',system-ui,-apple-system,sans-serif;color:var(--text);-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;overflow-x:hidden}
 .hhh *,.hhh *::before,.hhh *::after{box-sizing:border-box}
 .hhh button{font-family:inherit;touch-action:manipulation;cursor:pointer}

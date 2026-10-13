@@ -7,7 +7,7 @@ import { useEffect, useRef } from "react";
 
 const CSS = `@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Kanit:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap');
 
-.aloha-root{position:relative;width:100%;height:100vh;height:100dvh;overflow:hidden;background:var(--bg);font-family:var(--ft);color:var(--ink);user-select:none;-webkit-user-select:none;touch-action:manipulation;--bg:#120a24;--ink:#fff;--gold1:#fff6b8;--gold2:#ffd23a;--gold3:#e8890c;--wood:#5a2a06;--teal:#14a3d6;--teal2:#0b6f9e;--pink:#ff5aa0;
+.aloha-root{position:relative;width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:var(--ft);color:var(--ink);user-select:none;-webkit-user-select:none;touch-action:manipulation;--bg:#120a24;--ink:#fff;--gold1:#fff6b8;--gold2:#ffd23a;--gold3:#e8890c;--wood:#5a2a06;--teal:#14a3d6;--teal2:#0b6f9e;--pink:#ff5aa0;
   --fd:"Cinzel","Kanit",Georgia,serif;--fn:"Oswald","Kanit",system-ui,sans-serif;--ft:"Kanit",system-ui,sans-serif;
   box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);}
 .aloha-root *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}

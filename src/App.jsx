@@ -4,6 +4,7 @@ import CascadeSlot from "./CascadeSlot";
 import NamTaoPuPla from "./NamTaoPuPla";
 import { CASCADE_GAMES } from "../backend/src/slotThemes.js";
 import IMG_GILT_NEW from "./assets/giltreels.jpg";
+import { LANGUAGES, getLang, setLang, onLang, initI18n } from "./i18n.js";
 import IMG_CLASSIC_NEW from "./assets/classicslots.jpg";
 import IMG_JUNGLE_NEW from "./assets/jungle.jpg";
 import IMG_GOLDENDRAGON from "./assets/golden-dragon.jpg";
@@ -18,6 +19,19 @@ import AlohaTotem from "./AlohaTotem";
 import CopperGulchSlots from "./CopperGulchSlots";
 import FishShooter from "./FishShooter";
 import { makeExtraHost } from "./extraHost.js";
+import PokerOnline from "./poker/PokerOnline.jsx";
+import { createLocalPokerApi } from "./poker/localApi.js";
+import IMG_POKER from "./assets/poker.jpg";
+import PokDengGame from "./pokdeng/PokDengGame.jsx";
+import { createLocalPokDengApi } from "./pokdeng/localApi.js";
+import IMG_POKDENG from "./assets/pokdeng.jpg";
+import DummyGame from "./dummy/DummyGame.jsx";
+import { createLocalDummyApi } from "./dummy/localApi.js";
+import IMG_DUMMY from "./assets/dummy.jpg";
+import PhomSipGame from "./phomsip/PhomSipGame.jsx";
+import { createLocalPhomSipApi } from "./phomsip/localApi.js";
+import IMG_PHOMSIP from "./assets/phomsip.jpg";
+import IMG_FOOTBALL from "./assets/football.jpg";
 import IMG_INFERNO7S from "./assets/inferno7s.jpg";
 import IMG_FRUITCANOPY from "./assets/fruitcanopy.jpg";
 import IMG_ALOHATOTEM from "./assets/alohatotem.jpg";
@@ -59,8 +73,8 @@ const IMG_LOGIN_BG = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAo
 // old house-edge defaults (100 - old edge), so game balance is unchanged
 // until an admin actually moves a slider. Adjustable per game, 20%-100% in steps of 10.
 const RTP_STEPS = [20, 30, 40, 50, 60, 70, 80, 90, 100];
-const DEFAULT_EDGES = { dice: 99, limbo: 97, mines: 97, hilo: 97, keno: 97, slot: 97, jungle: 95, classicslots: 96, hoohey: 96, horserace: 94, roulette: 97.3, fortune: 95, dragontiger: 96.5, neonfortune: 97, plushieparadise: 92, neonfishing: 94, stocktrading: 96, goldendragon: 96.5, inferno7s: 96, fruitcanopy: 96, alohatotem: 96, coppergulch: 96, fishshooter: 95 };
-const GAME_LABELS = { dice: "Dice", limbo: "Limbo", mines: "Mines", hilo: "Hi-Lo", keno: "Keno", slot: "ขุมทรัพย์ราชันย์", jungle: "ป่ามรกต", classicslots: "777 คลาสสิก", hoohey: "น้ำเต้าปูปลา", horserace: "Horse Riches", roulette: "Roulette", fortune: "Fortune Riches", dragontiger: "Dragon Tiger", neonfortune: "Neon Fortune", plushieparadise: "Plushie Paradise", neonfishing: "Neon Fishing", stocktrading: "Stock Trading" , goldendragon: "มังกรทองนำโชค", inferno7s: "Inferno 7s", fruitcanopy: "Fruit Canopy", alohatotem: "Aloha Totem", coppergulch: "Copper Gulch", fishshooter: "ยิงปลา Ocean Royale" };
+const DEFAULT_EDGES = { dice: 99, limbo: 97, mines: 97, hilo: 97, keno: 97, slot: 97, jungle: 95, classicslots: 96, hoohey: 96, horserace: 94, roulette: 97.3, fortune: 95, dragontiger: 96.5, neonfortune: 97, plushieparadise: 92, neonfishing: 94, stocktrading: 96, goldendragon: 96.5, inferno7s: 96, fruitcanopy: 96, alohatotem: 96, coppergulch: 96, fishshooter: 95, pokdeng: 96 };
+const GAME_LABELS = { dice: "Dice", limbo: "Limbo", mines: "Mines", hilo: "Hi-Lo", keno: "Keno", slot: "ขุมทรัพย์ราชันย์", jungle: "ป่ามรกต", classicslots: "777 คลาสสิก", hoohey: "น้ำเต้าปูปลา", horserace: "Horse Riches", roulette: "Roulette", fortune: "Fortune Riches", dragontiger: "Dragon Tiger", neonfortune: "Neon Fortune", plushieparadise: "Plushie Paradise", neonfishing: "Neon Fishing", stocktrading: "Stock Trading" , goldendragon: "มังกรทองนำโชค", inferno7s: "Inferno 7s", fruitcanopy: "Fruit Canopy", alohatotem: "Aloha Totem", coppergulch: "Copper Gulch", fishshooter: "ยิงปลา Ocean Royale", poker: "Texas Hold'em", pokdeng: "ป๊อกเด้ง", dummy: "ดัมมี่", phomsip: "ผสมสิบ", football: "WINNER69 Football League" };
 // Admin PINs are NOT in this file any more: they are checked by the backend
 // (Railway variable ADMIN_PINS, format admin1=code,admin2=code,...).
 const ADMIN_ACCOUNTS = [
@@ -706,13 +720,16 @@ function GlobalStyle() {
          above the 420px breakpoint (tablet/desktop) keeps the full text. */
       @media (max-width:420px){
         .lang-trigger-btn span:not(.lang-caret) { display:none; }
-        .lang-trigger-btn { padding:0; border-radius:50%; width:34px; height:34px; justify-content:center; }
+        .lang-trigger-btn { padding:0; border-radius:50%; width:34px; height:34px; justify-content:center; overflow:hidden; }
+        .lang-trigger-btn .lang-caret { display:none; }
+        .lang-trigger-btn .lang-flag { width:24px; height:24px; border-radius:50% !important; }
       }
       @media (max-width:359px){
         .lobby-username { max-width:78px; font-size:12.5px; }
         .lobby-header-right { gap:5px; }
         .icon-circle-btn { width:29px; height:29px; font-size:13px; }
         .lang-trigger-btn { width:29px; height:29px; font-size:13px; }
+        .lang-trigger-btn .lang-flag { width:21px; height:21px; }
         .lobby-avatar { width:38px; height:38px; }
       }
       .dropdown-backdrop { position:fixed; inset:0; z-index:59; }
@@ -885,6 +902,21 @@ function GlobalStyle() {
       }
       .gr-app .primary-btn:active:not(:disabled) { transform:translateY(3px); box-shadow:0 1px 0 #7a4a0c, 0 4px 10px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.7); }
       .gr-app .chip-btn { background:linear-gradient(180deg,#2c1416,#1b0b0d); border-color:rgba(214,170,74,0.32); }
+      /* profile: deposit / withdraw pair - same size, same shape, two matching colours */
+      .wallet-btns { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px; }
+      .wallet-btn { display:flex; align-items:center; justify-content:center; gap:9px; height:52px; border-radius:14px; cursor:pointer;
+        font-family:'Prompt',sans-serif; font-weight:700; font-size:16px; letter-spacing:.2px; transition:transform .12s ease, filter .15s ease; }
+      .wallet-btn:active { transform:translateY(2px); }
+      .wallet-btn:hover { filter:brightness(1.06); }
+      .wallet-btn .wb-ico { width:28px; height:28px; border-radius:50%; display:grid; place-items:center; flex:none; }
+      .wallet-btn.dep { color:#3a1d00; border:1.5px solid #fff1bf;
+        background:linear-gradient(180deg,#ffe58f 0%,#f3c24a 50%,#c8861b 100%);
+        box-shadow:0 3px 0 #7a4a0c, 0 8px 18px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.7); }
+      .wallet-btn.dep .wb-ico { background:rgba(58,29,0,.14); box-shadow:inset 0 0 0 1.5px rgba(58,29,0,.35); }
+      .wallet-btn.wd { color:#fff3d6; border:1.5px solid #f3cf6a;
+        background:linear-gradient(180deg,#e0262d 0%,#b3141c 55%,#7a0a10 100%);
+        box-shadow:0 3px 0 #4a0508, 0 8px 18px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,200,160,.45); }
+      .wallet-btn.wd .wb-ico { background:rgba(255,241,191,.14); box-shadow:inset 0 0 0 1.5px rgba(243,207,106,.6); color:#ffe08a; }
       .gr-app .chip-btn:hover { border-color:var(--gold2); }
       .gr-app .panel { background:linear-gradient(180deg,#1d0b0d,#140607); border-color:rgba(214,170,74,0.32); box-shadow:0 0 0 1px rgba(0,0,0,0.4), 0 10px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,220,150,0.06); }
       .gr-app .field-input { background:#0f0506; border-color:rgba(214,170,74,0.28); }
@@ -1116,38 +1148,184 @@ function GlobalStyle() {
       .gr-app .fortune-freespin-badge { background-image:linear-gradient(180deg,#fff2a8,#ffc93c 50%,#d48a12); animation:none; color:#3a1d00; border:1.5px solid #fff1bf; }
 
       /* ---------- Bottom tab bar: text-only, rounded-rectangle tabs ---------- */
-      .tabbar { position:fixed; left:0; right:0; bottom:0; z-index:40;
-        background:linear-gradient(180deg,#8f0c1a 0%,#6e0814 55%,#4a0610 100%);
-        border-top:2px solid #c8962b; box-shadow:0 -6px 20px rgba(0,0,0,0.55); }
-      .tabbar-inner { display:flex; gap:6px; max-width:920px; margin:0 auto; padding:8px 10px calc(8px + env(safe-area-inset-bottom, 0px)); }
-      .tabbar-item { flex:1 1 0; min-width:0; display:flex; align-items:center; justify-content:center; gap:6px; height:46px; padding:0 4px;
-        border:none; border-radius:12px; background:transparent; cursor:pointer;
-        font-family:'Prompt',sans-serif; font-weight:700; font-size:14px; color:#e7c3b8; transition:background .15s ease, color .15s ease; }
-      .tabbar-label { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .tabbar { position:fixed; left:0; right:0; bottom:0; z-index:40; pointer-events:none;
+        padding:0 10px calc(8px + env(safe-area-inset-bottom, 0px)); }
+      .tabbar-inner { pointer-events:auto; position:relative; display:flex; align-items:stretch; max-width:560px; margin:0 auto; height:62px; padding:0 6px;
+        border-radius:22px; border:1.5px solid rgba(243,207,106,0.55);
+        background:linear-gradient(180deg,rgba(150,16,30,0.97) 0%,rgba(108,8,20,0.97) 55%,rgba(70,5,12,0.98) 100%);
+        box-shadow:0 10px 26px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,220,150,0.25); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); }
+      .tabbar-item { position:relative; flex:1 1 0; min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+        border:none; background:transparent; cursor:pointer; padding:6px 2px 7px; color:#e3b9ad;
+        font-family:'Prompt',sans-serif; font-weight:600; font-size:11px; transition:color .15s ease; -webkit-tap-highlight-color:transparent; }
+      .tabbar-icon { position:relative; width:34px; height:28px; display:grid; place-items:center; border-radius:10px; transition:background .15s ease, color .15s ease, box-shadow .15s ease; }
+      .tabbar-label { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; line-height:1.1; }
       .tabbar-item:hover { color:#ffe0a0; }
-      .tabbar-item.active { background:rgba(255,255,255,0.10); color:#f6c453; box-shadow:inset 0 1px 0 rgba(255,255,255,0.06); }
-      .tabbar-badge { flex:0 0 auto; min-width:22px; height:22px; padding:0 6px; border-radius:999px; display:grid; place-items:center;
-        background:#f6c453; color:#2a0a0c; font-size:12px; font-weight:800; line-height:1; }
-      @media (max-width:400px){ .tabbar-inner { gap:4px; padding-left:6px; padding-right:6px; } .tabbar-item { font-size:12.5px; height:42px; border-radius:10px; } .tabbar-badge { min-width:19px; height:19px; font-size:11px; } }
+      /* active: warm glow behind the icon, like the reference */
+      .tabbar-item.active { color:#ffd76a; }
+      .tabbar-item.active .tabbar-icon { color:#fff3c4; background:radial-gradient(circle at 50% 60%, rgba(255,200,80,0.55), rgba(255,160,40,0.12) 70%, transparent 75%);
+        box-shadow:0 0 14px rgba(255,190,60,0.45); }
+      .tabbar-item.active::before { content:""; position:absolute; top:-1px; left:50%; width:26px; height:3px; transform:translateX(-50%); border-radius:0 0 4px 4px;
+        background:linear-gradient(90deg,#f3cf6a,#fff1bf,#f3cf6a); box-shadow:0 0 10px rgba(255,200,80,0.9); }
+      /* centre: raised gold hexagon */
+      .tabbar-item.center { justify-content:flex-end; }
+      .tabbar-hex { position:absolute; top:-19px; left:50%; transform:translateX(-50%); width:52px; height:56px; display:grid; place-items:center; color:#4a1f00;
+        clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+        background:linear-gradient(180deg,#fff1bf 0%,#f3c24a 45%,#c8861b 100%);
+        filter:drop-shadow(0 6px 10px rgba(0,0,0,0.55)) drop-shadow(0 0 10px rgba(255,190,60,0.55)); transition:transform .15s ease; }
+      .tabbar-hex::after { content:""; position:absolute; inset:3px; clip-path:inherit; background:linear-gradient(180deg,#ffd76a 0%,#e8a52a 60%,#b5701a 100%); z-index:-1; }
+      .tabbar-hex svg { position:relative; z-index:1; }
+      .tabbar-item.center:active .tabbar-hex { transform:translateX(-50%) scale(.94); }
+      .tabbar-item.center .tabbar-label { margin-top:34px; }
+      .tabbar-item.center.active .tabbar-label { color:#ffd76a; }
+      .tabbar-badge { position:absolute; top:-5px; right:-6px; min-width:18px; height:18px; padding:0 5px; border-radius:999px; display:grid; place-items:center;
+        background:#f6c453; color:#2a0a0c; font-size:10.5px; font-weight:800; line-height:1; box-shadow:0 0 0 2px #7a0a14; }
+      @media (max-width:400px){ .tabbar { padding-left:8px; padding-right:8px; } .tabbar-item { font-size:10.5px; } }
       /* tab bar on every page + full-screen games */
-      .gr-app.has-nav { padding-bottom:calc(80px + env(safe-area-inset-bottom, 0px)); }
-      .gr-app.in-game { padding-left:8px; padding-right:8px; padding-top:10px; }
-      .gr-app.in-game .top-header { margin-bottom:8px; }
-      .gr-app.in-game .game-wrap > .panel, .gr-app.in-game .game-wrap > div[style*="max-width"] { max-width:560px !important; }
-      .gr-app.fs-game { height:100vh; height:100dvh; min-height:0; overflow:hidden; display:flex; flex-direction:column; padding:8px 0 0; }
-      .gr-app.fs-game.has-nav { padding-bottom:calc(62px + env(safe-area-inset-bottom, 0px)); }
-      .gr-app.fs-game > .game-wrap { flex:1 1 auto; min-height:0; width:100%; }
-      .gr-app.fs-game .top-header { width:100%; padding:0 10px; margin-bottom:6px; }
-      @media (max-width:400px){ .gr-app.fs-game.has-nav { padding-bottom:calc(58px + env(safe-area-inset-bottom, 0px)); } }
+      .gr-app.has-nav { padding-bottom:calc(92px + env(safe-area-inset-bottom, 0px)); }
+      /* every game lives in one frame: between the game header and the bottom tab bar */
+      .gr-app.in-game { height:100vh; height:100dvh; min-height:0; overflow:hidden; display:flex; flex-direction:column; padding:8px 0 0; }
+      .gr-app.in-game.has-nav { padding-bottom:calc(90px + env(safe-area-inset-bottom, 0px)); }
+      
+      .gr-app.in-game > .top-header { width:100%; padding:0 10px; margin-bottom:6px; flex:none; }
+      .gr-app.in-game .fit-frame .game-wrap > .top-header, .gr-app.in-game .fit-frame .game-wrap > .top-actions { display:none; }
+      .fit-frame { position:relative; flex:1 1 auto; min-height:0; width:100%; overflow:hidden; }
+      .fit-frame > .fit-inner { width:100%; }
+      .fit-frame.fill > .fit-inner { height:100%; display:flex; flex-direction:column; }
+      .fit-frame.fill .game-wrap { flex:1 1 auto; min-height:0; width:100%; }
+      .fit-frame.scale > .fit-inner { padding:0 8px 6px; transform-origin:top center; }
+      .fit-frame.scroll { overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
+      .fit-frame.scroll > .fit-inner { padding:0 8px 12px; }
+      .fit-frame .game-wrap > .panel, .fit-frame .game-wrap > div[style*="max-width"] { max-width:560px !important; }
       /* lottery: its own ซื้อหวย / ช่องเก็บหวย switch floats just above the main tab bar */
-      .gr-app.has-nav .lt-nav { bottom:calc(70px + env(safe-area-inset-bottom, 0px)); left:50%; right:auto; transform:translateX(-50%); width:min(440px, calc(100% - 24px)); border:2px solid #c8962b; border-radius:16px; box-shadow:0 8px 20px rgba(0,0,0,.6); padding:4px; gap:4px; }
+      .gr-app.has-nav .lt-nav { bottom:calc(84px + env(safe-area-inset-bottom, 0px)); left:50%; right:auto; transform:translateX(-50%); width:min(440px, calc(100% - 24px)); border:2px solid #c8962b; border-radius:16px; box-shadow:0 8px 20px rgba(0,0,0,.6); padding:4px; gap:4px; }
       .gr-app.has-nav .lt-nav button { height:40px; font-size:14.5px; }
-      .gr-app.has-nav .lt { padding-bottom:84px; }
-      .gr-app.has-nav .lt-toast { bottom:150px; }
+      .gr-app.has-nav .lt { padding-bottom:96px; }
+      .gr-app.has-nav .lt-toast { bottom:160px; }
       /* gentle warm ambience behind every game screen */
       .gr-app .game-wrap::before { background:
           radial-gradient(480px 320px at 12% 8%, rgba(255,90,60,0.12), transparent 60%),
           radial-gradient(420px 300px at 88% 92%, rgba(255,190,60,0.08), transparent 60%) !important; }
+    `}</style>
+  );
+}
+
+// ---------- Christmas edition ----------
+// Christmas look (snow, banner, festive colours) turns itself on in December only (Thai time).
+// To force it: CHRISTMAS_FORCE = true (always on) / false (always off); null = by date.
+const CHRISTMAS_FORCE = null;
+const CHRISTMAS_MODE = CHRISTMAS_FORCE !== null ? CHRISTMAS_FORCE
+  : new Date(Date.now() + 7 * 3600 * 1000).getUTCMonth() === 11;
+
+// Snow falling over the whole screen. Pure decoration: never blocks a tap (pointer-events:none).
+function ChristmasSnow({ light }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const cv = ref.current;
+    if (!cv) return undefined;
+    const ctx = cv.getContext("2d");
+    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let W = 0, H = 0, DPR = 1, flakes = [], raf = 0, last = performance.now();
+    const make = (anyY) => {
+      const big = Math.random() < 0.12;
+      return {
+        x: Math.random() * W, y: anyY ? Math.random() * H : -10 - Math.random() * 40,
+        r: big ? 3 + Math.random() * 2.5 : 0.8 + Math.random() * 2.2,
+        vy: 22 + Math.random() * 38, sway: 10 + Math.random() * 22, ph: Math.random() * 6.28, sp: 0.6 + Math.random() * 1.2,
+        a: 0.55 + Math.random() * 0.4, star: big && Math.random() < 0.6, rot: Math.random() * 6.28,
+      };
+    };
+    const resize = () => {
+      DPR = Math.min(window.devicePixelRatio || 1, 2);
+      W = window.innerWidth; H = window.innerHeight;
+      cv.width = W * DPR; cv.height = H * DPR; cv.style.width = W + "px"; cv.style.height = H + "px";
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      const n = Math.round(Math.min(150, (W * H) / (light ? 14000 : 7500)) * (reduce ? 0.3 : 1));
+      flakes = Array.from({ length: n }, () => make(true));
+    };
+    const drawStar = (f) => {
+      ctx.save(); ctx.translate(f.x, f.y); ctx.rotate(f.rot);
+      ctx.strokeStyle = `rgba(255,255,255,${f.a})`; ctx.lineWidth = 1.1; ctx.lineCap = "round";
+      for (let i = 0; i < 3; i++) { ctx.rotate(Math.PI / 3); ctx.beginPath(); ctx.moveTo(-f.r * 1.6, 0); ctx.lineTo(f.r * 1.6, 0); ctx.stroke(); }
+      ctx.restore();
+    };
+    const frame = (now) => {
+      raf = requestAnimationFrame(frame);
+      const dt = Math.min(0.05, (now - last) / 1000); last = now;
+      if (document.hidden) return;
+      ctx.clearRect(0, 0, W, H);
+      for (const f of flakes) {
+        if (!reduce) { f.y += f.vy * dt; f.ph += f.sp * dt; f.rot += dt * 0.6; }
+        const x = f.x + Math.sin(f.ph) * f.sway;
+        if (f.y > H + 10) Object.assign(f, make(false));
+        if (f.star) drawStar({ ...f, x });
+        else {
+          ctx.beginPath(); ctx.arc(x, f.y, f.r, 0, 6.283);
+          ctx.fillStyle = `rgba(255,255,255,${f.a})`; ctx.shadowColor = "rgba(255,255,255,0.8)"; ctx.shadowBlur = f.r > 2 ? 6 : 0; ctx.fill();
+        }
+      }
+      ctx.shadowBlur = 0;
+    };
+    resize();
+    window.addEventListener("resize", resize);
+    raf = requestAnimationFrame(frame);
+    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", resize); };
+  }, [light]);
+  return <canvas ref={ref} className="xmas-snow" aria-hidden="true" />;
+}
+
+function ChristmasBanner() {
+  return (
+    <div className="xmas-banner" role="note">
+      <div className="xmas-lights" aria-hidden="true">{Array.from({ length: 14 }, (_, i) => <i key={i} />)}</div>
+      <div className="xmas-banner-body">
+        <span className="xmas-tree" aria-hidden="true">🎄</span>
+        <div>
+          <b>Merry Christmas</b>
+          <small>สุขสันต์วันคริสต์มาสและเทศกาลปีใหม่ จาก WINNER 69</small>
+        </div>
+        <span className="xmas-tree" aria-hidden="true">🎁</span>
+      </div>
+    </div>
+  );
+}
+
+function ChristmasStyle() {
+  return (
+    <style>{`
+      .xmas-snow { position:fixed; inset:0; z-index:45; pointer-events:none; }
+      /* snow caps on the game covers */
+      .gr-app.xmas .gt-art::before { content:""; position:absolute; left:0; right:0; top:0; height:14px; z-index:3; pointer-events:none;
+        background:
+          radial-gradient(circle at 10% 3px, #fff 0 7px, transparent 8px),
+          radial-gradient(circle at 30% 3px, #fff 0 5px, transparent 6px),
+          radial-gradient(circle at 52% 3px, #fff 0 8px, transparent 9px),
+          radial-gradient(circle at 74% 3px, #fff 0 5px, transparent 6px),
+          radial-gradient(circle at 92% 3px, #fff 0 7px, transparent 8px),
+          linear-gradient(#fff, #fff) top / 100% 4px no-repeat;
+        filter:drop-shadow(0 1px 1px rgba(0,0,0,0.35)); }
+      /* lobby banner */
+      .xmas-banner { position:relative; max-width:920px; margin:0 auto 14px; border-radius:16px; overflow:hidden;
+        border:1.5px solid #f3cf6a; box-shadow:0 8px 22px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.25);
+        background:
+          radial-gradient(circle at 15% 120%, rgba(255,255,255,0.25) 0 30px, transparent 31px),
+          radial-gradient(circle at 85% 130%, rgba(255,255,255,0.22) 0 36px, transparent 37px),
+          linear-gradient(120deg, #0f5a2e 0%, #13703a 35%, #b3141c 65%, #7a0a10 100%); }
+      .xmas-banner-body { display:flex; align-items:center; justify-content:center; gap:12px; padding:16px 12px 12px; text-align:center; }
+      .xmas-banner b { display:block; font-family:'Prompt',sans-serif; font-weight:800; font-size:20px; letter-spacing:.5px; color:#fff6d6;
+        text-shadow:0 2px 0 rgba(0,0,0,0.35), 0 0 12px rgba(255,220,140,0.6); }
+      .xmas-banner small { display:block; font-size:12px; color:#ffe9c2; margin-top:2px; }
+      .xmas-tree { font-size:30px; filter:drop-shadow(0 3px 4px rgba(0,0,0,0.4)); animation:xmas-bob 2.6s ease-in-out infinite; }
+      .xmas-tree:last-child { animation-delay:-1.3s; }
+      @keyframes xmas-bob { 0%,100% { transform:translateY(0) rotate(-4deg); } 50% { transform:translateY(-4px) rotate(4deg); } }
+      .xmas-lights { position:absolute; left:0; right:0; top:0; height:14px; display:flex; justify-content:space-around; align-items:flex-start;
+        border-top:2px solid #2a3a1a; }
+      .xmas-lights i { width:8px; height:11px; border-radius:50% 50% 45% 45%; margin-top:2px; animation:xmas-twinkle 1.6s ease-in-out infinite; }
+      .xmas-lights i:nth-child(4n+1) { background:#ff4d4d; color:#ff4d4d; }
+      .xmas-lights i:nth-child(4n+2) { background:#ffd84a; color:#ffd84a; animation-delay:-.4s; }
+      .xmas-lights i:nth-child(4n+3) { background:#4dd27a; color:#4dd27a; animation-delay:-.8s; }
+      .xmas-lights i:nth-child(4n+4) { background:#5ab8ff; color:#5ab8ff; animation-delay:-1.2s; }
+      @keyframes xmas-twinkle { 0%,100% { opacity:1; box-shadow:0 0 8px currentColor; } 50% { opacity:.35; box-shadow:none; } }
+      @media (prefers-reduced-motion: reduce) { .xmas-tree, .xmas-lights i { animation:none; } }
     `}</style>
   );
 }
@@ -1739,6 +1917,7 @@ function AdminPanel({ onBack }) {
     { id: "games", label: "🎮 เกม" },
     { id: "chat", label: "💬 แชท" },
     { id: "lottery", label: "🎟️ หวย" },
+    { id: "football", label: "⚽ ฟุตบอล" },
     { id: "logs", label: "📝 บันทึก" },
   ];
 
@@ -2115,6 +2294,9 @@ function AdminPanel({ onBack }) {
           </>)}
 
           {adminTab === "lottery" && <AdminLotteryTab adminName={adminName} />}
+          {adminTab === "football" && (API_URL
+            ? <FootballFrame admin style={{ height: "78vh", borderRadius: 10, border: "1px solid var(--line)" }} />
+            : <div className="panel">จัดการฟุตบอลลีกได้เมื่อเชื่อมต่อเซิร์ฟเวอร์ (ตั้งค่า VITE_API_URL)</div>)}
           {adminTab === "logs" && (<>
           <div className="admin-section-title" style={{ marginTop: 0 }}>📝 บันทึกกิจกรรมแอดมิน (การแก้ไขทุกครั้งถูกบันทึกไว้ที่นี่)</div>
           {adminLog.length === 0 ? (
@@ -3376,7 +3558,7 @@ function NamTaoGame({ onBack }) {
   return (
     <div className="game-wrap" data-wm="🦀">
       <TopBar onBack={onBack} />
-      <div style={{ width: "100%", maxWidth: 460 }}>
+      <div style={{ width: "100%", maxWidth: 460, flex: "1 1 auto", minHeight: 0, display: "flex", flexDirection: "column" }}>
         <NamTaoPuPla
           balance={balance}
           winRate={edges.hoohey}
@@ -3385,6 +3567,261 @@ function NamTaoGame({ onBack }) {
           onBalanceDelta={(d) => { if (!API_URL) setBalance((b) => Math.max(0, Math.round((b + d) * 100) / 100)); }}
           onRound={(wager, payout) => { recordRound("hoohey", wager, payout, !!API_URL); releaseAll(); }}
         />
+      </div>
+    </div>
+  );
+}
+
+// ---------- one frame for every game ----------
+// fill  : the game sizes itself to the frame (imported full-screen games)
+// scale : the game keeps its layout and is shrunk just enough to fit the frame (no scrolling)
+// scroll: very tall pages (or ones that would get too small) scroll inside the frame
+function FitFrame({ mode, children }) {
+  const outer = useRef(null);
+  const inner = useRef(null);
+  const [fit, setFit] = useState({ s: 1, scroll: mode === "scroll" });
+  useEffect(() => {
+    if (mode !== "scale") { setFit({ s: 1, scroll: mode === "scroll" }); return undefined; }
+    const o = outer.current, i = inner.current;
+    if (!o || !i || typeof ResizeObserver === "undefined") return undefined;
+    const measure = () => {
+      const H = o.clientHeight, h = i.scrollHeight;
+      if (!H || !h) return;
+      const s = Math.min(1, H / h);
+      const next = s < 0.6 ? { s: 1, scroll: true } : { s, scroll: false };
+      setFit((p) => (p.scroll === next.scroll && Math.abs(p.s - next.s) < 0.004 ? p : next));
+    };
+    const ro = new ResizeObserver(measure);
+    ro.observe(o); ro.observe(i); measure();
+    const t = setInterval(measure, 1000); // late images/fonts
+    return () => { ro.disconnect(); clearInterval(t); };
+  }, [mode]);
+  const cls = mode === "fill" ? "fill" : fit.scroll ? "scroll" : "scale";
+  return (
+    <div ref={outer} className={`fit-frame ${cls}`}>
+      <div ref={inner} className="fit-inner" style={cls === "scale" && fit.s < 1 ? { transform: `scale(${fit.s})` } : undefined}>{children}</div>
+    </div>
+  );
+}
+
+// ---------- Texas Hold'em online (server: backend/src/pokerRoutes.js + poker/hub.js) ----------
+function PokerScreen({ onBack }) {
+  const { balance, setBalance, serverAction, currentUser } = useApp();
+  const balRef = useRef(balance);
+  balRef.current = balance;
+  const api = useMemo(() => (API_URL
+    ? {
+        call: (path, body) => serverAction(path, body, () => 0),
+        poll: (path, body) => memberFetch(path, { method: "POST", body: JSON.stringify(body || {}) }),
+      }
+    : createLocalPokerApi({
+        username: currentUser || "you",
+        getBalance: () => balRef.current,
+        addBalance: (d) => { balRef.current = Math.round((balRef.current + d) * 100) / 100; setBalance((b) => Math.max(0, Math.round((b + d) * 100) / 100)); },
+      })), []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => () => { if (api.stop) api.stop(); }, [api]);
+  return (
+    <div className="game-wrap">
+      <TopBar onBack={onBack} />
+      <div className="xg-box" style={{ position: "relative", width: "100%", flex: "1 1 auto", minHeight: 0, transform: "translateZ(0)", overflow: "hidden", background: "#080909" }}>
+        <PokerOnline api={api} balance={balance} onExit={onBack} />
+      </div>
+    </div>
+  );
+}
+
+// ---------- Pok Deng online (server: backend/src/pokdengRoutes.js + pokdeng/hub.js) ----------
+function PokDengScreen({ onBack }) {
+  const { balance, setBalance, serverAction, currentUser, edges, users } = useApp();
+  const balRef = useRef(balance);
+  balRef.current = balance;
+  const edgesRef = useRef(edges);
+  edgesRef.current = edges;
+  const api = useMemo(() => (API_URL
+    ? {
+        call: (path, body) => serverAction(path, body, () => 0),
+        poll: (path, body) => memberFetch(path, { method: "POST", body: JSON.stringify(body || {}) }),
+      }
+    : createLocalPokDengApi({
+        username: currentUser || "you",
+        getBalance: () => balRef.current,
+        addBalance: (d) => { balRef.current = Math.round((balRef.current + d) * 100) / 100; setBalance((b) => Math.max(0, Math.round((b + d) * 100) / 100)); },
+        getRtp: () => (edgesRef.current && edgesRef.current.pokdeng) || DEFAULT_EDGES.pokdeng,
+      })), []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => () => { if (api.stop) api.stop(); }, [api]);
+  return (
+    <div className="game-wrap">
+      <TopBar onBack={onBack} />
+      <div className="xg-box" style={{ position: "relative", width: "100%", flex: "1 1 auto", minHeight: 0, transform: "translateZ(0)", overflow: "hidden", background: "#04351D" }}>
+        <PokDengGame api={api} wallet={balance} playerName={displayNameOf(users, currentUser) || "คุณ"} onBack={onBack} />
+      </div>
+    </div>
+  );
+}
+
+// ---------- Dummy online (server: backend/src/dummyRoutes.js + dummy/hub.js) ----------
+function DummyScreen({ onBack }) {
+  const { balance, setBalance, serverAction, currentUser, users } = useApp();
+  const balRef = useRef(balance);
+  balRef.current = balance;
+  const api = useMemo(() => (API_URL
+    ? {
+        call: (path, body) => serverAction(path, body, () => 0),
+        poll: (path, body) => memberFetch(path, { method: "POST", body: JSON.stringify(body || {}) }),
+      }
+    : createLocalDummyApi({
+        username: currentUser || "you",
+        getBalance: () => balRef.current,
+        addBalance: (d) => { balRef.current = Math.round((balRef.current + d) * 100) / 100; setBalance((b) => Math.max(0, Math.round((b + d) * 100) / 100)); },
+      })), []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => () => { if (api.stop) api.stop(); }, [api]);
+  return (
+    <div className="game-wrap">
+      <TopBar onBack={onBack} />
+      <div className="xg-box" style={{ position: "relative", width: "100%", flex: "1 1 auto", minHeight: 0, transform: "translateZ(0)", overflow: "hidden", background: "#090B12" }}>
+        <DummyGame api={api} wallet={balance} playerName={displayNameOf(users, currentUser) || "คุณ"} height="100%" onExit={onBack} />
+      </div>
+    </div>
+  );
+}
+
+// ---------- WINNER69 Football League 7 ----------
+// The game page (src/football/fl7.html, built from games-src/football-league-7) runs in a frame.
+// The league itself runs on the server (backend/src/footballRoutes.js + football/league.js): one league
+// for everyone, predictions paid from / to the WINNER 69 wallet. The page talks to this component with
+// postMessage ("state" / "act") and this component forwards to the server. With no server, the same
+// league code runs here in the browser against the local wallet.
+const FOOTBALL_LOCAL_KEY = "w69fl7:server:v1";
+let footballLocalLeague = null;
+function makeFootballBackend(admin, live) {
+  if (API_URL) {
+    if (admin) {
+      const post = (path, body) => apiFetch(path, { method: "POST", headers: { "x-admin-key": readAdminKey() }, body: JSON.stringify(body || {}) });
+      return { state: (p) => post("/api/admin/football/state", p), act: (p) => post("/api/admin/football/act", p).then((r) => r.result) };
+    }
+    return {
+      state: (p) => memberFetch("/api/football/state", { method: "POST", body: JSON.stringify(p || {}) }),
+      act: (p) => live.current.serverAction("/api/football/act", p, () => 0).then((r) => r.result),
+    };
+  }
+  const league = async () => {
+    if (footballLocalLeague) return footballLocalLeague;
+    const { WalletLeague } = await import("../backend/src/football/league.js");
+    footballLocalLeague = new WalletLeague({
+      storage: {
+        load() { try { return JSON.parse(localStorage.getItem(FOOTBALL_LOCAL_KEY) || "null"); } catch (e) { return null; } },
+        save(st) { try { localStorage.setItem(FOOTBALL_LOCAL_KEY, JSON.stringify(st)); } catch (e) { /* storage full */ } },
+      },
+      wallet: { // only the member on this browser has a wallet here
+        balance: (u) => (u === live.current.currentUser ? live.current.balRef.current : 0),
+        charge: (u, amount) => {
+          const L = live.current;
+          if (u !== L.currentUser || L.balRef.current < amount) return false;
+          L.balRef.current = Math.round((L.balRef.current - amount) * 100) / 100;
+          L.setBalance((b) => Math.max(0, Math.round((b - amount) * 100) / 100));
+          return true;
+        },
+        credit: (u, amount) => {
+          const L = live.current;
+          if (u !== L.currentUser) return;
+          L.balRef.current = Math.round((L.balRef.current + amount) * 100) / 100;
+          L.setBalance((b) => Math.round((b + amount) * 100) / 100);
+        },
+      },
+    });
+    return footballLocalLeague;
+  };
+  const who = () => { const L = live.current; return [L.currentUser || "guest", displayNameOf(L.users, L.currentUser) || "guest"]; };
+  const fail = (e) => { throw new Error((e && e.message) || "เกิดข้อผิดพลาด"); };
+  return {
+    state: async (p) => {
+      const lg = await league(); lg.tick();
+      const [u, n] = who();
+      lg.member(u, n);
+      if (p && p.rev && p.rev === lg.rev) return { same: true, rev: lg.rev, now: Date.now(), balance: live.current.balRef.current };
+      return lg.snapshot(u, n);
+    },
+    act: async (p) => { const lg = await league(); const [u, n] = who(); try { return lg.memberAct(u, n, String(p.method || ""), p.args || []); } catch (e) { return fail(e); } },
+    start: async () => { const lg = await league(); const t = setInterval(() => { try { lg.tick(); } catch (e) { /* keep going */ } }, 1000); return () => clearInterval(t); },
+  };
+}
+function FootballFrame({ admin = false, style }) {
+  const { currentUser, users, serverAction, balance, setBalance } = useApp();
+  const balRef = useRef(balance);
+  balRef.current = balance;
+  const live = useRef({});
+  live.current = { currentUser, users, serverAction, setBalance, balRef };
+  const backend = useMemo(() => makeFootballBackend(admin, live), [admin]);
+  const frameRef = useRef(null);
+  const [src, setSrc] = useState("");
+  const [failed, setFailed] = useState("");
+  useEffect(() => {
+    let alive = true, url = "", stop = null;
+    if (backend.start) backend.start().then((f) => { if (alive) stop = f; else f(); });
+    Promise.all([import("./football/fl7.html?raw"), backend.state({})]).then(([m, snap]) => {
+      if (!alive) return;
+      const boot = JSON.stringify({ mode: admin ? "admin" : "member", start: admin ? "#/admin" : "#/home", snap }).replace(/</g, "\\u003c");
+      const page = m.default.replace("<script>", () => `<script>window.W69_FL7 = ${boot};</script><script>`);
+      // a blob URL (not srcDoc): the game routes with #/... and a srcDoc frame would resolve that against this page
+      url = URL.createObjectURL(new Blob([page], { type: "text/html;charset=utf-8" }));
+      setSrc(url);
+    }).catch((e) => { if (alive) setFailed(e && e.status === 401 ? "กรุณาเข้าสู่ระบบก่อน" : "โหลดเกมไม่สำเร็จ ลองใหม่อีกครั้ง"); });
+    return () => { alive = false; if (stop) stop(); if (url) URL.revokeObjectURL(url); };
+  }, [backend, admin]);
+  useEffect(() => {
+    const onMsg = async (e) => {
+      const f = frameRef.current;
+      const d = e.data;
+      if (!f || e.source !== f.contentWindow || !d || !d.fl7) return;
+      const reply = (x) => { try { f.contentWindow.postMessage({ fl7reply: true, id: d.id, ...x }, "*"); } catch (err) { /* frame closed */ } };
+      try {
+        const result = d.kind === "state" ? await backend.state(d.payload || {}) : d.kind === "act" ? await backend.act(d.payload || {}) : null;
+        reply({ result });
+      } catch (err) { reply({ error: (err && err.message && !/^HTTP /.test(err.message) ? err.message : "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ลองใหม่อีกครั้ง"), code: err && err.code }); }
+    };
+    window.addEventListener("message", onMsg);
+    return () => window.removeEventListener("message", onMsg);
+  }, [backend]);
+  return (
+    <div style={{ position: "relative", width: "100%", overflow: "hidden", background: "#080D18", ...style }}>
+      {src ? (
+        <iframe ref={frameRef} title="WINNER69 Football League" src={src} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: 0, background: "#080D18" }} />
+      ) : (
+        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--muted)" }}>{failed || "กำลังโหลด…"}</div>
+      )}
+    </div>
+  );
+}
+function FootballScreen({ onBack }) {
+  return (
+    <div className="game-wrap">
+      <TopBar onBack={onBack} />
+      <FootballFrame style={{ flex: "1 1 auto", minHeight: 0 }} />
+    </div>
+  );
+}
+
+// ---------- ผสมสิบ online (server: backend/src/phomsipRoutes.js + phomsip/hub.js) ----------
+function PhomSipScreen({ onBack }) {
+  const { balance, setBalance, serverAction, currentUser } = useApp();
+  const balRef = useRef(balance);
+  balRef.current = balance;
+  const api = useMemo(() => (API_URL
+    ? {
+        call: (path, body) => serverAction(path, body, () => 0),
+        poll: (path, body) => memberFetch(path, { method: "POST", body: JSON.stringify(body || {}) }),
+      }
+    : createLocalPhomSipApi({
+        username: currentUser || "you",
+        getBalance: () => balRef.current,
+        addBalance: (d) => { balRef.current = Math.round((balRef.current + d) * 100) / 100; setBalance((b) => Math.max(0, Math.round((b + d) * 100) / 100)); },
+      })), []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => () => { if (api.stop) api.stop(); }, [api]);
+  return (
+    <div className="game-wrap">
+      <TopBar onBack={onBack} />
+      <div className="xg-box" style={{ position: "relative", width: "100%", flex: "1 1 auto", minHeight: 0, transform: "translateZ(0)", overflow: "hidden", background: "#030605" }}>
+        <PhomSipGame api={api} wallet={balance} onExit={onBack} />
       </div>
     </div>
   );
@@ -4343,10 +4780,17 @@ ICONS.lottery = <span style={{ fontSize: 44, lineHeight: 1 }}>🎟️</span>;
 
 
 // games laid out to fill the whole screen; landscape ones also hide the bottom tab bar
-const FULLSCREEN_GAMES = new Set(["inferno7s", "fruitcanopy", "alohatotem", "coppergulch", "fishshooter"]);
+const FULLSCREEN_GAMES = new Set(["football", "poker", "pokdeng", "dummy", "phomsip", "inferno7s", "fruitcanopy", "alohatotem", "coppergulch", "fishshooter", "hoohey"]);
 const LANDSCAPE_GAMES = new Set(["fishshooter"]);
-const PLAYABLE = { goldendragon: "goldendragon", lottery: "lottery", dice: "dice", limbo: "limbo", mines: "mines", keno: "keno", hilo: "hilo", giltreels: "slot", jungle: "jungle", classicslots: "classicslots", hoohey: "hoohey", horserace: "horserace", roulette: "roulette", fortune: "fortune", dragontiger: "dragontiger", neonfortune: "neonfortune", plushieparadise: "plushieparadise", neonfishing: "neonfishing", stocktrading: "stocktrading", inferno7s: "inferno7s", fruitcanopy: "fruitcanopy", alohatotem: "alohatotem", coppergulch: "coppergulch", fishshooter: "fishshooter" };
+const OWN_NAV_GAMES = new Set(["football"]); // has its own bottom menu, so the site tab bar is hidden there
+const SCROLL_GAMES = new Set(["stocktrading"]); // long dashboard: scrolls inside the frame instead of shrinking
+const PLAYABLE = { goldendragon: "goldendragon", lottery: "lottery", dice: "dice", limbo: "limbo", mines: "mines", keno: "keno", hilo: "hilo", giltreels: "slot", jungle: "jungle", classicslots: "classicslots", hoohey: "hoohey", horserace: "horserace", roulette: "roulette", fortune: "fortune", dragontiger: "dragontiger", neonfortune: "neonfortune", plushieparadise: "plushieparadise", neonfishing: "neonfishing", stocktrading: "stocktrading", poker: "poker", pokdeng: "pokdeng", dummy: "dummy", phomsip: "phomsip", football: "football", inferno7s: "inferno7s", fruitcanopy: "fruitcanopy", alohatotem: "alohatotem", coppergulch: "coppergulch", fishshooter: "fishshooter" };
 const GAMES = [
+  { id: "football", online: true, name: "WINNER69 ฟุตบอลลีก", cat: "originals", icon: "fortune", grad: ["#0B1F4D", "#F3C94B"], base: 3580, tag: "ใหม่", img: IMG_FOOTBALL },
+  { id: "phomsip", online: true, name: "ผสมสิบ ออนไลน์", cat: "originals", icon: "cards", grad: ["#0B513A", "#F6D68A"], base: 2760, tag: "ใหม่", img: IMG_PHOMSIP },
+  { id: "dummy", online: true, name: "ดัมมี่ ออนไลน์", cat: "originals", icon: "cards", grad: ["#0B5144", "#FFD76A"], base: 3420, tag: "ใหม่", img: IMG_DUMMY },
+  { id: "pokdeng", online: true, name: "ป๊อกเด้ง ออนไลน์", cat: "originals", icon: "cards", grad: ["#08713A", "#FFC107"], base: 2980, tag: "ใหม่", img: IMG_POKDENG },
+  { id: "poker", online: true, name: "Texas Hold'em ออนไลน์", cat: "originals", icon: "cards", grad: ["#0b8a48", "#d9a441"], base: 3260, tag: "ใหม่", img: IMG_POKER },
   { id: "fishshooter", name: "ยิงปลา Ocean Royale", cat: "originals", icon: "fishing", grad: ["#0277bd", "#ffc83a"], base: 2640, tag: "ใหม่", img: IMG_FISHSHOOTER },
   { id: "inferno7s", name: "Inferno 7s", cat: "slots", icon: "reel", grad: ["#b71c1c", "#ff9800"], base: 1720, tag: "ใหม่", img: IMG_INFERNO7S },
   { id: "fruitcanopy", name: "Fruit Canopy", cat: "slots", icon: "reel", grad: ["#2e7d32", "#ffca28"], base: 1460, tag: "ใหม่", img: IMG_FRUITCANOPY },
@@ -4374,6 +4818,7 @@ const GAMES = [
 ];
 const CATEGORIES = [
   { id: "lobby", label: "ทั้งหมด", icon: "🏠" },
+  { id: "online", label: "ออนไลน์", icon: "🌐" },
   { id: "originals", label: "เกมต้นฉบับ", icon: "🔥" },
   { id: "slots", label: "สล็อต", icon: "🎰" },
   { id: "cards", label: "ไพ่", icon: "🃏" },
@@ -4387,6 +4832,7 @@ const CATEGORIES = [
 // all derived from data the catalog already has, nothing fabricated.
 function gamesForCategory(games, catId, counts) {
   if (catId === "lobby") return games;
+  if (catId === "online") return games.filter((g) => g.online); // multiplayer tables (members + bots)
   if (catId === "cards") return games.filter((g) => g.icon === "cards");
   if (catId === "wheel") return games.filter((g) => g.icon === "wheel");
   if (catId === "new") return games.filter((g) => g.tag === "ใหม่");
@@ -4506,6 +4952,15 @@ function WithdrawTicker({ notifications, wins }) {
 // dropped - per "keep all existing functionality working" - they've moved
 // into the header's ⚙️ settings menu (LobbyHeader) and the hero carousel's
 // shop slide instead of taking two of the five primary slots.
+function TabIcon({ id }) {
+  const p = { width: 22, height: 22, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.9, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true };
+  if (id === "home") return <svg {...p}><path d="M3.5 10.5 12 3.8l8.5 6.7V19a1.6 1.6 0 0 1-1.6 1.6H5.1A1.6 1.6 0 0 1 3.5 19z" /><path d="M9.5 20.6v-5.4a2.5 2.5 0 0 1 5 0v5.4" /></svg>;
+  if (id === "chat") return <svg {...p}><path d="M20.5 11.6c0 4.2-3.8 7.4-8.5 7.4-1.2 0-2.3-.2-3.3-.6L4 19.6l1.2-3.6c-1.1-1.2-1.7-2.7-1.7-4.4 0-4.2 3.8-7.6 8.5-7.6s8.5 3.4 8.5 7.6z" /><path d="M8.5 11.7h.01M12 11.7h.01M15.5 11.7h.01" strokeWidth="2.6" /></svg>;
+  if (id === "shop") return <svg {...p} width="24" height="24" strokeWidth="2.1"><path d="M13.2 2.8 5.6 13.4h5.6l-1 7.8 7.6-10.6h-5.6z" /></svg>;
+  if (id === "lottery") return <svg {...p}><path d="M3.5 7.5A1.5 1.5 0 0 1 5 6h14a1.5 1.5 0 0 1 1.5 1.5v2.2a2.4 2.4 0 0 0 0 4.6v2.2A1.5 1.5 0 0 1 19 18H5a1.5 1.5 0 0 1-1.5-1.5v-2.2a2.4 2.4 0 0 0 0-4.6z" /><path d="M14.5 6.5v11" strokeDasharray="1.6 2" /></svg>;
+  return <svg {...p}><circle cx="12" cy="8.2" r="3.9" /><path d="M4.5 20.3c.8-3.6 3.9-5.9 7.5-5.9s6.7 2.3 7.5 5.9" /></svg>;
+}
+
 function BottomNav({ active, onShop, onProfile, onChat, onLottery, onHome }) {
   const { chatThreads, currentUser } = useApp();
   const unreadFromAdmin = currentUser ? (chatThreads[currentUser] || []).filter((m) => m.from === "admin" && !m.read).length : 0;
@@ -4520,9 +4975,13 @@ function BottomNav({ active, onShop, onProfile, onChat, onLottery, onHome }) {
     <nav className="tabbar">
       <div className="tabbar-inner">
         {items.map((it) => (
-          <button key={it.id} className={`tabbar-item${active === it.id ? " active" : ""}`} onClick={it.onClick}>
+          <button key={it.id} className={`tabbar-item${it.id === "shop" ? " center" : ""}${active === it.id ? " active" : ""}`} onClick={it.onClick} aria-label={it.label}>
+            {it.id === "shop" ? (
+              <span className="tabbar-hex"><TabIcon id={it.id} /></span>
+            ) : (
+              <span className="tabbar-icon"><TabIcon id={it.id} />{it.badge > 0 && <span className="tabbar-badge">{it.badge > 99 ? "99+" : it.badge}</span>}</span>
+            )}
             <span className="tabbar-label">{it.label}</span>
-            {it.badge > 0 && <span className="tabbar-badge">{it.badge > 99 ? "99+" : it.badge}</span>}
           </button>
         ))}
       </div>
@@ -4530,45 +4989,45 @@ function BottomNav({ active, onShop, onProfile, onChat, onLottery, onHome }) {
   );
 }
 
-// ---------- Language selector (9 flags, UI-level only) ----------
-// NOTE: this switches which flag is shown/selected and persists the choice,
-// but does not machine-translate the rest of the app's copy into all nine
-// languages - that would need a full i18n pass across every component.
-// Thai stays the default and primary language everywhere else in the UI.
-const LANGUAGES = [
-  { code: "th", flag: "🇹🇭", label: "ไทย" },
-  { code: "en", flag: "🇬🇧", label: "English" },
-  { code: "zh", flag: "🇨🇳", label: "中文" },
-  { code: "ja", flag: "🇯🇵", label: "日本語" },
-  { code: "ko", flag: "🇰🇷", label: "한국어" },
-  { code: "vi", flag: "🇻🇳", label: "Tiếng Việt" },
-  { code: "my", flag: "🇲🇲", label: "မြန်မာ" },
-  { code: "lo", flag: "🇱🇦", label: "ລາວ" },
-  { code: "km", flag: "🇰🇭", label: "ខ្មែរ" },
-];
+initI18n();
 
+// Drawn flags (emoji flags show as letters "TH", "KH"... on Windows)
+const FLAG_SVG = {
+  th: <><rect width="30" height="20" fill="#A51931" /><rect y="3.33" width="30" height="13.34" fill="#F4F5F8" /><rect y="6.67" width="30" height="6.66" fill="#2D2A4A" /></>,
+  en: <><rect width="30" height="20" fill="#012169" /><path d="M0 0L30 20M30 0L0 20" stroke="#fff" strokeWidth="4" /><path d="M0 0L30 20M30 0L0 20" stroke="#C8102E" strokeWidth="1.6" /><path d="M15 0V20M0 10H30" stroke="#fff" strokeWidth="6" /><path d="M15 0V20M0 10H30" stroke="#C8102E" strokeWidth="3.4" /></>,
+  km: <><rect width="30" height="20" fill="#032EA1" /><rect y="5" width="30" height="10" fill="#E00025" /><path d="M9.5 13.6h11v-1.1h-.8v-1.5h-.7v-1.3h-.6V8.3l-.6-.9-.6.9v1.4h-.7V8.6l-.5-1.2-.5 1.2v1.1h-.7V8.3l-.6-.9-.6.9v1.4h-.6V11h-.7v1.5h-.8z" fill="#fff" /></>,
+  lo: <><rect width="30" height="20" fill="#CE1126" /><rect y="5" width="30" height="10" fill="#002868" /><circle cx="15" cy="10" r="4" fill="#fff" /></>,
+  id: <><rect width="30" height="20" fill="#fff" /><rect width="30" height="10" fill="#CE1126" /></>,
+  zh: <><rect width="30" height="20" fill="#DE2910" /><path d="M5.00,2.00 L5.67,4.07 L7.85,4.07 L6.09,5.35 L6.76,7.43 L5.00,6.15 L3.24,7.43 L3.91,5.35 L2.15,4.07 L4.33,4.07Z M10.39,1.08 L10.33,1.80 L11.00,2.09 L10.29,2.25 L10.22,2.97 L9.85,2.35 L9.14,2.52 L9.62,1.97 L9.25,1.34 L9.91,1.63Z M12.72,3.31 L12.38,3.95 L12.88,4.47 L12.17,4.34 L11.83,4.98 L11.73,4.27 L11.01,4.14 L11.66,3.82 L11.56,3.10 L12.07,3.62Z M12.94,6.66 L12.37,7.11 L12.62,7.79 L12.01,7.38 L11.44,7.83 L11.64,7.13 L11.04,6.72 L11.76,6.70 L11.97,6.00 L12.21,6.68Z M10.36,8.07 L10.32,8.79 L11.00,9.05 L10.30,9.24 L10.26,9.97 L9.86,9.36 L9.16,9.54 L9.62,8.98 L9.22,8.37 L9.90,8.63Z" fill="#FFDE00" /></>,
+  vi: <><rect width="30" height="20" fill="#DA251D" /><path d="M15 4.2l1.36 4.18h4.4l-3.56 2.59 1.36 4.18L15 12.56l-3.56 2.59 1.36-4.18-3.56-2.59h4.4z" fill="#FFFF00" /></>,
+};
+function FlagIcon({ code, size = 20, className }) {
+  return (
+    <svg viewBox="0 0 30 20" width={size * 1.5} height={size} className={className} preserveAspectRatio="xMidYMid slice" style={{ borderRadius: 3, boxShadow: "0 0 0 1px rgba(255,255,255,0.35)", flexShrink: 0, display: "block" }} aria-hidden="true">
+      {FLAG_SVG[code] || FLAG_SVG.th}
+    </svg>
+  );
+}
+
+// ---------- Country / language selector (src/i18n.js swaps the listed Thai texts on screen) ----------
 function LanguageSelector() {
   const [open, setOpen] = useState(false);
-  const [lang, setLang] = useState(() => {
-    try { return localStorage.getItem("winner69_lang") || "th"; } catch (e) { return "th"; }
-  });
-  useEffect(() => {
-    try { localStorage.setItem("winner69_lang", lang); } catch (e) {}
-  }, [lang]);
+  const [lang, setLangState] = useState(getLang);
+  useEffect(() => onLang(setLangState), []);
   const current = LANGUAGES.find((l) => l.code === lang) || LANGUAGES[0];
   return (
     <div style={{ position: "relative" }}>
       <button onClick={() => setOpen((o) => !o)} title="เลือกเซิร์ฟเวอร์ประเทศ" className="lang-trigger-btn">
-        {current.flag} <span>Server {current.label}</span> <span className="lang-caret">▼</span>
+        <FlagIcon code={current.code} size={14} className="lang-flag" /> <span data-no-i18n>{current.label}</span> <span className="lang-caret">▼</span>
       </button>
       {open && (
         <>
           <div onClick={() => setOpen(false)} className="dropdown-backdrop" />
-          <div className="lang-dropdown">
+          <div className="lang-dropdown" data-no-i18n>
             {LANGUAGES.map((l) => (
               <button key={l.code} onClick={() => { setLang(l.code); setOpen(false); }}
                 className={`lang-option${l.code === lang ? " active" : ""}`}>
-                <span style={{ fontSize: 16 }}>{l.flag}</span>{l.label}
+                <FlagIcon code={l.code} size={16} /><span>{l.label}</span>
               </button>
             ))}
           </div>
@@ -4583,9 +5042,58 @@ function deriveVipTier(wagered) {
   return Math.min(10, 1 + Math.floor((wagered || 0) / 500));
 }
 
+// ---------- Member avatar / display name ----------
+const PROFILE_FEE = 10; // B per profile save (the server has the same price: PROFILE_FEE in server.js)
+const AVATAR_PRESETS = [
+  ["🦁", "#FFD76A", "#C98A22"], ["🐯", "#FF9F43", "#B84A00"], ["🐉", "#E53935", "#6D0F0F"], ["🦊", "#FF7043", "#8E2C0B"],
+  ["🐼", "#B0BEC5", "#37474F"], ["🦄", "#F48FB1", "#7B1FA2"], ["🐸", "#9CCC65", "#2E6B12"], ["🐵", "#D7A86E", "#6B4423"],
+  ["🦅", "#90CAF9", "#1A3D8F"], ["🐺", "#9FA8DA", "#283593"], ["🤠", "#FFCC80", "#8D5A1C"], ["😎", "#4DD0E1", "#006064"],
+  ["👑", "#FFE082", "#B8860B"], ["💎", "#80DEEA", "#00838F"], ["🍀", "#A5D6A7", "#1B5E20"], ["🔥", "#FFAB40", "#BF360C"],
+];
+function presetOf(id) { const n = Number(String(id || "").replace(/^p/, "")); return AVATAR_PRESETS[n - 1] || null; }
+function avatarImageSrc(username, avatar) {
+  if (!avatar || avatar.type !== "image") return "";
+  if (avatar.data) return avatar.data; // stored in this browser (no server)
+  return API_URL && avatar.rev ? `${API_URL}/api/members/avatar/${encodeURIComponent(username)}?v=${avatar.rev}` : "";
+}
+function displayNameOf(users, username) { return (users && users[username] && users[username].nickname) || username || ""; }
+/** round avatar: uploaded picture, a preset emoji, or the fallback (logo / first letter) */
+function MemberAvatar({ username, avatar, size = 46, fallback, style }) {
+  const [broken, setBroken] = useState(false);
+  const src = avatarImageSrc(username, avatar);
+  useEffect(() => setBroken(false), [src]);
+  const box = { width: size, height: size, borderRadius: "50%", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, ...style };
+  if (src && !broken) return <div style={box}><img src={src} alt="" onError={() => setBroken(true)} style={{ width: "100%", height: "100%", objectFit: "cover" }} /></div>;
+  const pre = avatar && avatar.type === "preset" ? presetOf(avatar.id) : null;
+  if (pre) return <div style={{ ...box, background: `radial-gradient(circle at 35% 30%, ${pre[1]}, ${pre[2]})`, fontSize: typeof size === "number" ? size * 0.56 : 24, lineHeight: 1 }}>{pre[0]}</div>;
+  return <div style={box}>{fallback}</div>;
+}
+/** shrink a picked photo to a square ~160px JPEG data URL (centre crop) */
+function shrinkAvatar(file, px = 160) {
+  return new Promise((resolve, reject) => {
+    if (!file || !/^image\//.test(file.type)) { reject(new Error("not_image")); return; }
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const s = Math.min(img.naturalWidth, img.naturalHeight);
+      const c = document.createElement("canvas");
+      c.width = px; c.height = px;
+      const g = c.getContext("2d");
+      g.drawImage(img, (img.naturalWidth - s) / 2, (img.naturalHeight - s) / 2, s, s, 0, 0, px, px);
+      URL.revokeObjectURL(url);
+      let q = 0.85, out = c.toDataURL("image/jpeg", q);
+      while (out.length > 60000 && q > 0.4) { q -= 0.15; out = c.toDataURL("image/jpeg", q); }
+      resolve(out);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("bad_image")); };
+    img.src = url;
+  });
+}
+
 // ---------- Lobby header: avatar/VIP/balance, centered brand, bell + settings + language ----------
 function LobbyHeader({ username, onLogout, onAdmin, onShop, balance }) {
-  const { notifications, userStats, muted, toggleMuted } = useApp();
+  const { notifications, userStats, muted, toggleMuted, users } = useApp();
+  const me = (users && users[username]) || {};
   const [bellOpen, setBellOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const wagered = userStats[username]?.wagered || 0;
@@ -4603,10 +5111,11 @@ function LobbyHeader({ username, onLogout, onAdmin, onShop, balance }) {
       <div className="lobby-header-row">
         <div className="lobby-header-left">
           <div className="lobby-avatar">
-            <img src={BRAND_LOGO} alt={username} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "inherit" }} />
+            <MemberAvatar username={username} avatar={me.avatar} size="100%"
+              fallback={<img src={BRAND_LOGO} alt={username} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "inherit" }} />} />
           </div>
           <div>
-            <div className="lobby-username">{username}</div>
+            <div className="lobby-username">{me.nickname || username}</div>
             {isVip ? (
               <div className="lobby-vip"><span className="lobby-vip-crown">👑</span> VIP Rank {vipTier}</div>
             ) : (
@@ -4877,8 +5386,9 @@ function Lobby({ onOpenGame, onWallet, onAdmin, username, onLogout, onProfile, o
   return (
     <>
     <div aria-hidden="true" className="dragon-bg" style={{ "--cloud-pattern": `url("${CLOUD_SVG}")` }} />
-    <div className="wrap-820" style={{ paddingBottom: 84, position: "relative", zIndex: 1 }}>
+    <div className="wrap-820" style={{ paddingBottom: 96, position: "relative", zIndex: 1 }}>
       <LobbyHeader username={username} onLogout={onLogout} onAdmin={onAdmin} onShop={onShop} balance={balance} />
+      {CHRISTMAS_MODE && <ChristmasBanner />}
 
       <WithdrawTicker notifications={[...notifications.filter((n) => n.status === "approved"), ...simulatedWithdrawals].sort((a, b) => b.time - a.time).slice(0, 30)} wins={simulatedWins} />
 
@@ -5208,7 +5718,37 @@ function LeaderboardPage({ onBack }) {
 }
 
 function ProfilePage({ onBack, username, onLogout, onWallet }) {
-  const { balance, userStats, changePassword, users, setWagerLimit, txHistory, redeemCoupon } = useApp();
+  const { balance, userStats, changePassword, users, setWagerLimit, txHistory, redeemCoupon, updateProfile } = useApp();
+  const me = users[username] || {};
+  const [editOpen, setEditOpen] = useState(false);
+  const [nickInput, setNickInput] = useState(me.nickname || "");
+  const [pickPreset, setPickPreset] = useState(null); // "p3"
+  const [pickImage, setPickImage] = useState("");     // data URL
+  const [profileMsg, setProfileMsg] = useState(null); // { ok, text }
+  const [profileBusy, setProfileBusy] = useState(false);
+  const fileRef = useRef(null);
+  const nickChanged = nickInput.trim() !== (me.nickname || "") && nickInput.trim() !== "";
+  const picChanged = !!(pickPreset || pickImage);
+  const previewAvatar = pickImage ? { type: "image", data: pickImage } : pickPreset ? { type: "preset", id: pickPreset } : me.avatar;
+  async function onPickFile(e) {
+    const f = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if (!f) return;
+    try { setPickImage(await shrinkAvatar(f)); setPickPreset(null); }
+    catch (err) { setProfileMsg({ ok: false, text: "เปิดรูปนี้ไม่ได้ ลองรูปอื่น" }); }
+  }
+  async function saveProfile() {
+    if (!nickChanged && !picChanged) return;
+    const change = {};
+    if (nickChanged) change.nickname = nickInput.trim();
+    if (pickImage) change.image = pickImage; else if (pickPreset) change.preset = pickPreset;
+    setProfileBusy(true);
+    const r = await updateProfile(change);
+    setProfileBusy(false);
+    if (r.ok) { setProfileMsg({ ok: true, text: `บันทึกโปรไฟล์แล้ว (หัก ${PROFILE_FEE} B)` }); setPickImage(""); setPickPreset(null); setEditOpen(false); }
+    else setProfileMsg({ ok: false, text: r.reason });
+    setTimeout(() => setProfileMsg(null), 3500);
+  }
   const [newPassword, setNewPassword] = useState("");
   const [savedMsg, setSavedMsg] = useState("");
   const currentLimit = users[username]?.wagerLimit || 0;
@@ -5252,25 +5792,80 @@ function ProfilePage({ onBack, username, onLogout, onWallet }) {
     <div className="game-wrap">
       <TopBar onBack={onBack} />
       <div className="panel" style={{ maxWidth: 420, marginBottom: 14, textAlign: "center" }}>
-        <div style={{
-          width: 74, height: 74, borderRadius: "50%", margin: "4px auto 12px",
-          background: "linear-gradient(155deg,var(--gold2),var(--gold) 55%,#6b4a12)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          fontFamily: "Prompt,sans-serif", fontWeight: 800, fontSize: 30, color: "#1c1204",
-          boxShadow: "0 0 20px rgba(184,134,11,0.5)",
-        }}>{initial}</div>
-        <div className="top-name" style={{ fontSize: 20 }}>{username}</div>
-        <div style={{ fontSize: 11, color: "var(--muted)", marginBottom: 12 }}>สมาชิก WINNER 69</div>
+        <MemberAvatar username={username} avatar={me.avatar} size={74}
+          style={{ margin: "4px auto 12px", border: "2px solid var(--gold)", boxShadow: "0 0 20px rgba(184,134,11,0.5)" }}
+          fallback={<div style={{
+            width: "100%", height: "100%", background: "linear-gradient(155deg,var(--gold2),var(--gold) 55%,#6b4a12)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontFamily: "Prompt,sans-serif", fontWeight: 800, fontSize: 30, color: "#1c1204",
+          }}>{initial}</div>} />
+        <div className="top-name" style={{ fontSize: 20 }}>{me.nickname || username}</div>
+        <div style={{ fontSize: 11, color: "var(--muted)", marginBottom: 8 }}>{me.nickname ? `ไอดี ${username} · ` : ""}สมาชิก WINNER 69</div>
+        <button className="chip-btn" style={{ marginBottom: 12 }} onClick={() => { setEditOpen((o) => !o); setNickInput(me.nickname || ""); setPickImage(""); setPickPreset(null); }}>
+          ✏️ {editOpen ? "ปิด" : "เปลี่ยนชื่อ / รูปโปรไฟล์"}
+        </button>
+        {profileMsg && !editOpen && (
+          <div style={{ color: profileMsg.ok ? "var(--teal)" : "#f08a7c", fontSize: 12.5, marginBottom: 10 }}>{profileMsg.ok ? "✅ " : "❌ "}{profileMsg.text}</div>
+        )}
         <div style={{ fontFamily: "Prompt,sans-serif", fontWeight: 800, fontSize: 26, color: "var(--gold2)" }}>
           {balance.toLocaleString(undefined, { maximumFractionDigits: 2 })} <span style={{ fontSize: 13, color: "var(--muted)", fontWeight: 500 }}>B</span>
         </div>
         {onWallet && (
-          <div className="field-row" style={{ marginTop: 14 }}>
-            <button className="primary-btn" style={{ flex: 1 }} onClick={onWallet}>+ ฝากเงิน</button>
-            <button className="chip-btn" style={{ flex: 1 }} onClick={onWallet}>ถอนเงิน</button>
+          <div className="wallet-btns">
+            <button className="wallet-btn dep" onClick={onWallet}>
+              <span className="wb-ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
+              </span>
+              ฝากเงิน
+            </button>
+            <button className="wallet-btn wd" onClick={onWallet}>
+              <span className="wb-ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V6M6 11l6-6 6 6" /></svg>
+              </span>
+              ถอนเงิน
+            </button>
           </div>
         )}
       </div>
+
+      {editOpen && (
+        <div className="panel" style={{ maxWidth: 420, marginBottom: 14 }}>
+          <div className="admin-section-title" style={{ marginTop: 0 }}>✏️ แก้ไขโปรไฟล์ <span style={{ fontSize: 12, color: "var(--muted)", fontWeight: 500 }}>· ครั้งละ {PROFILE_FEE} B</span></div>
+          <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
+            <MemberAvatar username={username} avatar={previewAvatar} size={64} style={{ border: "2px solid var(--gold)" }}
+              fallback={<div style={{ width: "100%", height: "100%", background: "linear-gradient(155deg,var(--gold2),var(--gold) 55%,#6b4a12)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 26, color: "#1c1204" }}>{initial}</div>} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 4 }}>ชื่อที่แสดง (2–16 ตัวอักษร)</div>
+              <input className="field-input" style={{ width: "100%" }} maxLength={16} placeholder={username} value={nickInput} onChange={(e) => setNickInput(e.target.value)} />
+            </div>
+          </div>
+          <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>เลือกรูปโปรไฟล์</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 8, marginBottom: 10 }}>
+            <button onClick={() => fileRef.current && fileRef.current.click()} title="อัปโหลดรูป"
+              style={{ aspectRatio: "1", borderRadius: "50%", border: `2px dashed ${pickImage ? "var(--gold2)" : "rgba(232,199,102,0.45)"}`, background: "rgba(255,255,255,0.04)", color: "var(--gold2)", fontSize: 20, cursor: "pointer", padding: 0, overflow: "hidden" }}>
+              {pickImage ? <img src={pickImage} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : "📷"}
+            </button>
+            {AVATAR_PRESETS.map((a, i) => {
+              const id = "p" + (i + 1);
+              const on = pickPreset === id || (!pickPreset && !pickImage && me.avatar && me.avatar.type === "preset" && me.avatar.id === id);
+              return (
+                <button key={id} onClick={() => { setPickPreset(id); setPickImage(""); }}
+                  style={{ aspectRatio: "1", borderRadius: "50%", border: on ? "2px solid var(--gold2)" : "2px solid transparent", boxShadow: on ? "0 0 10px rgba(243,207,106,0.7)" : "none", background: `radial-gradient(circle at 35% 30%, ${a[1]}, ${a[2]})`, fontSize: 20, cursor: "pointer", padding: 0 }}>{a[0]}</button>
+              );
+            })}
+          </div>
+          <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={onPickFile} />
+          <button className="chip-btn" style={{ width: "100%", padding: "10px 0", fontSize: 14 }} disabled={profileBusy || (!nickChanged && !picChanged) || balance < PROFILE_FEE} onClick={saveProfile}>
+            {profileBusy ? "กำลังบันทึก…" : `บันทึก (หัก ${PROFILE_FEE} B)`}
+          </button>
+          <div style={{ fontSize: 11.5, color: "var(--muted)", marginTop: 8 }}>
+            {balance < PROFILE_FEE ? `เครดิตไม่พอ ต้องมีอย่างน้อย ${PROFILE_FEE} B` : "เปลี่ยนชื่อและรูปพร้อมกันในครั้งเดียว ก็จ่ายแค่ครั้งเดียว · ไอดีเข้าสู่ระบบไม่เปลี่ยน"}
+          </div>
+          {profileMsg && (
+            <div style={{ color: profileMsg.ok ? "var(--teal)" : "#f08a7c", fontSize: 12.5, marginTop: 8 }}>{profileMsg.ok ? "✅ " : "❌ "}{profileMsg.text}</div>
+          )}
+        </div>
+      )}
 
       <div className="panel" style={{ maxWidth: 420, marginBottom: 14 }}>
         <div className="admin-section-title" style={{ marginTop: 0 }}>🎟️ กรอกโค้ดโบนัส</div>
@@ -5592,6 +6187,7 @@ function memberFromServer(m) {
   return {
     ...pickMemberData(m.data), remote: true, phone: m.phone || "", balance: m.balance || 0,
     suspended: !!m.suspended, note: m.note || "", joinedAt: m.joinedAt, lastLoginAt: m.lastLoginAt, lastActiveAt: m.lastActiveAt,
+    nickname: m.nickname || "", avatar: m.avatar || null,
   };
 }
 
@@ -5846,6 +6442,7 @@ export default function GiltRowApp() {
         ...cur, remote: true, balance: Math.max(0, round2(m.balance - ((syncStateRef.current && syncStateRef.current.held) || 0) + add)),
         suspended: !!m.suspended, note: m.note || "", phone: m.phone || cur.phone,
         joinedAt: m.joinedAt, lastLoginAt: m.lastLoginAt, lastActiveAt: m.lastActiveAt,
+        nickname: m.nickname || "", avatar: m.avatar || null,
       };
       const d = pickMemberData(m.data);
       // boost is always the server's; the rest only when an admin changed it or on first load
@@ -6117,6 +6714,34 @@ export default function GiltRowApp() {
     }
     setUsers((u) => ({ ...u, [username]: { ...u[username], password: newPassword } }));
     return Promise.resolve(true);
+  };
+
+  // ---- Profile: display name + picture, PROFILE_FEE per save (server: /api/members/me/profile) ----
+  const PROFILE_ERR = {
+    nick_length: "ชื่อต้องยาว 2–16 ตัวอักษร", nick_reserved: "ใช้ชื่อนี้ไม่ได้ (คล้ายชื่อทีมงาน)", nick_taken: "มีคนใช้ชื่อนี้แล้ว ลองชื่ออื่น",
+    bad_avatar: "รูปนี้ใช้ไม่ได้ ลองรูปอื่น", nothing_changed: "ยังไม่ได้เปลี่ยนอะไร", insufficient_balance: `เครดิตไม่พอ (ต้องมีอย่างน้อย ${PROFILE_FEE} B)`,
+  };
+  const updateProfile = async (change) => {
+    if (!currentUser) return { ok: false, reason: "กรุณาเข้าสู่ระบบก่อน" };
+    if (API_URL) {
+      try { await serverAction("/api/members/me/profile", change, () => 0); return { ok: true }; }
+      catch (e) { return { ok: false, reason: PROFILE_ERR[e && e.message] || (e && e.status === 429 ? "ลองบ่อยเกินไป รอสักครู่" : "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง") }; }
+    }
+    const me = users[currentUser] || {};
+    let nick = null;
+    if (change.nickname !== undefined) {
+      nick = String(change.nickname).replace(/\s+/g, " ").trim();
+      if ([...nick].length < 2 || [...nick].length > 16) return { ok: false, reason: PROFILE_ERR.nick_length };
+      if (/(admin|แอดมิน|ทีมงาน|staff|support|winner\s*69|ผู้ดูแล)/i.test(nick)) return { ok: false, reason: PROFILE_ERR.nick_reserved };
+      const low = nick.toLowerCase();
+      if (Object.entries(users).some(([n, u]) => n !== currentUser && ((u.nickname || "").toLowerCase() === low || n.toLowerCase() === low))) return { ok: false, reason: PROFILE_ERR.nick_taken };
+      if (nick === (me.nickname || "")) nick = null;
+    }
+    const avatar = change.preset !== undefined ? { type: "preset", id: change.preset } : change.image !== undefined ? { type: "image", data: change.image } : null;
+    if (nick === null && !avatar) return { ok: false, reason: PROFILE_ERR.nothing_changed };
+    if ((me.balance || 0) < PROFILE_FEE) return { ok: false, reason: PROFILE_ERR.insufficient_balance };
+    setUsers((u) => ({ ...u, [currentUser]: { ...u[currentUser], balance: round2((u[currentUser].balance || 0) - PROFILE_FEE), ...(nick !== null ? { nickname: nick } : {}), ...(avatar ? { avatar } : {}) } }));
+    return { ok: true };
   };
 
   // ---- Coupon codes: admin creates a CODE -> credit amount; each member
@@ -6675,7 +7300,7 @@ export default function GiltRowApp() {
   const ctx = {
     balance, setBalance, edges, baseEdges, setEdge, stats, dailyStats, recordRound, users,
     adminSetMemberBalance, adminAdjustMemberBalance, adminSetMemberBoost, adminSetMemberSuspended, adminSetMemberNote,
-    userStats, changePassword, celebrate,
+    userStats, changePassword, updateProfile, celebrate,
     boostStacks, boostActive, boostBetsLeft, boostBonusPerStack, setBoostBonusPerStack: (v, adminName) => { setBoostBonusPerStackRaw(v); if (adminName) logAdminAction(adminName, `ปรับ RTP เมื่อใช้บูสต์เป็น ${v}%`); }, buyBoost, useBoostCharge, boostCost: BOOST_COST, nextBoostPrice: () => nextBoostPrice(currentUser),
     notifications, notifyWithdraw, markNotificationsRead, simulatedWithdrawals, pushSimulatedWithdraw, approveWithdraw, rejectWithdraw,
     muted, toggleMuted, setWagerLimit, currentUser, txHistory,
@@ -6721,6 +7346,11 @@ export default function GiltRowApp() {
   else if (view === "jungle") content = <CascadeGame onBack={back} gameId="jungle" />;
   else if (view === "classicslots") content = <CascadeGame onBack={back} gameId="classicslots" />;
   else if (view === "hoohey") content = <NamTaoGame onBack={back} />;
+  else if (view === "dummy") content = <DummyScreen key="dummy" onBack={back} />;
+  else if (view === "phomsip") content = <PhomSipScreen key="phomsip" onBack={back} />;
+  else if (view === "football") content = <FootballScreen key="football" onBack={back} />;
+  else if (view === "pokdeng") content = <PokDengScreen key="pokdeng" onBack={back} />;
+  else if (view === "poker") content = <PokerScreen key="poker" onBack={back} />;
   else if (view === "inferno7s") content = <ExtraGame key="inferno7s" onBack={back} gameId="inferno7s" Comp={Inferno7s} />;
   else if (view === "fruitcanopy") content = <ExtraGame key="fruitcanopy" onBack={back} gameId="fruitcanopy" Comp={FruitCanopySlots} />;
   else if (view === "alohatotem") content = <ExtraGame key="alohatotem" onBack={back} gameId="alohatotem" Comp={AlohaTotem} />;
@@ -6735,13 +7365,14 @@ export default function GiltRowApp() {
   // bottom tab bar on every page (the lobby draws its own); not on login/admin or landscape games
   const inGame = Object.values(PLAYABLE).includes(view) && view !== "lottery";
   const fsGame = FULLSCREEN_GAMES.has(view);
-  const showNav = !["login", "admin", "lobby"].includes(view) && !LANDSCAPE_GAMES.has(view);
+  const showNav = !["login", "admin", "lobby"].includes(view) && !LANDSCAPE_GAMES.has(view) && !OWN_NAV_GAMES.has(view);
   const navActive = { chat: "chat", shop: "shop", lottery: "lottery", profile: "profile" }[view] || "";
-  const appClass = "gr-app" + (inGame ? " in-game" : "") + (fsGame ? " fs-game" : "") + (showNav ? " has-nav" : "");
+  const appClass = "gr-app" + (inGame ? " in-game" : "") + (showNav ? " has-nav" : "") + (CHRISTMAS_MODE ? " xmas" : "");
   return (
     <AppCtx.Provider value={ctx}>
       <div className={appClass}>
         <GlobalStyle />
+        {CHRISTMAS_MODE && <><ChristmasStyle /><ChristmasSnow light={inGame} /></>}
         <Confetti trigger={confettiKey} count={winTier === "mega" ? 140 : winTier === "big" ? 90 : 60} />
         <BigWinFlash trigger={confettiKey} tier={winTier} />
         <WinAmountPop pop={winPop} />
@@ -6751,7 +7382,10 @@ export default function GiltRowApp() {
           onGoLogin={() => { setShowAuthGate(false); setLoginMode("login"); setView("login"); }}
           onGoRegister={() => { setShowAuthGate(false); setLoginMode("register"); setView("login"); }}
         />
-        {content}
+        {inGame ? (<>
+          <TopBar onBack={back} />
+          <FitFrame key={view} mode={fsGame ? "fill" : SCROLL_GAMES.has(view) ? "scroll" : "scale"}>{content}</FitFrame>
+        </>) : content}
         {showNav && (
           <BottomNav
             active={navActive}

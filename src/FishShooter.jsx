@@ -101,6 +101,8 @@ function runGame(ALIVE, host) {
   const nextSid = () => SIDP + "-" + (++SIDN);
   const chainLeft = () => { let s = 0; ACTIVE_CHAINS.forEach((c) => { s += c.left; }); return s; };
   const r2 = (n) => Math.round(n * 100) / 100;
+  /* the fish game is played in points: 1 baht = 100 points; the wallet itself stays in baht */
+  const PTS = 100, hostPts = () => Math.round(host.getBalance() * PTS);
   const requestAnimationFrame = (f) => (ALIVE.v ? window.requestAnimationFrame(f) : 0);
   /* ====================== CORE ====================== */
   const W=1280,H=590;
@@ -635,9 +637,9 @@ function runGame(ALIVE, host) {
   const BETS=[100,200,300,500,1000,2000,3000,5000,9000,10000];
   const ROOMS=[{n:'เจ้าสมุทรจิตใจ',lo:0,hi:6,min:1000000,bonus:500000,info:'ห้องเจ้าสมุทรจิตใจ · เดิมพัน 100 – 3K · ปลาใหญ่จ่ายสูงสุด ×500'},
                {n:'หอระดับเทพ',lo:3,hi:9,min:3000000,bonus:1500000,info:'หอระดับเทพ · เดิมพัน 500 – 10K · รางวัลแข่งคะแนนสูงกว่า'}];
-  if(host){BETS.splice(0,BETS.length,1,2,3,5,10,20,30,50,90,100);ROOMS.forEach(r=>{r.min=0;r.bonus=0;});
-    ROOMS[0].info='ห้องเจ้าสมุทรจิตใจ · เดิมพัน 1 – 30 B ต่อนัด · ปลาใหญ่จ่ายสูงสุด ×500';
-    ROOMS[1].info='หอระดับเทพ · เดิมพัน 5 – 100 B ต่อนัด · ปลาใหญ่จ่ายสูงสุด ×500';}
+  if(host){BETS.splice(0,BETS.length,10,20,30,50,100,200,300,500,900,1000);ROOMS.forEach(r=>{r.min=0;r.bonus=0;});
+    ROOMS[0].info='ห้องเจ้าสมุทรจิตใจ · ยิงนัดละ 10 – 300 แต้ม · 100 แต้ม = 1 บาท';
+    ROOMS[1].info='หอระดับเทพ · ยิงนัดละ 50 – 1,000 แต้ม · 100 แต้ม = 1 บาท';}
   const SKINS=[
    {n:'Plasma Shooter',th:'ปืนพลาสม่า',fx:'plasma',cool:.3,blast:1,L:96,off:0,desc:'ยิงลูกพลังงานพลาสม่า ระเบิดเป็นประกายไฟฟ้า',req:0},
    {n:'Gatling Gun',th:'ปืนกลแกตลิ่ง',fx:'fire',cool:.19,blast:.85,L:98,off:0,desc:'ลำกล้องหมุน ยิงรัวเร็ว รัศมีระเบิดเล็ก',req:30},
@@ -2133,16 +2135,16 @@ function runGame(ALIVE, host) {
   if(SV){S.skin=SV.skin|0;S.wing=SV.wing|0;S.room=SV.room|0;S.saveCoins=SV.coins;}
   function initGame(){
     const rm=ROOMS[S.room];let coins=S.saveCoins||14597886;
-    if(host){coins=host.getBalance();ACTIVE_CHAINS.clear();}else if(coins<rm.min)coins=rm.min*3;
-    you=newSeat(true,640,'Royal_9911787',23,coins);you.skin=S.skin;you.wing=S.wing;you.angT=0;you.y=H-74;you.bet=clamp(host?3:5,rm.lo,rm.hi);
+    if(host){coins=hostPts();ACTIVE_CHAINS.clear();}else if(coins<rm.min)coins=rm.min*3;
+    you=newSeat(true,640,'Royal_9911787',23,coins);you.skin=S.skin;you.wing=S.wing;you.angT=0;you.y=H-74;you.bet=clamp(host?rm.lo:5,rm.lo,rm.hi);
     bot=newSeat(false,900,'Konpentapang',18,14597886);bot.bet=clamp(5,rm.lo,rm.hi);bot.skin=1;bot.wing=2;
     S.fish=[];S.blasts=[];S.bullets=[];S.nets=[];S.parts=[];S.cfx=[];S.txt=[];S.bolts=[];S.rockets=[];S.expl=[];S.rings=[];S.timers=[];S.bands=[];S.band=null;S.winB=null;
     S.mq={q:[],cur:null,x:0,w:0,w1:0,fillT:2};S.ct={ph:'pre',t:6,you:0,bot:0};S.bossT=26;S.evtT=34;S.lockOn=false;S.lockT=null;S.x2=false;S.atom=0;S.tp=0;S.tdots=0;S.youTag=9;S.panelOpen=true;S.sideOpen=true;S.shake=0;S.flash=0;
     for(let i=0;i<14;i++){const k=['clown','tang','angel','puffer','dolphin','sword','octo','crab','turtle'][i%9];spawnAt(k,{silent:true});const f=S.fish[S.fish.length-1];f.x=R(150,W-150);}
     S.fish.forEach(f=>{f.x=R(100,W-100);});
-    pushMQ('[ยิงปลา4คน คลาสสิก]','ยินดีต้อนรับสู่ '+rm.n+(host?'! ยิงแต่ละนัดใช้เครดิต WINNER 69 · ผลตัดสินโดยเซิร์ฟเวอร์':'! เหรียญทั้งหมดเป็นเหรียญจำลอง'));
+    pushMQ('[ยิงปลา4คน คลาสสิก]','ยินดีต้อนรับสู่ '+rm.n+(host?'! เล่นเป็นแต้ม (1 บาท = 100 แต้ม) · ผลตัดสินโดยเซิร์ฟเวอร์':'! เหรียญทั้งหมดเป็นเหรียญจำลอง'));
   }
-  function toLobby(){S.mode='lobby';if(S.auto.on)stopAuto();S.saveCoins=you?Math.round(you.coins):S.saveCoins;$('lobby').classList.add('on');$('lobcoins').textContent=host?fmt(host.getBalance()):fmt(S.saveCoins||14597886);}
+  function toLobby(){S.mode='lobby';if(S.auto.on)stopAuto();S.saveCoins=you?Math.round(you.coins):S.saveCoins;$('lobby').classList.add('on');$('lobcoins').textContent=host?fmt(hostPts()):fmt(S.saveCoins||14597886);}
   function startGame(){
     auInit();sfx('click');const rm=ROOMS[S.room];
     $('lobby').classList.remove('on');initGame();S.mode='play';sfx('banner');
@@ -2152,17 +2154,17 @@ function runGame(ALIVE, host) {
   $('room0').onclick=()=>selRoom(0);$('room1').onclick=()=>selRoom(1);
   $('startBtn').onclick=startGame;
   $('lobsnd').onclick=()=>{auInit();AU.on=!AU.on;$('lobsnd').textContent=AU.on?'🔊 เสียง':'🔇 ปิดเสียง';};
-  selRoom(S.room);$('lobcoins').textContent=host?fmt(host.getBalance()):fmt(S.saveCoins||14597886);
+  selRoom(S.room);$('lobcoins').textContent=host?fmt(hostPts()):fmt(S.saveCoins||14597886);
   if(host){
-    const sub=stage.querySelector('.sub');if(sub)sub.textContent='OCEAN ROYALE · ใช้เครดิต WINNER 69 · เซิร์ฟเวอร์ตัดสินผล';
-    const en=stage.querySelectorAll('.room .ent');if(en[0])en[0].innerHTML='<span class="coin"></span>1 – 30 B';if(en[1])en[1].innerHTML='<span class="coin"></span>5 – 100 B';
+    const sub=stage.querySelector('.sub');if(sub)sub.textContent='OCEAN ROYALE · เล่นเป็นแต้ม 1 บาท = 100 แต้ม · แต้มที่เหลือคืนเข้ากระเป๋าอัตโนมัติ';
+    const en=stage.querySelectorAll('.room .ent');if(en[0])en[0].innerHTML='<span class="coin"></span>10 – 300 แต้ม';if(en[1])en[1].innerHTML='<span class="coin"></span>50 – 1K แต้ม';
   }
   /* send queued shots + hits to WINNER 69 every 250 ms and play back the fish the server killed */
   function flush(){
     if(!host||INFLIGHT)return;
     if(!Q.shots.length&&!Q.claims.length){
-      if(you&&!OUT&&!QSTAKE&&!ACTIVE_CHAINS.size)you.coins=host.getBalance();
-      if(S.mode==='lobby')$('lobcoins').textContent=fmt(host.getBalance());
+      if(you&&!OUT&&!QSTAKE&&!ACTIVE_CHAINS.size)you.coins=hostPts();
+      if(S.mode==='lobby')$('lobcoins').textContent=fmt(hostPts());
       return;
     }
     const batch=Q;Q={shots:[],claims:[]};OUT=QSTAKE;QSTAKE=0;INFLIGHT=true;
@@ -2171,14 +2173,14 @@ function runGame(ALIVE, host) {
       host.round(r.wager||0,r.payout||0);
       for(const k of (r.kills||[])){
         const bet=SHOTBET[k.b]||curBet(),f=S.fish.find(x=>x.id===k.id);
-        if(f&&!f.dead&&!f.gone&&you)killFish(f,you,bet,0,k.reward,k.chain);
-        else if(you){const v=r2(k.reward+k.chain);you.coins+=v;S.st.win+=v;floatTxt(you.x,H-170,'+'+fmt(v),{s:30,pop:1});sfx('coin',30);}
+        if(f&&!f.dead&&!f.gone&&you)killFish(f,you,bet,0,Math.round(k.reward*PTS),Math.round(k.chain*PTS));
+        else if(you){const v=Math.round((k.reward+k.chain)*PTS);you.coins+=v;S.st.win+=v;floatTxt(you.x,H-170,'+'+fmt(v),{s:30,pop:1});sfx('coin',30);}
       }
       batch.claims.forEach(c=>{delete SHOTBET[c.b];});
-      if(you)you.coins=r2(host.getBalance()-QSTAKE-chainLeft());
+      if(you)you.coins=Math.round(hostPts()-QSTAKE-chainLeft());
     }).catch(e=>{
       INFLIGHT=false;OUT=0;if(!ALIVE.v)return;
-      if(you)you.coins=r2(host.getBalance()-QSTAKE-chainLeft());
+      if(you)you.coins=Math.round(hostPts()-QSTAKE-chainLeft());
       toast(errText(e));if(S.auto.on)stopAuto(errText(e));
     });
   }

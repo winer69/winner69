@@ -20,7 +20,7 @@ import { useEffect, useRef } from "react";
 const CSS = `@import url('https://fonts.googleapis.com/css2?family=Lilita+One&family=Kanit:wght@500;700&display=swap');
 
 .fc-root{
-  position:relative;width:100%;height:100%;min-height:560px;box-sizing:border-box;overflow:hidden;background:var(--page);color:var(--ink);font-family:var(--body);
+  position:relative;width:100%;height:100%;min-height:0;box-sizing:border-box;overflow:hidden;background:var(--page);color:var(--ink);font-family:var(--body);
   -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;
   padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);
@@ -415,9 +415,12 @@ function initGame(root, host) {
   /* ================= CANVAS / LAYOUT ================= */
   const cv=$('#reels'),ctx=cv.getContext('2d');
   let RW=0,RH=0,CW=0,CH=0,DPR=1;
-  function layout(){const aw=app.clientWidth,ah=app.clientHeight;const fixed=150+22+50+120;let w=Math.min(aw,(ah-fixed)/0.63);w=Math.max(220,w);
-    RW=Math.floor(w);CW=RW/5;CH=CW*1.04;RH=Math.floor(CH*3+CH*.12);DPR=Math.min(2.5,window.devicePixelRatio||1);
-    cv.width=RW*DPR;cv.height=RH*DPR;cv.style.width=RW+'px';cv.style.height=RH+'px';ctx.setTransform(DPR,0,0,DPR,0,0);
+  function layout(){const aw=app.clientWidth,ah=app.clientHeight;const fixed=150+22+50+120+40;let w=Math.min(aw,(ah-fixed)/0.63);w=Math.max(200,w);
+    const size=(w)=>{RW=Math.floor(w);CW=RW/5;CH=CW*1.04;RH=Math.floor(CH*3+CH*.12);DPR=Math.min(2.5,window.devicePixelRatio||1);
+    cv.width=RW*DPR;cv.height=RH*DPR;cv.style.width=RW+'px';cv.style.height=RH+'px';ctx.setTransform(DPR,0,0,DPR,0,0);};
+    size(w);
+    /* never let the controls fall below the screen: shrink the reels by whatever still overflows */
+    for(let k=0;k<3;k++){const over=app.scrollHeight-app.clientHeight;if(over<=0||w<=160)break;w=Math.max(160,w-over/0.63-6);size(w);}
     const bw=$('#bwfx');bw.width=app.clientWidth*DPR;bw.height=app.clientHeight*DPR;}
   const TOPPAD=()=>CH*.06;
   

@@ -1,0 +1,2013 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#080D18">
+<title>WINNER69 Football League 7</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&family=Kanit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>:root{--bg:#080D18;--bg2:#0C1322;--card:#111B2A;--card2:#16233A;--line:#22324B;--gold:#F5C451;--gold2:#C9971F;--text:#E8EEF8;--muted:#8DA0BC;--live:#2BE38A;--danger:#FF5C6C;--warn:#FFB547;--pitch:#1F7A3D;--pitch2:#23863F;--blue:#5AA9FF;
+--r-lg:18px;--r-md:12px;--r-sm:8px;--shadow:0 10px 30px rgba(0,0,0,.35);--display:"Kanit","IBM Plex Sans Thai",system-ui,sans-serif;--body:"IBM Plex Sans Thai","Kanit",system-ui,sans-serif}
+:root:not([data-theme="light"]){color-scheme:dark}
+*{box-sizing:border-box}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:calc(64px + env(safe-area-inset-top,0px))}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);font-size:15px;line-height:1.55;-webkit-tap-highlight-color:transparent}
+body{min-height:100%;background:radial-gradient(1200px 500px at 50% -200px,rgba(245,196,81,.10),transparent 70%),var(--bg)}
+a{color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
+.num{font-family:var(--display);font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:6px}
+img,svg,canvas{max-width:100%}
+.wrap{max-width:1180px;margin:0 auto;padding:0 14px}
+/* header */
+.hdr{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:rgba(8,13,24,.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.hdr .wrap{display:flex;align-items:center;gap:12px;height:60px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;min-width:0}
+.brand .mark{font-family:var(--display);font-weight:800;font-size:21px;letter-spacing:.5px;color:#fff;line-height:1}
+.brand .mark b{color:var(--gold)}
+.brand .sub{font-family:var(--display);font-size:11.5px;color:var(--muted);line-height:1.1;font-weight:500}
+.nav{display:flex;gap:2px;margin-left:12px}
+.nav a{padding:8px 12px;border-radius:10px;text-decoration:none;color:var(--muted);font-weight:500;font-size:14.5px}
+.nav a:hover{color:var(--text);background:var(--card)}
+.nav a.on{color:var(--gold);background:rgba(245,196,81,.08)}
+.hdr .right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.credits{display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--line);padding:6px 11px;border-radius:999px;font-size:13.5px;white-space:nowrap}
+.credits .coin{width:16px;height:16px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#FFE7A3,var(--gold) 55%,var(--gold2));box-shadow:0 0 10px rgba(245,196,81,.5)}
+.credits .num{font-weight:600;color:var(--gold)}
+.iconbtn{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;cursor:pointer}
+.iconbtn:hover{border-color:#36507a}
+.demo-strip{background:repeating-linear-gradient(135deg,rgba(245,196,81,.12) 0 12px,rgba(245,196,81,.04) 12px 24px);border-bottom:1px solid rgba(245,196,81,.25);font-size:12.5px;color:#F8DC95;text-align:center;padding:5px 10px}
+/* bottom nav */
+.bnav{display:none}
+@media (max-width:860px){.nav{display:none}.bnav{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:45;background:rgba(10,16,29,.96);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.bnav a{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 7px;text-decoration:none;color:var(--muted);font-size:11.5px;font-weight:500;min-height:56px;justify-content:center}
+.bnav a.on{color:var(--gold)}.bnav svg{width:22px;height:22px}
+main{padding-bottom:90px}.brand .sub{display:none}}
+main{padding-top:16px;padding-bottom:40px}
+/* type */
+h1,h2,h3{font-family:var(--display);font-weight:600;margin:0;line-height:1.2}
+h1{font-size:26px}h2{font-size:19px}h3{font-size:16px}
+.sec{margin:22px 0}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:10px}
+.sec-h .link{color:var(--gold);font-size:14px;text-decoration:none;font-weight:500;background:none;border:0;cursor:pointer;padding:6px 0}
+.muted{color:var(--muted)}.small{font-size:13px}.tiny{font-size:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg)}
+.pad{padding:14px}
+.grid{display:grid;gap:14px}
+@media(min-width:900px){.g2{grid-template-columns:1.35fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:620px){.gt{grid-template-columns:repeat(2,1fr)}}@media(min-width:980px){.gt{grid-template-columns:repeat(3,1fr)}}
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:var(--card2);color:var(--text);font-weight:600;cursor:pointer;text-decoration:none;transition:background .15s,transform .05s,border-color .15s;font-size:14.5px}
+.btn:hover{border-color:#3b5784;background:#1b2b46}
+.btn:active{transform:translateY(1px) scale(.99)}
+.btn[disabled]{opacity:.45;cursor:not-allowed;transform:none}
+.btn.gold{background:linear-gradient(180deg,#FFD978,var(--gold) 60%,#E3AE33);color:#1C1404;border-color:#F8D27A;box-shadow:0 6px 18px rgba(245,196,81,.25)}
+.btn.gold:hover{filter:brightness(1.05)}
+.btn.ghost{background:transparent}
+.btn.danger{background:rgba(255,92,108,.12);border-color:rgba(255,92,108,.45);color:#FFB3BB}
+.btn.sm{min-height:36px;padding:0 11px;font-size:13px;border-radius:10px}
+.btn.block{width:100%}
+.btn.loading{pointer-events:none;color:transparent;position:relative}
+.btn.loading::after{content:"";position:absolute;width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(0,0,0,.25);border-top-color:#1C1404;animation:spin .7s linear infinite}
+.btn:not(.gold).loading::after{border-color:rgba(255,255,255,.2);border-top-color:#fff}
+@keyframes spin{to{transform:rotate(360deg)}}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;min-height:40px;padding:6px 13px;border-radius:12px;border:1px solid var(--line);background:var(--card);cursor:pointer;text-align:center;line-height:1.2;font-size:13px}
+.chip b{display:block;font-family:var(--display);font-size:15px;font-weight:600}
+.chip.on{border-color:var(--gold);background:rgba(245,196,81,.1);color:var(--gold)}
+/* status */
+.st{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;white-space:nowrap;font-family:var(--display);letter-spacing:.2px}
+.st.live{background:rgba(43,227,138,.14);color:var(--live)}
+.st.live::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--live);box-shadow:0 0 0 0 rgba(43,227,138,.7);animation:pulse 1.4s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 7px rgba(43,227,138,0)}100%{box-shadow:0 0 0 0 rgba(43,227,138,0)}}
+.st.ht{background:rgba(255,181,71,.14);color:var(--warn)}
+.st.sched{background:rgba(90,169,255,.12);color:#9CCBFF}
+.st.ft{background:rgba(141,160,188,.15);color:#C6D2E3}
+.st.pend{background:rgba(245,196,81,.14);color:var(--gold)}
+.st.pp{background:rgba(255,181,71,.12);color:#FFCF8A}
+.st.cx{background:rgba(255,92,108,.12);color:#FF9BA6}
+.st.sim{background:transparent;border:1px dashed #3a4d6b;color:var(--muted);font-weight:500}
+/* match rows */
+.mrow{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;padding:12px 14px;border-top:1px solid var(--line);text-decoration:none}
+.mrow:first-child{border-top:0}
+.mrow:hover{background:rgba(255,255,255,.02)}
+.tm{display:flex;align-items:center;gap:9px;min-width:0;font-weight:600}
+.tm span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tm.away{flex-direction:row-reverse;text-align:right}
+.mid{text-align:center;min-width:76px}
+.mid .sc{font-family:var(--display);font-size:22px;font-weight:700;line-height:1}
+.mid .tt{font-family:var(--display);font-size:18px;font-weight:600;color:var(--gold)}
+.mmeta{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);margin-top:-2px}
+/* hero */
+.hero{position:relative;overflow:hidden;border-radius:22px;border:1px solid #2a3c58;background:linear-gradient(180deg,#0E1A2C,#0A1220)}
+.hero .board{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;padding:16px 16px 10px}
+.hero .team{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;font-family:var(--display);font-weight:600;font-size:15px;line-height:1.2}
+.hero .score{font-family:var(--display);font-weight:800;font-size:52px;line-height:1;letter-spacing:2px;text-align:center;text-shadow:0 0 30px rgba(245,196,81,.25)}
+.hero .score .sep{color:var(--muted);font-weight:400;margin:0 6px}
+.hero .clock{font-family:var(--display);font-size:17px;color:var(--live);text-align:center;font-weight:600}
+.hero .kick{font-family:var(--display);font-size:34px;font-weight:700;color:var(--gold);text-align:center;line-height:1}
+.hero .foot{display:flex;gap:10px;justify-content:space-between;align-items:center;padding:10px 14px 14px;flex-wrap:wrap}
+@media(min-width:700px){.hero .score{font-size:68px}.hero .team{font-size:18px}}
+.pitchbox{position:relative;margin:0 12px;border-radius:14px;overflow:hidden;background:#0d3a1d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+.pitchbox canvas{display:block;width:100%;height:auto}
+.goalfx{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;pointer-events:none;background:radial-gradient(circle,rgba(245,196,81,.25),rgba(0,0,0,.55) 70%)}
+.goalfx.on{display:flex;animation:gin .35s ease-out}
+.goalfx .g{font-family:var(--display);font-weight:800;font-size:clamp(48px,12vw,110px);color:var(--gold);letter-spacing:4px;text-shadow:0 4px 0 #7a5810,0 0 40px rgba(245,196,81,.7);line-height:1}
+.goalfx .who{font-family:var(--display);font-size:18px;font-weight:600;margin-top:6px}
+@keyframes gin{from{transform:scale(1.3);opacity:0}to{transform:scale(1);opacity:1}}
+.htfx{position:absolute;left:50%;top:12px;transform:translateX(-50%);background:rgba(8,13,24,.8);border:1px solid var(--line);border-radius:999px;padding:4px 14px;font-family:var(--display);font-size:13px;display:none}
+.htfx.on{display:block}
+@media (prefers-reduced-motion:reduce){.goalfx.on{animation:none}.st.live::before{animation:none}}
+/* table */
+.tbl-wrap{overflow-x:auto}
+table.tbl{width:100%;border-collapse:collapse;font-size:14px;min-width:560px}
+.tbl th{font-weight:500;color:var(--muted);font-size:12.5px;text-align:center;padding:10px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
+.tbl td{text-align:center;padding:9px 6px;border-bottom:1px solid rgba(34,50,75,.6);font-variant-numeric:tabular-nums}
+.tbl td.t{text-align:left}.tbl th.t{text-align:left}
+.tbl tr.top td:first-child{box-shadow:inset 3px 0 0 var(--gold)}
+.tbl tr.top{background:linear-gradient(90deg,rgba(245,196,81,.07),transparent 60%)}
+.tbl .pts{font-family:var(--display);font-weight:700;font-size:16px;color:var(--gold)}
+.tbl.compact{min-width:0}
+.form{display:inline-flex;gap:3px}.form i{width:18px;height:18px;border-radius:5px;display:inline-grid;place-items:center;font-size:10.5px;font-style:normal;font-weight:700;font-family:var(--display)}
+.form .W{background:#1f8f55;color:#E6FFF1}.form .D{background:#5b6880;color:#fff}.form .L{background:#b33a48;color:#fff}.form .N{background:var(--card2);color:var(--muted)}
+/* bars */
+.bar{height:8px;border-radius:99px;background:#1A2740;overflow:hidden}.bar>i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--gold2),var(--gold))}
+.prob{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;padding:8px 0}
+/* predict */
+.pickgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pick{min-height:74px;border-radius:14px;border:1.5px solid var(--line);background:var(--card2);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px;transition:border-color .15s,background .15s}
+.pick .lb{font-size:12.5px;color:var(--muted);text-align:center;line-height:1.2}
+.pick .od{font-family:var(--display);font-size:22px;font-weight:700}
+.pick:hover{border-color:#3b5784}
+.pick.on{border-color:var(--gold);background:rgba(245,196,81,.12)}.pick.on .od{color:var(--gold)}
+.pick[disabled]{opacity:.5;cursor:not-allowed}
+.stepper{display:flex;align-items:center;gap:6px}
+.stepper button{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card2);font-size:20px;cursor:pointer}
+.stepper .v{width:44px;text-align:center;font-family:var(--display);font-size:26px;font-weight:700}
+.summary{display:grid;grid-template-columns:1fr auto;gap:6px 12px;font-size:14px;background:#0C1524;border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.summary .v{text-align:right;font-family:var(--display);font-weight:600}
+.notice{border-radius:12px;padding:10px 12px;font-size:13px;background:rgba(90,169,255,.08);border:1px solid rgba(90,169,255,.25);color:#C5DEFF}
+.notice.gold{background:rgba(245,196,81,.07);border-color:rgba(245,196,81,.3);color:#F6DE9F}
+.notice.err{background:rgba(255,92,108,.08);border-color:rgba(255,92,108,.3);color:#FFC2C9}
+.notice.ok{background:rgba(43,227,138,.08);border-color:rgba(43,227,138,.3);color:#B6F5D5}
+/* misc */
+.kv{display:grid;grid-template-columns:1fr auto 1fr;gap:6px 10px;align-items:center;font-size:14px}
+.kv .c{color:var(--muted);text-align:center;font-size:12.5px}
+.kv .l{text-align:left;font-family:var(--display);font-weight:600}.kv .r{text-align:right;font-family:var(--display);font-weight:600}
+.tabs{display:flex;gap:4px;background:var(--bg2);border:1px solid var(--line);padding:4px;border-radius:14px;overflow-x:auto;scrollbar-width:none}
+.tabs button{flex:1 0 auto;min-height:40px;border:0;background:none;border-radius:10px;padding:0 14px;color:var(--muted);font-weight:500;cursor:pointer;white-space:nowrap}
+.tabs button.on{background:var(--card2);color:var(--text);box-shadow:0 1px 0 rgba(255,255,255,.04) inset}
+.log{max-height:420px;overflow:auto;font-size:13.5px}
+.log .ev{display:grid;grid-template-columns:52px 1fr;gap:8px;padding:7px 12px;border-top:1px solid rgba(34,50,75,.6)}
+.log .ev .t{font-family:var(--display);color:var(--muted);font-variant-numeric:tabular-nums}
+.log .ev.goal{background:rgba(245,196,81,.08)}.log .ev.goal .x{color:var(--gold);font-weight:700}
+.log .ev.key .x{font-weight:600}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.empty{padding:30px 16px;text-align:center;color:var(--muted)}
+.skel{background:linear-gradient(90deg,#132036,#1a2a44,#132036);background-size:200% 100%;animation:sk 1.2s infinite;border-radius:12px;height:70px}
+@keyframes sk{to{background-position:-200% 0}}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.field label{font-size:13px;color:var(--muted)}
+.inp{min-height:44px;border-radius:11px;border:1px solid var(--line);background:#0B1322;padding:0 12px;width:100%}
+textarea.inp{padding:10px 12px;min-height:80px}
+.inp:focus{border-color:var(--gold);outline:none}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}@media(min-width:760px){.kpis{grid-template-columns:repeat(6,1fr)}}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+.kpi .v{font-family:var(--display);font-size:26px;font-weight:700;line-height:1.1}.kpi .k{font-size:12.5px;color:var(--muted)}
+.pl{display:grid;grid-template-columns:34px 1fr auto auto;gap:10px;align-items:center;padding:8px 12px;border-top:1px solid rgba(34,50,75,.6);font-size:14px}
+.pl .n{font-family:var(--display);font-weight:700;color:var(--gold);text-align:center}
+.pos{font-size:11px;font-weight:600;padding:2px 7px;border-radius:6px;background:#1B2A44;color:#A9C3E8;font-family:var(--display)}
+.pos.GK{background:#3b2f0d;color:#FFD979}.pos.DEF{background:#13314a;color:#8ECBFF}.pos.MID{background:#14382a;color:#86E3B3}.pos.FWD{background:#3d1a20;color:#FF9FAA}
+/* modal & toast */
+.modal-bg{position:fixed;inset:0;z-index:80;background:rgba(3,6,12,.72);display:flex;align-items:flex-end;justify-content:center;padding:0;animation:fade .15s}
+@media(min-width:640px){.modal-bg{align-items:center;padding:20px}}
+.modal{background:var(--card);border:1px solid #2b3e5d;border-radius:20px 20px 0 0;width:100%;max-width:480px;max-height:90vh;overflow:auto;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));box-shadow:var(--shadow)}
+@media(min-width:640px){.modal{border-radius:20px}}
+@keyframes fade{from{opacity:0}}
+.toasts{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(80px + env(safe-area-inset-bottom,0px));z-index:90;display:flex;flex-direction:column;gap:8px;width:min(92vw,420px)}
+.toast{background:#17243B;border:1px solid #2f4566;border-radius:12px;padding:11px 14px;font-size:14px;box-shadow:var(--shadow);animation:fade .2s}
+.toast.err{border-color:rgba(255,92,108,.5)}.toast.ok{border-color:rgba(43,227,138,.45)}
+.disclaim{font-size:12px;color:var(--muted);border-left:3px solid var(--gold2);padding:4px 10px;margin-top:10px}
+.foot{padding:26px 0 30px;color:var(--muted);font-size:12.5px;text-align:center}
+.teamhead{display:flex;gap:16px;align-items:center;padding:18px;border-radius:20px;border:1px solid var(--line)}
+.split{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.hide-m{}@media(max-width:620px){.hide-m{display:none}}
+.grid>*{min-width:0}.mrow>*{min-width:0}
+@media(max-width:520px){.tbl.compact th,.tbl.compact td{padding:9px 4px}.tbl.compact td.t span{display:inline-block;max-width:118px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}.tbl.compact .tm .logo{width:20px;height:20px}}
+.prob .split{flex-wrap:wrap;row-gap:2px}
+</style></head>
+<body>
+<header class="hdr" id="hdr"></header>
+<main class="wrap" id="view" tabindex="-1"><div class="skel" style="height:280px;margin-top:10px"></div></main>
+<nav class="bnav" id="bnav" aria-label="เมนูหลักบนมือถือ"></nav>
+<footer class="foot wrap">WINNER69 Football League 7 เป็นเกมจำลองเพื่อความบันเทิง ใช้เครดิตทดลองเท่านั้น ไม่เชื่อมต่อระบบฝาก ถอน หรือการชำระเงินใดๆ</footer>
+<script>/* WINNER69 FOOTBALL LEAGUE 7 — core engines (UI-independent, deterministic, testable)
+ * modules: rng, teams, league-scheduler, match-engine, standings, odds/model,
+ *          demo-credit-engine, prediction-engine, league service (backend layer)
+ */
+(function (root) {
+  'use strict';
+
+  /* ===================== RNG (seeded) ===================== */
+  function hashStr(s) {
+    let h = 2166136261 >>> 0;
+    s = String(s);
+    for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return h >>> 0;
+  }
+  function makeRng(seed) {
+    let a = (typeof seed === 'number' ? seed : hashStr(seed)) >>> 0;
+    const next = function () {
+      a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+    return {
+      next,
+      range: (lo, hi) => lo + next() * (hi - lo),
+      int: (lo, hi) => lo + Math.floor(next() * (hi - lo + 1)),
+      pick: (arr) => arr[Math.floor(next() * arr.length)],
+      chance: (p) => next() < p,
+      weighted: (items, wf) => {
+        let tot = 0; const ws = items.map((x) => { const w = Math.max(0, wf(x)); tot += w; return w; });
+        let r = next() * tot;
+        for (let i = 0; i < items.length; i++) { r -= ws[i]; if (r <= 0) return items[i]; }
+        return items[items.length - 1];
+      },
+    };
+  }
+
+  /* ===================== Time (Asia/Bangkok, UTC+7, no DST) ===================== */
+  const BKK = 7 * 3600 * 1000;
+  const DAY = 86400000;
+  /** epoch ms for a Bangkok wall-clock date 'YYYY-MM-DD' + 'HH:MM' */
+  function bkkToEpoch(dateStr, timeStr) {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    const [hh, mm] = (timeStr || '00:00').split(':').map(Number);
+    return Date.UTC(y, m - 1, d, hh, mm) - BKK;
+  }
+  function epochToBkkDate(ms) {
+    const d = new Date(ms + BKK);
+    return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0') + '-' + String(d.getUTCDate()).padStart(2, '0');
+  }
+  function epochToBkkTime(ms) {
+    const d = new Date(ms + BKK);
+    return String(d.getUTCHours()).padStart(2, '0') + ':' + String(d.getUTCMinutes()).padStart(2, '0');
+  }
+  function addDays(dateStr, n) { return epochToBkkDate(bkkToEpoch(dateStr, '12:00') + n * DAY); }
+
+  /* ===================== Teams & players ===================== */
+  const TEAM_DEFS = [
+    { id: 'WIN', name: 'WINNER FC', primary: '#F5C451', secondary: '#1A1408', kit2: '#111B2A', shape: 'shield', tier: 78 },
+    { id: 'BKU', name: 'Bangkok United 7', primary: '#E63946', secondary: '#F1FAEE', kit2: '#1D3557', shape: 'round', tier: 80 },
+    { id: 'GEA', name: 'Golden Eagles', primary: '#E9A400', secondary: '#2B1D05', kit2: '#FFFFFF', shape: 'hex', tier: 78 },
+    { id: 'THW', name: 'Thunder Wolves', primary: '#7B61FF', secondary: '#F2EEFF', kit2: '#1B1440', shape: 'shield', tier: 76 },
+    { id: 'RLI', name: 'Royal Lions', primary: '#3A5BD9', secondary: '#F5C451', kit2: '#F5F5F5', shape: 'crest', tier: 79 },
+    { id: 'BSH', name: 'Blue Sharks', primary: '#00A6D6', secondary: '#E6FBFF', kit2: '#022B3A', shape: 'round', tier: 74 },
+    { id: 'RPH', name: 'Red Phoenix', primary: '#FF5A1F', secondary: '#2A0A04', kit2: '#FFD6C7', shape: 'hex', tier: 75 },
+    { id: 'BPA', name: 'Black Panthers', primary: '#2B2D42', secondary: '#EDF2F4', kit2: '#EDF2F4', shape: 'shield', tier: 77 },
+    { id: 'DST', name: 'Diamond Stars', primary: '#B392F0', secondary: '#1F0B3A', kit2: '#E0F7FF', shape: 'crest', tier: 72 },
+    { id: 'SFA', name: 'Silver Falcons', primary: '#AEB7C2', secondary: '#1B2129', kit2: '#3B4450', shape: 'round', tier: 73 },
+    { id: 'TIW', name: 'Tiger Warriors', primary: '#F77F00', secondary: '#120A00', kit2: '#FFF1DE', shape: 'hex', tier: 76 },
+    { id: 'DRF', name: 'Dragon Force', primary: '#1FBF5A', secondary: '#04140A', kit2: '#D7FFE4', shape: 'crest', tier: 78 },
+  ];
+  const FIRST = ['ธนพล', 'กิตติพัฒน์', 'ศุภชัย', 'อนุชา', 'วีรยุทธ', 'ณัฐวุฒิ', 'ปิยะพงษ์', 'สุริยา', 'ชนาธิป', 'ธีรศิลป์', 'พีรพัฒน์', 'อดิศักดิ์', 'จักรพันธ์', 'สมพงษ์', 'ภานุวัฒน์', 'ธนวัฒน์', 'นครินทร์', 'วรชิต', 'ศักดิ์ชัย', 'เอกนิษฐ์', 'ทศพล', 'รัฐพล', 'กฤษดา', 'ปกรณ์', 'อัครพล', 'สิทธิชัย', 'ยศกร', 'ธราดล', 'พงศกร', 'วิทวัส'];
+  const LAST = ['ศรีสุข', 'ทองดี', 'แก้วมณี', 'บุญมา', 'วงศ์ไทย', 'สายทอง', 'มั่นคง', 'ใจดี', 'พรหมมา', 'จันทร์เพ็ญ', 'รุ่งเรือง', 'ศักดิ์สิทธิ์', 'ทองคำ', 'เพชรรัตน์', 'สิงห์ทอง', 'คงสวัสดิ์', 'ชัยมงคล', 'นาคสุข', 'อินทร์แก้ว', 'พูลผล'];
+  // 7 starters (GK, DEF x2, MID x2, FWD x2) + 3 subs (GK, DEF/MID, FWD)
+  const SQUAD_LAYOUT = [
+    ['GK', true], ['DEF', true], ['DEF', true], ['MID', true], ['MID', true], ['FWD', true], ['FWD', true],
+    ['GK', false], ['MID', false], ['FWD', false],
+  ];
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+  function playerOverall(p) {
+    const a = p.attrs;
+    switch (p.pos) {
+      case 'GK': return Math.round(a.gk * 0.75 + a.pas * 0.1 + a.def * 0.15);
+      case 'DEF': return Math.round(a.def * 0.55 + a.pac * 0.2 + a.pas * 0.25);
+      case 'MID': return Math.round(a.pas * 0.5 + a.def * 0.2 + a.sho * 0.15 + a.pac * 0.15);
+      default: return Math.round(a.sho * 0.55 + a.pac * 0.3 + a.pas * 0.15);
+    }
+  }
+  function generateSquad(teamDef, seed) {
+    const rng = makeRng(seed + ':' + teamDef.id);
+    const used = new Set(); const nums = new Set();
+    return SQUAD_LAYOUT.map(([pos, starter], i) => {
+      let name; do { name = rng.pick(FIRST) + ' ' + rng.pick(LAST); } while (used.has(name)); used.add(name);
+      let num; const pref = { GK: [1, 13, 22], DEF: [2, 3, 4, 5, 15], MID: [6, 8, 10, 14, 16], FWD: [7, 9, 11, 17, 19] }[pos];
+      num = pref.find((n) => !nums.has(n)) || rng.int(20, 40); nums.add(num);
+      const t = teamDef.tier + (starter ? 0 : -5);
+      const v = () => clamp(Math.round(t + rng.range(-9, 7)), 40, 97);
+      const attrs = { pac: v(), pas: v(), sho: v(), def: v(), gk: pos === 'GK' ? clamp(t + rng.int(-4, 6), 45, 97) : rng.int(15, 30) };
+      if (pos === 'FWD') attrs.sho = clamp(attrs.sho + 6, 40, 97), attrs.def = clamp(attrs.def - 12, 30, 97);
+      if (pos === 'DEF') attrs.def = clamp(attrs.def + 6, 40, 97), attrs.sho = clamp(attrs.sho - 12, 30, 97);
+      const p = { id: teamDef.id + '-' + (i + 1), name, num, pos, starter, attrs };
+      p.ovr = playerOverall(p);
+      return p;
+    });
+  }
+  function createTeams(seed) {
+    return TEAM_DEFS.map((d) => ({ ...d, active: true, players: generateSquad(d, seed || 'w69') }));
+  }
+  function starters(team) {
+    const s = team.players.filter((p) => p.starter);
+    return s.length >= 7 ? s.slice(0, 7) : s.concat(team.players.filter((p) => !p.starter)).slice(0, 7);
+  }
+  function teamStrength(team) {
+    const s = starters(team); const avg = (arr, f) => arr.length ? arr.reduce((t, p) => t + f(p), 0) / arr.length : 50;
+    const by = (pos) => s.filter((p) => p.pos === pos);
+    const gk = by('GK')[0] || s[0];
+    const attack = avg(by('FWD').concat(by('MID')), (p) => p.attrs.sho * 0.6 + p.attrs.pac * 0.4);
+    const midfield = avg(by('MID').concat(by('DEF')), (p) => p.attrs.pas);
+    const defense = avg(by('DEF').concat(by('MID')), (p) => p.attrs.def * 0.7 + p.attrs.pac * 0.3);
+    const keeper = gk.attrs.gk;
+    const overall = Math.round(attack * 0.3 + midfield * 0.3 + defense * 0.25 + keeper * 0.15);
+    return { attack: Math.round(attack), midfield: Math.round(midfield), defense: Math.round(defense), keeper, overall };
+  }
+
+  /* ===================== League scheduler (double round robin, circle method) ===================== */
+  /**
+   * Generates a balanced double round-robin. Returns rounds (array of [home, away] id pairs).
+   * Home/away alternates per team; second leg mirrors the first with venues swapped.
+   */
+  function roundRobin(teamIds) {
+    const ids = teamIds.slice(); if (ids.length % 2) ids.push(null);
+    const n = ids.length, rounds = [];
+    const fixed = ids[0]; let rot = ids.slice(1);
+    for (let r = 0; r < n - 1; r++) {
+      const cur = [fixed].concat(rot), pairs = [];
+      for (let i = 0; i < n / 2; i++) {
+        const a = cur[i], b = cur[n - 1 - i];
+        if (a === null || b === null) continue;
+        // alternate venue: fixed team flips every round; others by round parity & slot
+        const swap = i === 0 ? r % 2 === 1 : (i % 2 === 1);
+        pairs.push(swap ? [b, a] : [a, b]);
+      }
+      rounds.push(pairs);
+      rot = [rot[rot.length - 1]].concat(rot.slice(0, -1));
+    }
+    const second = rounds.map((rd) => rd.map(([h, a]) => [a, h]));
+    return rounds.concat(second);
+  }
+  /**
+   * Build full season fixtures. cfg: {seasonId, startDate 'YYYY-MM-DD', matchesPerDay, slotTimes ['21:00','21:00']}
+   * Matches of one day are taken from the same round, so a team never plays twice on one day.
+   */
+  function generateSchedule(teamIds, cfg) {
+    if (!cfg || !cfg.startDate) throw new Error('startDate required');
+    const perDay = cfg.matchesPerDay || 2;
+    const slots = cfg.slotTimes && cfg.slotTimes.length ? cfg.slotTimes : ['21:00'];
+    const rounds = roundRobin(teamIds);
+    const matches = []; let day = 0; let no = 0;
+    rounds.forEach((pairs, ri) => {
+      for (let i = 0; i < pairs.length; i += perDay) {
+        const date = addDays(cfg.startDate, day);
+        pairs.slice(i, i + perDay).forEach(([h, a], k) => {
+          no++;
+          const time = slots[Math.min(k, slots.length - 1)];
+          matches.push({
+            id: cfg.seasonId + '-M' + String(no).padStart(3, '0'), no, round: ri + 1, day: day + 1,
+            homeId: h, awayId: a, date, time, kickoff: bkkToEpoch(date, time), status: 'scheduled',
+          });
+        });
+        day++;
+      }
+    });
+    return matches;
+  }
+  function validateSchedule(matches, teamIds) {
+    const errs = []; const pair = new Map(); const perTeam = {}; const homeCnt = {};
+    teamIds.forEach((t) => { perTeam[t] = 0; homeCnt[t] = 0; });
+    const byDate = {};
+    for (const m of matches) {
+      perTeam[m.homeId]++; perTeam[m.awayId]++; homeCnt[m.homeId]++;
+      const k = m.homeId + '>' + m.awayId; pair.set(k, (pair.get(k) || 0) + 1);
+      (byDate[m.date] = byDate[m.date] || []).push(m);
+      if (m.homeId === m.awayId) errs.push('self match ' + m.id);
+    }
+    for (const [d, ms] of Object.entries(byDate)) {
+      const seen = new Set();
+      for (const m of ms) { for (const t of [m.homeId, m.awayId]) { if (seen.has(t)) errs.push('team ' + t + ' twice on ' + d); seen.add(t); } }
+    }
+    for (const a of teamIds) for (const b of teamIds) if (a !== b && pair.get(a + '>' + b) !== 1) errs.push('pair ' + a + '>' + b + ' count ' + (pair.get(a + '>' + b) || 0));
+    return { ok: errs.length === 0, errors: errs, perTeam, homeCnt };
+  }
+
+  /* ===================== Match engine ===================== */
+  const H1_END = 900, HT_END = 1200, FT = 2100; // game seconds: 15' + 5' break + 15'
+  const FORMATION = { GK: [[0.05, 0.5]], DEF: [[0.2, 0.3], [0.2, 0.7]], MID: [[0.4, 0.32], [0.4, 0.68]], FWD: [[0.6, 0.38], [0.6, 0.62]] };
+  function clockOf(t) { // game time -> displayed match clock seconds, half
+    if (t < H1_END) return { sec: Math.max(0, t), half: 1, phase: 'H1' };
+    if (t < HT_END) return { sec: H1_END, half: 1, phase: 'HT' };
+    if (t < FT) return { sec: H1_END + (t - HT_END), half: 2, phase: 'H2' };
+    return { sec: 1800, half: 2, phase: 'FT' };
+  }
+  function fmtClock(sec) { return String(Math.floor(sec / 60)).padStart(2, '0') + ':' + String(Math.floor(sec % 60)).padStart(2, '0'); }
+  /** compact, immutable snapshot of a team used as simulation input */
+  function snapshotTeam(team) {
+    return { id: team.id, players: starters(team).map((p) => ({ id: p.id, name: p.name, num: p.num, pos: p.pos, a: [p.attrs.pac, p.attrs.pas, p.attrs.sho, p.attrs.def, p.attrs.gk] })) };
+  }
+  /**
+   * simulateMatch({seed, home, away}) — home/away are snapshots. Pure & deterministic.
+   * Home attacks to x=1 in 1st half, x=0 in 2nd. Ball coordinates are absolute (0..1).
+   */
+  function simulateMatch(input) {
+    const rng = makeRng(input.seed);
+    const sides = { home: input.home, away: input.away };
+    const P = (s) => sides[s].players.map((p) => ({ ...p, pac: p.a[0], pas: p.a[1], sho: p.a[2], def: p.a[3], gk: p.a[4] }));
+    const squads = { home: P('home'), away: P('away') };
+    const avg = (arr, f) => arr.reduce((t, x) => t + f(x), 0) / arr.length;
+    const str = {};
+    for (const s of ['home', 'away']) {
+      const sq = squads[s];
+      str[s] = {
+        pass: avg(sq.filter((p) => p.pos !== 'GK'), (p) => p.pas),
+        def: avg(sq.filter((p) => p.pos !== 'GK'), (p) => p.def * 0.75 + p.pac * 0.25),
+        gk: (sq.find((p) => p.pos === 'GK') || sq[0]).gk,
+      };
+    }
+    const HOME_ADV = 2; // rating points
+    const events = []; const score = { home: 0, away: 0 };
+    const stats = { home: { shots: 0, onTarget: 0, passes: 0, tackles: 0, corners: 0, saves: 0, poss: 0 }, away: { shots: 0, onTarget: 0, passes: 0, tackles: 0, corners: 0, saves: 0, poss: 0 } };
+    const opp = (s) => (s === 'home' ? 'away' : 'home');
+    const dirOf = (side, half) => ((side === 'home') === (half === 1) ? 1 : -1);
+    const absX = (side, half, prog) => (dirOf(side, half) > 0 ? prog : 1 - prog);
+    const push = (e) => { e.score = { home: score.home, away: score.away }; events.push(e); };
+    const playerRef = (p) => ({ id: p.id, num: p.num, name: p.name });
+
+    for (const half of [1, 2]) {
+      const start = half === 1 ? 0 : HT_END, end = half === 1 ? H1_END : FT;
+      let side = half === 1 ? 'home' : 'away';
+      let prog = 0.5, y = 0.5;
+      let carrier = squads[side].find((p) => p.pos === 'FWD');
+      let t = start;
+      push({ t, type: 'kickoff', side, player: playerRef(carrier), x: 0.5, y: 0.5 });
+      t += 2;
+      while (t < end) {
+        const a = str[side], d = str[opp(side)];
+        const adv = (side === 'home' ? HOME_ADV : -HOME_ADV);
+        const edge = (a.pass - d.def + adv) / 160; // ~ -0.2..0.2
+        const dt = rng.int(3, 8);
+        stats[side].poss += dt;
+        const inShootZone = prog > 0.7;
+        const shootP = inShootZone ? 0.15 + (prog - 0.7) * 1.2 + edge * 0.4 : (prog > 0.55 ? 0.025 : 0);
+        if (rng.chance(clamp(shootP, 0, 0.75))) {
+          // SHOT — shooter weighted by finishing & position
+          const shooter = rng.chance(0.75) && carrier.pos !== 'GK' ? carrier : rng.weighted(squads[side].filter((p) => p.pos !== 'GK'), (p) => p.sho * (p.pos === 'FWD' ? 2 : p.pos === 'MID' ? 1 : 0.3));
+          const gk = squads[opp(side)].find((p) => p.pos === 'GK') || squads[opp(side)][0];
+          const dist = 1 - prog; // smaller = closer
+          const quality = clamp(0.5 + (shooter.sho - 70) / 160 - dist * 1.1 + edge * 0.3, 0.12, 0.92);
+          stats[side].shots++;
+          const shotT = t; const gx = dirOf(side, half) > 0 ? 1 : 0;
+          const onTarget = rng.chance(clamp(0.3 + quality * 0.45, 0.25, 0.8));
+          if (!onTarget) {
+            push({ t: shotT, type: 'shot', side, player: playerRef(shooter), x: gx, y: rng.chance(0.5) ? rng.range(0.3, 0.4) : rng.range(0.6, 0.7), outcome: 'wide' });
+            side = opp(side); prog = 0.08; y = 0.5; carrier = squads[side].find((p) => p.pos === 'GK');
+            t += dt + 3; continue;
+          }
+          stats[side].onTarget++;
+          const goalP = clamp(0.36 + quality * 0.35 + (shooter.sho - gk.gk) / 220, 0.14, 0.8);
+          if (rng.chance(goalP)) {
+            score[side]++;
+            push({ t: shotT, type: 'shot', side, player: playerRef(shooter), x: gx, y: rng.range(0.44, 0.56), outcome: 'goal' });
+            push({ t: shotT + 1, type: 'goal', side, player: playerRef(shooter), x: gx, y: 0.5 });
+            if (shotT + 20 >= end) { t = end; break; }
+            side = opp(side); prog = 0.5; y = 0.5; carrier = squads[side].find((p) => p.pos === 'FWD');
+            t = shotT + 20;
+            push({ t, type: 'kickoff', side, player: playerRef(carrier), x: 0.5, y: 0.5 });
+            t += 2; continue;
+          }
+          stats[opp(side)].saves++;
+          push({ t: shotT, type: 'shot', side, player: playerRef(shooter), x: gx, y: rng.range(0.42, 0.58), outcome: 'saved' });
+          push({ t: shotT + 1, type: 'save', side: opp(side), player: playerRef(gk), x: absX(side, half, 0.96), y: rng.range(0.42, 0.58) });
+          t = shotT + 1 + dt;
+          if (rng.chance(0.38) && t < end - 5) {
+            stats[side].corners++;
+            const cy = rng.chance(0.5) ? 0.01 : 0.99;
+            push({ t, type: 'corner', side, player: playerRef(rng.pick(squads[side].filter((p) => p.pos !== 'GK'))), x: gx, y: cy });
+            prog = 0.88; y = rng.range(0.4, 0.6);
+            carrier = rng.weighted(squads[side].filter((p) => p.pos !== 'GK'), (p) => (p.pos === 'FWD' ? 3 : 1));
+            t += 4; continue;
+          }
+          side = opp(side); prog = 0.06; y = 0.5; carrier = gk; continue;
+        }
+        // PASS or DRIBBLE vs pressure
+        const dribble = carrier.pos !== 'GK' && rng.chance(0.22 + (carrier.pac - 70) / 300);
+        const press = squads[opp(side)].filter((p) => p.pos !== 'GK');
+        const defender = rng.weighted(press, (p) => p.def * (prog > 0.5 ? (p.pos === 'DEF' ? 2 : 1) : (p.pos === 'FWD' ? 2 : 1)));
+        const succ = dribble
+          ? clamp(0.62 + (carrier.pac + carrier.pas * 0.3 - defender.def * 1.15) / 260 + edge * 0.4 - prog * 0.18, 0.3, 0.88)
+          : clamp(0.86 + (carrier.pas - defender.def) / 420 + edge * 0.3 - prog * 0.22, 0.45, 0.95);
+        if (rng.chance(succ)) {
+          if (dribble) {
+            prog = clamp(prog + rng.range(0.04, 0.12), 0.05, 0.95); y = clamp(y + rng.range(-0.12, 0.12), 0.08, 0.92);
+            push({ t, type: 'dribble', side, player: playerRef(carrier), x: absX(side, half, prog), y });
+          } else {
+            const mates = squads[side].filter((p) => p.id !== carrier.id && p.pos !== 'GK');
+            const fwdBias = prog < 0.35 ? { DEF: 1, MID: 3, FWD: 1.5 } : { DEF: 0.6, MID: 2, FWD: 3 };
+            const rec = rng.weighted(mates, (p) => fwdBias[p.pos] * (p.pas / 70));
+            const target = { DEF: 0.3, MID: 0.55, FWD: 0.78 }[rec.pos];
+            prog = clamp(prog + (target - prog) * rng.range(0.35, 0.8) + rng.range(-0.04, 0.08), 0.05, 0.93);
+            y = clamp(rng.range(0.15, 0.85) * 0.6 + y * 0.4, 0.08, 0.92);
+            stats[side].passes++;
+            push({ t, type: 'pass', side, player: playerRef(carrier), to: playerRef(rec), x: absX(side, half, prog), y });
+            carrier = rec;
+          }
+        } else {
+          stats[opp(side)].tackles++;
+          side = opp(side); prog = clamp(1 - prog, 0.08, 0.9); carrier = defender;
+          push({ t, type: 'tackle', side, player: playerRef(defender), x: absX(side, half, prog), y });
+        }
+        t += dt;
+      }
+      push({ t: end, type: half === 1 ? 'halftime' : 'fulltime', side: null, x: 0.5, y: 0.5 });
+    }
+    const tot = stats.home.poss + stats.away.poss || 1;
+    stats.home.possPct = Math.round((stats.home.poss / tot) * 100); stats.away.possPct = 100 - stats.home.possPct;
+    return { events, homeGoals: score.home, awayGoals: score.away, stats };
+  }
+  /** Find last event at or before game time t (binary search) */
+  function eventIndexAt(events, t) {
+    let lo = 0, hi = events.length - 1, ans = -1;
+    while (lo <= hi) { const m = (lo + hi) >> 1; if (events[m].t <= t) { ans = m; lo = m + 1; } else hi = m - 1; }
+    return ans;
+  }
+  function scoreAt(events, t) { const i = eventIndexAt(events, t); return i < 0 ? { home: 0, away: 0 } : events[i].score; }
+
+  /* ===================== Standings (single source of truth) ===================== */
+  function emptyRow(id) { return { teamId: id, played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, gd: 0, points: 0, form: [] }; }
+  /** Only matches with status 'confirmed' count. Tie-break: points, GD, GF, head-to-head points, H2H GD, H2H GF, name. */
+  function computeStandings(teams, matches) {
+    const rows = {}; teams.forEach((t) => { rows[t.id] = emptyRow(t.id); });
+    const done = matches.filter((m) => m.status === 'confirmed' && m.result).sort((a, b) => a.kickoff - b.kickoff);
+    for (const m of done) {
+      const h = rows[m.homeId], a = rows[m.awayId]; if (!h || !a) continue;
+      const hg = m.result.home, ag = m.result.away;
+      h.played++; a.played++; h.gf += hg; h.ga += ag; a.gf += ag; a.ga += hg;
+      if (hg > ag) { h.won++; a.lost++; h.points += 3; h.form.push('W'); a.form.push('L'); }
+      else if (hg < ag) { a.won++; h.lost++; a.points += 3; h.form.push('L'); a.form.push('W'); }
+      else { h.drawn++; a.drawn++; h.points++; a.points++; h.form.push('D'); a.form.push('D'); }
+    }
+    const list = Object.values(rows); list.forEach((r) => { r.gd = r.gf - r.ga; r.form = r.form.slice(-5); });
+    const name = (id) => (teams.find((t) => t.id === id) || { name: id }).name;
+    const h2h = (group) => {
+      const ids = new Set(group.map((r) => r.teamId)); const mini = {}; group.forEach((r) => { mini[r.teamId] = { p: 0, gd: 0, gf: 0 }; });
+      for (const m of done) if (ids.has(m.homeId) && ids.has(m.awayId)) {
+        const hg = m.result.home, ag = m.result.away;
+        mini[m.homeId].gf += hg; mini[m.awayId].gf += ag; mini[m.homeId].gd += hg - ag; mini[m.awayId].gd += ag - hg;
+        if (hg > ag) mini[m.homeId].p += 3; else if (hg < ag) mini[m.awayId].p += 3; else { mini[m.homeId].p++; mini[m.awayId].p++; }
+      }
+      return mini;
+    };
+    list.sort((x, y) => y.points - x.points || y.gd - x.gd || y.gf - x.gf);
+    // resolve fully tied groups by head-to-head
+    const out = []; let i = 0;
+    while (i < list.length) {
+      let j = i + 1; while (j < list.length && list[j].points === list[i].points && list[j].gd === list[i].gd && list[j].gf === list[i].gf) j++;
+      const grp = list.slice(i, j);
+      if (grp.length > 1) { const mini = h2h(grp); grp.sort((x, y) => mini[y.teamId].p - mini[x.teamId].p || mini[y.teamId].gd - mini[x.teamId].gd || mini[y.teamId].gf - mini[x.teamId].gf || name(x.teamId).localeCompare(name(y.teamId))); }
+      out.push(...grp); i = j;
+    }
+    out.forEach((r, k) => { r.rank = k + 1; });
+    return out;
+  }
+
+  /* ===================== Probability model (odds & title chances) ===================== */
+  function poissonPmf(k, l) { let p = Math.exp(-l); for (let i = 1; i <= k; i++) p *= l / i; return p; }
+  function expectedGoals(home, away) {
+    const sh = teamStrength(home), sa = teamStrength(away);
+    const BASE = 1.85; // calibrated against simulateMatch (see tests)
+    const lh = BASE * Math.exp(((sh.attack + sh.midfield) / 2 - (sa.defense * 0.7 + sa.keeper * 0.3) + 2) / 22);
+    const la = BASE * Math.exp(((sa.attack + sa.midfield) / 2 - (sh.defense * 0.7 + sh.keeper * 0.3) - 2) / 22);
+    return { lh, la };
+  }
+  function outcomeProbs(home, away) {
+    const { lh, la } = expectedGoals(home, away); let pH = 0, pD = 0, pA = 0; const grid = [];
+    for (let i = 0; i <= 10; i++) { grid[i] = []; for (let j = 0; j <= 10; j++) { const p = poissonPmf(i, lh) * poissonPmf(j, la); grid[i][j] = p; if (i > j) pH += p; else if (i === j) pD += p; else pA += p; } }
+    const s = pH + pD + pA; return { home: pH / s, draw: pD / s, away: pA / s, grid, lh, la };
+  }
+  const MARGIN = 1.07;
+  function toOdds(p, margin) { return Math.max(1.05, Math.round((1 / (p * (margin || MARGIN))) * 100) / 100); }
+  function matchOdds(home, away) {
+    const pr = outcomeProbs(home, away);
+    return { home: toOdds(pr.home), draw: toOdds(pr.draw), away: toOdds(pr.away), probs: { home: pr.home, draw: pr.draw, away: pr.away }, xg: { home: pr.lh, away: pr.la } };
+  }
+  function scoreOdds(home, away, hg, ag) {
+    const pr = outcomeProbs(home, away); const p = (pr.grid[hg] && pr.grid[hg][ag]) || 0.0005;
+    return Math.min(150, toOdds(Math.max(p, 0.0005), 1.18));
+  }
+  /** Monte-Carlo season projection for remaining (non-confirmed, non-cancelled) matches */
+  function titleOdds(teams, matches, n, seed) {
+    const rng = makeRng(seed || 'title'); const N = n || 1500;
+    const remain = matches.filter((m) => m.status !== 'confirmed' && m.status !== 'cancelled');
+    const tmap = Object.fromEntries(teams.map((t) => [t.id, t]));
+    const lam = remain.map((m) => (tmap[m.homeId] && tmap[m.awayId] ? expectedGoals(tmap[m.homeId], tmap[m.awayId]) : { lh: 2, la: 2 }));
+    const pois = (l) => { const L = Math.exp(-l); let k = 0, p = 1; do { k++; p *= rng.next(); } while (p > L); return k - 1; };
+    const wins = Object.fromEntries(teams.map((t) => [t.id, 0]));
+    if (!remain.length) { const st = computeStandings(teams, matches); wins[st[0].teamId] = N; }
+    else for (let s = 0; s < N; s++) {
+      const sim = matches.map((m) => m);
+      const extra = remain.map((m, i) => ({ ...m, status: 'confirmed', result: { home: pois(lam[i].lh), away: pois(lam[i].la) } }));
+      const st = computeStandings(teams, sim.filter((m) => m.status === 'confirmed').concat(extra));
+      wins[st[0].teamId]++;
+    }
+    const out = {}; for (const k in wins) out[k] = wins[k] / N; return out;
+  }
+
+  /* ===================== IDs ===================== */
+  let idCounter = 0;
+  function uid(prefix) {
+    idCounter = (idCounter + 1) % 1679616;
+    const r = (typeof crypto !== 'undefined' && crypto.getRandomValues) ? Array.from(crypto.getRandomValues(new Uint8Array(6))).map((b) => b.toString(16).padStart(2, '0')).join('') : Math.random().toString(16).slice(2, 14);
+    return prefix + '-' + Date.now().toString(36).toUpperCase() + '-' + idCounter.toString(36).toUpperCase().padStart(4, '0') + '-' + r.toUpperCase();
+  }
+
+  /* ===================== League service (backend layer) =====================
+   * All mutations go through this class. UI never edits state directly.
+   * Persistence is pluggable (storage.load/save). In production, run the same
+   * class on Node/Express with a DB transaction around each public method.
+   */
+  class ApiError extends Error { constructor(code, msg) { super(msg); this.code = code; } }
+  const DEFAULT_SETTINGS = { startingCredits: 1000, stakeOptions: [50, 100, 200, 500], minStake: 10, maxStake: 1000, autoConfirm: true, matchesPerDay: 2, slotTimes: ['21:00', '21:00'], defaultSpeed: 1, champDeadlineDay: 34 };
+
+  class LeagueService {
+    constructor(opts) {
+      opts = opts || {};
+      this.now = opts.now || (() => Date.now());
+      this.storage = opts.storage || null;
+      this.state = (this.storage && this.storage.load()) || null;
+      if (!this.state || this.state.v !== 3) this.state = this._fresh(opts);
+      this._simCache = new Map();
+    }
+    _fresh(opts) {
+      const today = epochToBkkDate(this.now());
+      const st = {
+        v: 3, settings: { ...DEFAULT_SETTINGS, ...(opts.settings || {}) }, teams: createTeams('w69-teams'),
+        season: null, matches: [], archive: [],
+        users: {}, ledger: [], predictions: [], champPicks: [], settled: {}, requests: {}, audit: [],
+        admins: { admin: { passHash: hashStr('w69:admin:winner69admin'), mustChange: true } },
+      };
+      this.state = st;
+      this.createSeason({ startDate: opts.startDate || addDays(today, -(opts.daysBack == null ? 12 : opts.daysBack)), seed: opts.seed || 'S1' }, 'system');
+      return this.state;
+    }
+    _save() { if (this.storage) this.storage.save(this.state); }
+    _audit(actor, action, detail) { this.state.audit.push({ id: uid('AUD'), at: this.now(), actor, action, detail }); }
+    _requireAdmin(token) { if (!token || token.role !== 'admin' || !this.state.admins[token.admin]) throw new ApiError('FORBIDDEN', 'ต้องเข้าสู่ระบบผู้ดูแล'); }
+    _requireUser(token) { if (!token || !token.userId || !this.state.users[token.userId]) throw new ApiError('UNAUTH', 'กรุณาเข้าสู่ระบบ'); return this.state.users[token.userId]; }
+    team(id) { return this.state.teams.find((t) => t.id === id); }
+    match(id) { const m = this.state.matches.find((x) => x.id === id); if (!m) throw new ApiError('NOT_FOUND', 'ไม่พบแมตช์'); return m; }
+
+    /* ----- auth ----- */
+    loginUser(username) {
+      const u = String(username || '').trim();
+      if (!/^[\wก-๙.\-]{3,20}$/.test(u)) throw new ApiError('BAD_INPUT', 'ชื่อผู้ใช้ 3–20 ตัวอักษร ไม่มีเว้นวรรค');
+      const id = 'U-' + u.toLowerCase();
+      if (!this.state.users[id]) {
+        this.state.users[id] = { id, name: u, balance: 0, createdAt: this.now() };
+        this._tx(id, 'INIT', this.state.settings.startingCredits, null, 'เครดิตทดลองเริ่มต้น');
+        this._save();
+      }
+      return { role: 'user', userId: id };
+    }
+    loginAdmin(user, pass) {
+      const a = this.state.admins[user];
+      if (!a || a.passHash !== hashStr('w69:' + user + ':' + pass)) throw new ApiError('BAD_LOGIN', 'ชื่อผู้ใช้หรือรหัสผ่านผู้ดูแลไม่ถูกต้อง');
+      this._audit(user, 'ADMIN_LOGIN', {}); this._save();
+      return { role: 'admin', admin: user, mustChange: a.mustChange };
+    }
+    changeAdminPassword(token, newPass) {
+      this._requireAdmin(token);
+      if (String(newPass).length < 8) throw new ApiError('BAD_INPUT', 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร');
+      this.state.admins[token.admin] = { passHash: hashStr('w69:' + token.admin + ':' + newPass), mustChange: false };
+      this._audit(token.admin, 'ADMIN_PASSWORD_CHANGED', {}); this._save();
+    }
+
+    /* ----- demo-credit-engine ----- */
+    _tx(userId, type, amount, ref, note) {
+      const u = this.state.users[userId];
+      const after = u.balance + amount;
+      if (after < 0) throw new ApiError('INSUFFICIENT', 'เครดิตไม่พอ');
+      u.balance = after;
+      const tx = { id: uid('TX'), userId, type, amount, balanceAfter: after, ref: ref || null, note: note || '', at: this.now() };
+      this.state.ledger.push(tx); return tx;
+    }
+    balance(userId) { return this.state.users[userId] ? this.state.users[userId].balance : 0; }
+    resetCredits(token, userId) {
+      this._requireAdmin(token);
+      const ids = userId ? [userId] : Object.keys(this.state.users);
+      for (const id of ids) {
+        const u = this.state.users[id]; if (!u) continue;
+        const old = u.balance;
+        // void any pending predictions first so stakes are not lost
+        this.state.predictions.filter((p) => p.userId === id && p.status === 'pending').forEach((p) => { p.status = 'void'; p.settledAt = this.now(); this.state.settled['pred:' + p.id] = true; });
+        this.state.champPicks.filter((p) => p.userId === id && p.status === 'pending').forEach((p) => { p.status = 'void'; this.state.settled['champ:' + p.id] = true; });
+        this._tx(id, 'RESET', this.state.settings.startingCredits - u.balance, null, 'รีเซ็ตบัญชีทดลองโดยผู้ดูแล');
+        this._audit(token.admin, 'RESET_CREDITS', { userId: id, old, new: u.balance });
+      }
+      this._save();
+    }
+
+    /* ----- league-scheduler ----- */
+    createSeason(cfg, actor) {
+      const st = this.state;
+      if (st.season && !st.season.closed && st.matches.some((m) => m.status !== 'scheduled')) {
+        if (!cfg.force) throw new ApiError('SEASON_OPEN', 'ฤดูกาลปัจจุบันยังไม่ปิด ต้องยืนยันการสร้างใหม่');
+      }
+      const num = (st.archive.length + (st.season ? 1 : 0)) + 1;
+      const seasonId = 'S' + num;
+      if (st.season && st.season.id === seasonId) throw new ApiError('DUPLICATE', 'มีโปรแกรมของฤดูกาลนี้แล้ว');
+      const teamIds = st.teams.filter((t) => t.active).map((t) => t.id);
+      if (teamIds.length < 4 || teamIds.length % 2) throw new ApiError('BAD_TEAMS', 'ต้องมีทีมที่เปิดใช้งานเป็นจำนวนคู่ อย่างน้อย 4 ทีม');
+      if (st.season) {
+        // refund open predictions of the old season
+        this._voidPending((p) => true, 'สร้างฤดูกาลใหม่');
+        st.archive.push({ season: st.season, standings: computeStandings(st.teams, st.matches), champion: st.season.champion || null });
+      }
+      const matches = generateSchedule(teamIds, { seasonId, startDate: cfg.startDate, matchesPerDay: st.settings.matchesPerDay, slotTimes: st.settings.slotTimes });
+      const v = validateSchedule(matches, teamIds); if (!v.ok) throw new ApiError('SCHEDULE', v.errors.join('; '));
+      const days = Math.max(...matches.map((m) => m.day));
+      const dl = Math.min(st.settings.champDeadlineDay, days);
+      const dlMatch = matches.find((m) => m.day === dl);
+      st.season = { id: seasonId, name: 'ฤดูกาล ' + num, seed: String(cfg.seed || seasonId), startDate: cfg.startDate, teamIds, createdAt: this.now(), closed: false, champion: null, champDeadline: dlMatch.kickoff, totalDays: days };
+      st.matches = matches; st.predictions = st.predictions.filter((p) => p.status !== 'pending');
+      this._simCache = new Map();
+      this._audit(actor || 'system', 'SEASON_CREATED', { seasonId, startDate: cfg.startDate, matches: matches.length });
+      this._save();
+      return st.season;
+    }
+
+    /* ----- match runtime ----- */
+    /** game seconds elapsed for a match at time now (server clock) */
+    gameTime(m, now) {
+      now = now == null ? this.now() : now;
+      if (m.result && (m.status === 'finished' || m.status === 'confirmed')) return FT;
+      const r = m.run; if (!r) return now >= m.kickoff && m.status === 'scheduled' ? (now - m.kickoff) / 1000 * this.state.settings.defaultSpeed : -1;
+      const g = r.acc + (r.paused ? 0 : (now - r.seg) / 1000 * r.speed);
+      return Math.min(FT, g);
+    }
+    simInputFor(m) {
+      if (!m.simInput) m.simInput = { seed: this.state.season.seed + ':' + m.id + ':' + (m.replay || 0), home: snapshotTeam(this.team(m.homeId)), away: snapshotTeam(this.team(m.awayId)) };
+      return m.simInput;
+    }
+    simOf(m) {
+      const inp = this.simInputFor(m); const key = m.id + ':' + inp.seed;
+      if (!this._simCache.has(key)) this._simCache.set(key, simulateMatch(inp));
+      return this._simCache.get(key);
+    }
+    /** advance all match states according to server time. Idempotent. */
+    tick() {
+      const now = this.now(); let changed = false;
+      for (const m of this.state.matches) {
+        if (m.status === 'cancelled' || m.status === 'postponed' || m.status === 'confirmed') continue;
+        if (m.status === 'scheduled' && now >= m.kickoff && !m.run) {
+          m.run = { seg: m.kickoff, acc: 0, speed: this.state.settings.defaultSpeed, paused: false };
+          this.simInputFor(m); m.status = 'live'; changed = true;
+        }
+        if (m.status === 'live' && this.gameTime(m, now) >= FT) { this._finish(m, 'system'); changed = true; }
+      }
+      if (changed) this._save();
+      return changed;
+    }
+    phaseOf(m) {
+      if (['cancelled', 'postponed', 'scheduled'].includes(m.status)) return m.status;
+      if (m.status === 'finished' || m.status === 'confirmed') return m.status;
+      const g = this.gameTime(m); const c = clockOf(g);
+      if (m.run && m.run.paused) return c.phase === 'HT' ? 'halftime' : 'paused';
+      return c.phase === 'HT' ? 'halftime' : 'live';
+    }
+    _finish(m, actor) {
+      const sim = this.simOf(m);
+      m.result = { home: sim.homeGoals, away: sim.awayGoals, source: 'engine' };
+      m.status = 'finished'; m.finishedAt = this.now();
+      if (this.state.settings.autoConfirm) this._confirm(m, actor);
+    }
+    _confirm(m, actor) {
+      if (m.status !== 'finished') throw new ApiError('BAD_STATE', 'ยืนยันได้เฉพาะแมตช์ที่จบแล้ว');
+      m.status = 'confirmed'; m.confirmedAt = this.now();
+      this._audit(actor, 'RESULT_CONFIRMED', { matchId: m.id, result: m.result.home + '-' + m.result.away });
+      this.settleMatch(m.id);
+    }
+    /* admin controls */
+    adminStartNow(token, id, speed) {
+      this._requireAdmin(token); const m = this.match(id);
+      if (!['scheduled', 'postponed'].includes(m.status)) throw new ApiError('BAD_STATE', 'เริ่มได้เฉพาะแมตช์ที่ยังไม่แข่ง');
+      const old = { kickoff: m.kickoff, status: m.status };
+      m.kickoff = this.now(); m.date = epochToBkkDate(m.kickoff); m.time = epochToBkkTime(m.kickoff);
+      m.status = 'live'; m.run = { seg: this.now(), acc: 0, speed: speed || 1, paused: false }; this.simInputFor(m);
+      this._audit(token.admin, 'MATCH_STARTED', { matchId: id, old, speed: speed || 1 }); this._save();
+    }
+    adminSetSpeed(token, id, speed) {
+      this._requireAdmin(token); const m = this.match(id); if (m.status !== 'live') throw new ApiError('BAD_STATE', 'แมตช์ไม่ได้กำลังแข่ง');
+      if (![1, 5, 15, 60].includes(speed)) throw new ApiError('BAD_INPUT', 'ความเร็วไม่ถูกต้อง');
+      const now = this.now(); m.run.acc = this.gameTime(m, now); m.run.seg = now; const old = m.run.speed; m.run.speed = speed;
+      this._audit(token.admin, 'MATCH_SPEED', { matchId: id, old, new: speed }); this._save();
+    }
+    adminPause(token, id, paused) {
+      this._requireAdmin(token); const m = this.match(id); if (m.status !== 'live') throw new ApiError('BAD_STATE', 'แมตช์ไม่ได้กำลังแข่ง');
+      const now = this.now(); m.run.acc = this.gameTime(m, now); m.run.seg = now; m.run.paused = !!paused;
+      this._audit(token.admin, paused ? 'MATCH_PAUSED' : 'MATCH_RESUMED', { matchId: id, at: fmtClock(clockOf(m.run.acc).sec) }); this._save();
+    }
+    adminFinishNow(token, id) {
+      this._requireAdmin(token); const m = this.match(id);
+      if (!['scheduled', 'live', 'postponed'].includes(m.status)) throw new ApiError('BAD_STATE', 'แมตช์นี้จบหรือถูกยกเลิกแล้ว');
+      if (m.status !== 'live') { m.kickoff = Math.min(m.kickoff, this.now()); m.date = epochToBkkDate(m.kickoff); m.time = epochToBkkTime(m.kickoff); }
+      m.run = m.run || { seg: this.now(), acc: 0, speed: 1, paused: false }; m.status = 'live';
+      this._audit(token.admin, 'MATCH_SIMULATED_INSTANT', { matchId: id });
+      this._finish(m, token.admin); this._save();
+    }
+    adminConfirm(token, id) { this._requireAdmin(token); this._confirm(this.match(id), token.admin); this._save(); }
+    adminPostpone(token, id, date, time, reason) {
+      this._requireAdmin(token); const m = this.match(id);
+      if (!['scheduled', 'postponed'].includes(m.status)) throw new ApiError('BAD_STATE', 'เลื่อนได้เฉพาะแมตช์ที่ยังไม่เริ่ม');
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^\d{2}:\d{2}$/.test(time)) throw new ApiError('BAD_INPUT', 'รูปแบบวันเวลาไม่ถูกต้อง');
+      const k = bkkToEpoch(date, time); if (k <= this.now()) throw new ApiError('BAD_INPUT', 'วันเวลาใหม่ต้องอยู่ในอนาคต');
+      const clash = this.state.matches.find((x) => x.id !== id && x.date === date && x.status !== 'cancelled' && [x.homeId, x.awayId].some((t) => t === m.homeId || t === m.awayId));
+      if (clash) throw new ApiError('CLASH', 'ทีมมีนัดอื่นในวันนั้นแล้ว (' + clash.id + ')');
+      const old = { date: m.date, time: m.time, status: m.status };
+      m.date = date; m.time = time; m.kickoff = k; m.status = 'scheduled'; m.postponedFrom = old.date + ' ' + old.time; m.note = reason || '';
+      this._audit(token.admin, 'MATCH_RESCHEDULED', { matchId: id, old, new: { date, time }, reason: reason || '' }); this._save();
+    }
+    adminMarkPostponed(token, id, reason) {
+      this._requireAdmin(token); const m = this.match(id);
+      if (m.status !== 'scheduled') throw new ApiError('BAD_STATE', 'เลื่อนได้เฉพาะแมตช์ที่ยังไม่เริ่ม');
+      m.status = 'postponed'; m.note = reason || '';
+      this._audit(token.admin, 'MATCH_POSTPONED', { matchId: id, reason: reason || '' }); this._save();
+    }
+    adminCancel(token, id, reason) {
+      this._requireAdmin(token); const m = this.match(id);
+      if (['confirmed', 'finished', 'cancelled'].includes(m.status)) throw new ApiError('BAD_STATE', 'ยกเลิกไม่ได้ในสถานะนี้');
+      const old = m.status; m.status = 'cancelled'; m.note = reason || ''; m.run = null;
+      this._voidPending((p) => p.matchId === id, 'แมตช์ถูกยกเลิก');
+      this._audit(token.admin, 'MATCH_CANCELLED', { matchId: id, old, reason: reason || '' }); this._save();
+    }
+    /** correct a confirmed result — reason required; predictions are NOT re-settled (settlement is final) */
+    adminEditResult(token, id, hg, ag, reason) {
+      this._requireAdmin(token); const m = this.match(id);
+      if (!['finished', 'confirmed'].includes(m.status)) throw new ApiError('BAD_STATE', 'แก้ไขได้เฉพาะแมตช์ที่จบแล้ว');
+      if (!reason || reason.trim().length < 5) throw new ApiError('BAD_INPUT', 'ต้องระบุเหตุผลอย่างน้อย 5 ตัวอักษร');
+      hg = Number(hg); ag = Number(ag);
+      if (!Number.isInteger(hg) || !Number.isInteger(ag) || hg < 0 || ag < 0 || hg > 30 || ag > 30) throw new ApiError('BAD_INPUT', 'สกอร์ไม่ถูกต้อง');
+      const old = { ...m.result };
+      m.result = { home: hg, away: ag, source: 'admin', engine: old.engine || { home: old.home, away: old.away } };
+      m.corrections = (m.corrections || []).concat([{ at: this.now(), by: token.admin, old: old.home + '-' + old.away, new: hg + '-' + ag, reason }]);
+      this._audit(token.admin, 'RESULT_EDITED', { matchId: id, old: old.home + '-' + old.away, new: hg + '-' + ag, reason });
+      this._save();
+    }
+    adminUpdateTeam(token, id, patch) {
+      this._requireAdmin(token); const t = this.team(id); if (!t) throw new ApiError('NOT_FOUND', 'ไม่พบทีม');
+      const allowed = ['name', 'primary', 'secondary', 'kit2', 'active']; const old = {}; const nw = {};
+      for (const k of allowed) if (k in patch && patch[k] !== t[k]) { old[k] = t[k]; nw[k] = patch[k]; }
+      if ('name' in nw && !String(nw.name).trim()) throw new ApiError('BAD_INPUT', 'ต้องมีชื่อทีม');
+      Object.assign(t, nw);
+      if (nw.active === false && this.state.season && this.state.season.teamIds.includes(id)) {
+        this.state.matches.filter((m) => (m.homeId === id || m.awayId === id) && ['scheduled', 'postponed'].includes(m.status)).forEach((m) => { m.status = 'cancelled'; m.note = 'ทีมถูกปิดใช้งาน'; this._voidPending((p) => p.matchId === m.id, 'ทีมถูกปิดใช้งาน'); });
+      }
+      this._audit(token.admin, 'TEAM_UPDATED', { teamId: id, old, new: nw }); this._save();
+    }
+    adminAddTeam(token, name, primary) {
+      this._requireAdmin(token); name = String(name || '').trim(); if (name.length < 3) throw new ApiError('BAD_INPUT', 'ชื่อทีมสั้นเกินไป');
+      let code = name.replace(/[^A-Za-z]/g, '').slice(0, 3).toUpperCase() || 'NEW'; while (this.team(code)) code = code.slice(0, 2) + String.fromCharCode(65 + Math.floor(Math.random() * 26));
+      const def = { id: code, name, primary: primary || '#5BC0EB', secondary: '#0B1320', kit2: '#FFFFFF', shape: 'shield', tier: 74, active: true };
+      def.players = generateSquad(def, 'added:' + this.now());
+      this.state.teams.push(def); this._audit(token.admin, 'TEAM_ADDED', { teamId: code, name }); this._save(); return code;
+    }
+    adminUpdatePlayer(token, teamId, playerId, patch) {
+      this._requireAdmin(token); const t = this.team(teamId); const p = t && t.players.find((x) => x.id === playerId); if (!p) throw new ApiError('NOT_FOUND', 'ไม่พบนักเตะ');
+      const old = { name: p.name, num: p.num, pos: p.pos, starter: p.starter, attrs: { ...p.attrs } };
+      if (patch.num != null) { const n = Number(patch.num); if (!Number.isInteger(n) || n < 1 || n > 99) throw new ApiError('BAD_INPUT', 'หมายเลขเสื้อ 1–99'); if (t.players.some((x) => x.id !== p.id && x.num === n)) throw new ApiError('BAD_INPUT', 'หมายเลขเสื้อซ้ำในทีม'); p.num = n; }
+      if (patch.name != null) { if (!String(patch.name).trim()) throw new ApiError('BAD_INPUT', 'ต้องมีชื่อ'); p.name = String(patch.name).trim(); }
+      if (patch.pos && ['GK', 'DEF', 'MID', 'FWD'].includes(patch.pos)) p.pos = patch.pos;
+      if (patch.attrs) for (const k of ['pac', 'pas', 'sho', 'def', 'gk']) if (patch.attrs[k] != null) p.attrs[k] = clamp(Math.round(Number(patch.attrs[k]) || 0), 1, 99);
+      if (patch.starter != null) p.starter = !!patch.starter;
+      const st = t.players.filter((x) => x.starter);
+      if (st.length !== 7 || st.filter((x) => x.pos === 'GK').length !== 1) { Object.assign(p, old, { attrs: old.attrs }); throw new ApiError('BAD_INPUT', 'ตัวจริงต้องมี 7 คน และผู้รักษาประตู 1 คน'); }
+      p.ovr = playerOverall(p);
+      this._audit(token.admin, 'PLAYER_UPDATED', { teamId, playerId, old, new: patch }); this._save();
+    }
+    adminCloseSeason(token) {
+      this._requireAdmin(token); const st = this.state; if (!st.season || st.season.closed) throw new ApiError('BAD_STATE', 'ไม่มีฤดูกาลที่เปิดอยู่');
+      const open = st.matches.filter((m) => !['confirmed', 'cancelled'].includes(m.status));
+      if (open.length) throw new ApiError('BAD_STATE', 'ยังมี ' + open.length + ' แมตช์ที่ยังไม่ยืนยันผล');
+      const table = computeStandings(st.teams.filter((t) => st.season.teamIds.includes(t.id)), st.matches);
+      st.season.closed = true; st.season.champion = table[0].teamId; st.season.closedAt = this.now();
+      this._audit(token.admin, 'SEASON_CLOSED', { champion: table[0].teamId, points: table[0].points });
+      this.settleChampionship(); this._save(); return table[0].teamId;
+    }
+    adminUpdateSettings(token, patch) {
+      this._requireAdmin(token); const s = this.state.settings; const old = {};
+      if (patch.startingCredits != null) { const v = Number(patch.startingCredits); if (!(v >= 100 && v <= 1e6)) throw new ApiError('BAD_INPUT', 'เครดิตเริ่มต้น 100–1,000,000'); old.startingCredits = s.startingCredits; s.startingCredits = v; }
+      if (patch.stakeOptions) { const arr = patch.stakeOptions.map(Number).filter((x) => x > 0); if (!arr.length) throw new ApiError('BAD_INPUT', 'ต้องมีจำนวนเครดิตต่อคำทายอย่างน้อย 1 ค่า'); old.stakeOptions = s.stakeOptions; s.stakeOptions = arr; s.maxStake = Math.max(...arr); s.minStake = Math.min(...arr); }
+      if (patch.autoConfirm != null) { old.autoConfirm = s.autoConfirm; s.autoConfirm = !!patch.autoConfirm; }
+      if (patch.slotTimes) { if (!patch.slotTimes.every((x) => /^\d{2}:\d{2}$/.test(x))) throw new ApiError('BAD_INPUT', 'เวลาไม่ถูกต้อง'); old.slotTimes = s.slotTimes; s.slotTimes = patch.slotTimes; }
+      if (patch.defaultSpeed != null) { old.defaultSpeed = s.defaultSpeed; s.defaultSpeed = [1, 5, 15].includes(Number(patch.defaultSpeed)) ? Number(patch.defaultSpeed) : 1; }
+      this._audit(token.admin, 'SETTINGS_UPDATED', { old, new: patch }); this._save();
+    }
+
+    /* ----- prediction-engine ----- */
+    oddsFor(m) {
+      if (m.lockedOdds) return m.lockedOdds;
+      return matchOdds(this.team(m.homeId), this.team(m.awayId));
+    }
+    /** place prediction. requestKey makes the call idempotent (double-tap safe). */
+    placePrediction(token, req) {
+      const u = this._requireUser(token);
+      if (req.requestKey && this.state.requests[req.requestKey]) return this.state.predictions.find((p) => p.id === this.state.requests[req.requestKey]);
+      const m = this.match(req.matchId); this.tick();
+      if (m.status !== 'scheduled' || this.now() >= m.kickoff) throw new ApiError('CLOSED', 'ปิดรับคำทายแล้ว');
+      const stake = Number(req.stake);
+      if (!this.state.settings.stakeOptions.includes(stake)) throw new ApiError('BAD_INPUT', 'จำนวนเครดิตไม่อยู่ในตัวเลือกที่กำหนด');
+      let odds, pick;
+      const home = this.team(m.homeId), away = this.team(m.awayId);
+      if (req.market === '1X2') {
+        if (!['home', 'draw', 'away'].includes(req.pick)) throw new ApiError('BAD_INPUT', 'ตัวเลือกไม่ถูกต้อง');
+        odds = matchOdds(home, away)[req.pick]; pick = req.pick;
+      } else if (req.market === 'SCORE') {
+        const hg = Number(req.home), ag = Number(req.away);
+        if (!Number.isInteger(hg) || !Number.isInteger(ag) || hg < 0 || ag < 0 || hg > 15 || ag > 15) throw new ApiError('BAD_INPUT', 'สกอร์ต้องเป็น 0–15');
+        odds = scoreOdds(home, away, hg, ag); pick = hg + '-' + ag;
+      } else throw new ApiError('BAD_INPUT', 'ประเภทคำทายไม่ถูกต้อง');
+      if (this.state.predictions.some((p) => p.userId === u.id && p.matchId === m.id && p.market === req.market && p.status !== 'void')) throw new ApiError('DUPLICATE', 'คุณทายประเภทนี้ของแมตช์นี้แล้ว');
+      if (u.balance < stake) throw new ApiError('INSUFFICIENT', 'เครดิตไม่พอ');
+      const id = uid('PRD');
+      const tx = this._tx(u.id, 'STAKE', -stake, id, 'ทายผล ' + home.name + ' vs ' + away.name);
+      const pred = { id, userId: u.id, matchId: m.id, market: req.market, pick, stake, odds, potential: Math.round(stake * odds * 100) / 100, status: 'pending', placedAt: this.now(), txId: tx.id };
+      this.state.predictions.push(pred);
+      if (req.requestKey) this.state.requests[req.requestKey] = id;
+      this._save(); return pred;
+    }
+    _voidPending(filter, why) {
+      for (const p of this.state.predictions) {
+        if (p.status !== 'pending' || !filter(p)) continue;
+        const key = 'pred:' + p.id; if (this.state.settled[key]) continue;
+        this.state.settled[key] = true; p.status = 'void'; p.settledAt = this.now();
+        if (this.state.users[p.userId]) this._tx(p.userId, 'REFUND', p.stake, p.id, 'คืนเครดิต: ' + why);
+      }
+    }
+    /** settles every pending prediction of a confirmed match exactly once */
+    settleMatch(matchId) {
+      const m = this.match(matchId); if (m.status !== 'confirmed') return 0;
+      const r = m.result; const outcome = r.home > r.away ? 'home' : r.home < r.away ? 'away' : 'draw';
+      let n = 0;
+      for (const p of this.state.predictions) {
+        if (p.matchId !== matchId || p.status !== 'pending') continue;
+        const key = 'pred:' + p.id; if (this.state.settled[key]) continue; // unique settlement key
+        this.state.settled[key] = true;
+        const won = p.market === '1X2' ? p.pick === outcome : p.pick === r.home + '-' + r.away;
+        p.status = won ? 'won' : 'lost'; p.settledAt = this.now(); p.resultSeen = r.home + '-' + r.away;
+        if (won) { p.payout = p.potential; this._tx(p.userId, 'PAYOUT', p.potential, p.id, 'ทายถูก ×' + p.odds.toFixed(2)); } else p.payout = 0;
+        n++;
+      }
+      this._save(); return n;
+    }
+    champOpen() { const s = this.state.season; return s && !s.closed && this.now() < s.champDeadline; }
+    placeChampionPick(token, req) {
+      const u = this._requireUser(token);
+      if (req.requestKey && this.state.requests[req.requestKey]) return this.state.champPicks.find((p) => p.id === this.state.requests[req.requestKey]);
+      const s = this.state.season; if (!this.champOpen()) throw new ApiError('CLOSED', 'ปิดรับคำทายแชมป์แล้ว');
+      if (!s.teamIds.includes(req.teamId) || !this.team(req.teamId).active) throw new ApiError('BAD_INPUT', 'ทีมไม่ถูกต้อง');
+      if (this.state.champPicks.some((p) => p.userId === u.id && p.seasonId === s.id && p.status !== 'void')) throw new ApiError('DUPLICATE', 'คุณเลือกทีมแชมป์ของฤดูกาลนี้แล้ว (แก้ไขไม่ได้)');
+      const stake = Number(req.stake); if (!this.state.settings.stakeOptions.includes(stake)) throw new ApiError('BAD_INPUT', 'จำนวนเครดิตไม่อยู่ในตัวเลือก');
+      if (u.balance < stake) throw new ApiError('INSUFFICIENT', 'เครดิตไม่พอ');
+      const probs = this.titleProbabilities(); const odds = Math.min(200, toOdds(Math.max(probs[req.teamId] || 0.004, 0.004), 1.12));
+      const id = uid('CHP'); const tx = this._tx(u.id, 'STAKE', -stake, id, 'ทายแชมป์: ' + this.team(req.teamId).name);
+      const pick = { id, userId: u.id, seasonId: s.id, teamId: req.teamId, stake, odds, potential: Math.round(stake * odds * 100) / 100, status: 'pending', placedAt: this.now(), txId: tx.id };
+      this.state.champPicks.push(pick); if (req.requestKey) this.state.requests[req.requestKey] = id; this._save(); return pick;
+    }
+    settleChampionship() {
+      const s = this.state.season; if (!s || !s.closed) return 0; let n = 0;
+      for (const p of this.state.champPicks) {
+        if (p.seasonId !== s.id || p.status !== 'pending') continue;
+        const key = 'champ:' + p.id; if (this.state.settled[key]) continue; this.state.settled[key] = true;
+        const won = p.teamId === s.champion; p.status = won ? 'won' : 'lost'; p.settledAt = this.now();
+        if (won) this._tx(p.userId, 'PAYOUT', p.potential, p.id, 'ทายแชมป์ถูก ×' + p.odds.toFixed(2)); n++;
+      }
+      return n;
+    }
+
+    /* ----- read API ----- */
+    standings() { const s = this.state.season; return computeStandings(this.state.teams.filter((t) => s.teamIds.includes(t.id)), this.state.matches); }
+    titleProbabilities() {
+      const s = this.state.season; const key = this.state.matches.filter((m) => m.status === 'confirmed' || m.status === 'cancelled').length + ':' + s.id + ':' + this.state.audit.length;
+      if (this._titleKey !== key) { this._titleKey = key; this._title = titleOdds(this.state.teams.filter((t) => s.teamIds.includes(t.id)), this.state.matches, 1200, s.seed + ':' + key); }
+      return this._title;
+    }
+    teamMatches(teamId) { return this.state.matches.filter((m) => m.homeId === teamId || m.awayId === teamId); }
+    headToHead(a, b) { return this.state.matches.filter((m) => m.status === 'confirmed' && ((m.homeId === a && m.awayId === b) || (m.homeId === b && m.awayId === a))); }
+    exportCsv(token) {
+      this._requireAdmin(token);
+      const rows = [['match_id', 'round', 'date', 'time_bkk', 'home', 'away', 'status', 'home_goals', 'away_goals', 'result_source']];
+      for (const m of this.state.matches) rows.push([m.id, m.round, m.date, m.time, this.team(m.homeId).name, this.team(m.awayId).name, m.status, m.result ? m.result.home : '', m.result ? m.result.away : '', m.result ? m.result.source : '']);
+      this._audit(token.admin, 'EXPORT_CSV', { rows: rows.length - 1 }); this._save();
+      return '\uFEFF' + rows.map((r) => r.map((c) => { const s = String(c); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }).join(',')).join('\n');
+    }
+  }
+
+  const api = {
+    hashStr, makeRng, bkkToEpoch, epochToBkkDate, epochToBkkTime, addDays, TEAM_DEFS, createTeams, generateSquad, starters, teamStrength, playerOverall,
+    roundRobin, generateSchedule, validateSchedule, simulateMatch, snapshotTeam, eventIndexAt, scoreAt, clockOf, fmtClock, FORMATION,
+    H1_END, HT_END, FT, computeStandings, outcomeProbs, matchOdds, scoreOdds, titleOdds, expectedGoals, LeagueService, ApiError, uid, DEFAULT_SETTINGS,
+  };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.W69 = api;
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
+<script>/* ===== WINNER69 FL7 — frontend core (state access only through LeagueService) ===== */
+'use strict';
+const STORE_KEY = 'w69fl7:state:v3', SESSION_KEY = 'w69fl7:session', ADMIN_KEY = 'w69fl7:admin';
+const storage = {
+  load() { try { const s = localStorage.getItem(STORE_KEY); return s ? JSON.parse(s) : null; } catch (e) { return null; } },
+  save(st) { try { localStorage.setItem(STORE_KEY, JSON.stringify(st)); } catch (e) { console.warn('save failed', e); } },
+};
+const ls = {
+  get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } },
+  set(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+};
+/* ---------- WINNER 69 link ----------
+ * Inside WINNER 69 the page gets window.W69_FL7 = { mode: 'member'|'admin', snap } from the site.
+ * The league then runs on the WINNER 69 server (one league for everyone, credits = the member's
+ * wallet): this page only shows the server's snapshot, asks the site for a fresh one every few
+ * seconds, and sends actions to the site, which forwards them to the server (postMessage bridge).
+ * Without W69_FL7 the page is the original stand-alone demo (local league + demo credits). */
+const LINK = (typeof window !== 'undefined' && window.W69_FL7 && window.W69_FL7.snap) ? window.W69_FL7 : null;
+const EMBED = !!LINK;
+const LINK_ADMIN = !!(LINK && LINK.mode === 'admin');
+const remote = { rev: 0, skew: 0, titleProbs: {}, seq: 0, wait: new Map() };
+let svc;
+if (LINK) {
+  svc = new W69.LeagueService({ storage: { load: () => LINK.snap.state, save() {} } });
+  svc.now = () => Date.now() + remote.skew;
+  svc.tick = () => false; // the server moves the matches
+  svc.titleProbabilities = () => remote.titleProbs || {};
+} else {
+  try { svc = new W69.LeagueService({ storage }); } catch (e) { console.error(e); try { localStorage.removeItem(STORE_KEY); } catch (_) {} svc = new W69.LeagueService({ storage }); }
+  svc.tick();
+}
+function applySnapshot(snap) {
+  if (!snap) return false;
+  if (snap.now) remote.skew = snap.now - Date.now();
+  if (snap.same) {
+    const u = app.session && svc.state.users[app.session.userId];
+    if (u && snap.balance != null && u.balance !== snap.balance) { u.balance = snap.balance; return true; }
+    return false;
+  }
+  svc.state = snap.state; remote.rev = snap.rev; remote.titleProbs = snap.titleProbs || {};
+  return true;
+}
+function linkCall(kind, payload) {
+  return new Promise((resolve, reject) => {
+    const id = ++remote.seq;
+    remote.wait.set(id, { resolve, reject });
+    window.parent.postMessage({ fl7: true, id, kind, payload }, '*');
+    setTimeout(() => { if (remote.wait.has(id)) { remote.wait.delete(id); reject(new Error('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ลองใหม่อีกครั้ง')); } }, 20000);
+  });
+}
+if (LINK) {
+  window.addEventListener('message', (e) => {
+    const d = e.data; if (!d || !d.fl7reply || e.source !== window.parent) return;
+    const w = remote.wait.get(d.id); if (!w) return; remote.wait.delete(d.id);
+    if (d.error) w.reject(Object.assign(new Error(d.error), { code: d.code })); else w.resolve(d.result);
+  });
+  applySnapshot(LINK.snap);
+}
+let syncing = false;
+async function syncNow() {
+  if (!LINK || syncing) return; syncing = true;
+  try { if (applySnapshot(await linkCall('state', { rev: remote.rev }))) app.pendingRender = true; }
+  catch (e) { /* next round */ } finally { syncing = false; }
+}
+/** run an action on the server; resolves with its result (and refreshes the league) */
+function linkAct(method, args) {
+  return linkCall('act', { method, args }).then((r) => { syncNow(); return r; }, (e) => { syncNow(); throw e; });
+}
+if (LINK) {
+  setInterval(syncNow, 2500);
+  if (LINK_ADMIN) { // admin buttons: show the result right away here, the server makes it final
+    ['adminStartNow', 'adminSetSpeed', 'adminPause', 'adminFinishNow', 'adminConfirm', 'adminPostpone', 'adminMarkPostponed', 'adminCancel', 'adminEditResult', 'adminUpdateTeam', 'adminAddTeam', 'adminUpdatePlayer', 'adminCloseSeason', 'adminUpdateSettings'].forEach((name) => {
+      const local = svc[name].bind(svc);
+      svc[name] = (tok, ...args) => { const r = local(tok, ...args); linkAct(name, args).catch((e) => toast(e.message || 'บันทึกไม่สำเร็จ', 'err')); return r; };
+    });
+    const localSeason = svc.createSeason.bind(svc);
+    svc.createSeason = (cfg, actor) => { const r = localSeason(cfg, actor); linkAct('createSeason', [{ startDate: cfg.startDate, force: !!cfg.force }]).catch((e) => toast(e.message || 'บันทึกไม่สำเร็จ', 'err')); return r; };
+  }
+}
+
+/* page routing: #/... in the address bar normally; inside WINNER 69 the page lives in a blob: frame
+   where changing the hash can be blocked, so the route is kept in memory there instead */
+const navState = { cur: (LINK && LINK.start) || '#/home', stack: [] };
+function curHash() { return LINK ? navState.cur : location.hash; }
+function goHash(h) {
+  if (!LINK) { location.hash = h; return; }
+  if (h === navState.cur) return;
+  navState.stack.push(navState.cur); if (navState.stack.length > 50) navState.stack.shift();
+  navState.cur = h; closeModal(); render(false); window.scrollTo(0, 0);
+}
+function navBack() {
+  navState.cur = navState.stack.pop() || '#/home'; closeModal(); render(false); window.scrollTo(0, 0);
+}
+if (LINK) document.addEventListener('click', (e) => {
+  const a = e.target.closest && e.target.closest('a[href^="#"]');
+  if (!a) return;
+  e.preventDefault(); goHash(a.getAttribute('href'));
+});
+
+const app = { session: LINK ? null : ls.get(SESSION_KEY), admin: LINK ? null : ls.get(ADMIN_KEY), route: [], pendingRender: false };
+if (LINK) {
+  if (LINK_ADMIN) app.admin = { role: 'admin', admin: LINK.snap.admin || 'winner69' };
+  else if (LINK.snap.userId && svc.state.users[LINK.snap.userId]) app.session = { role: 'user', userId: LINK.snap.userId };
+}
+if (app.session && !svc.state.users[app.session.userId]) app.session = null;
+
+/* ---------- helpers ---------- */
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fmtN = (n, d) => Number(n).toLocaleString('th-TH', { minimumFractionDigits: d || 0, maximumFractionDigits: d == null ? 2 : d });
+const T = (id) => svc.team(id);
+const now = () => svc.now();
+const today = () => W69.epochToBkkDate(now());
+const dfmt = new Intl.DateTimeFormat('th-TH', { timeZone: 'Asia/Bangkok', weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+const dfmtShort = new Intl.DateTimeFormat('th-TH', { timeZone: 'Asia/Bangkok', day: 'numeric', month: 'short' });
+const wkfmt = new Intl.DateTimeFormat('th-TH', { timeZone: 'Asia/Bangkok', weekday: 'short' });
+const thDate = (dateStr) => dfmt.format(new Date(W69.bkkToEpoch(dateStr, '12:00')));
+const thDateShort = (dateStr) => dfmtShort.format(new Date(W69.bkkToEpoch(dateStr, '12:00')));
+const thDT = (ms) => thDate(W69.epochToBkkDate(ms)) + ' ' + W69.epochToBkkTime(ms) + ' น.';
+const thTime = (ms) => W69.epochToBkkTime(ms) + ' น.';
+function countdown(ms) {
+  let s = Math.max(0, Math.floor((ms - now()) / 1000)); const d = Math.floor(s / 86400); s %= 86400;
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), x = s % 60;
+  return (d ? d + ' วัน ' : '') + String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(x).padStart(2, '0');
+}
+function lum(hex) { const h = hex.replace('#', ''); const [r, g, b] = [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)); return 0.2126 * r + 0.7152 * g + 0.0722 * b; }
+function colorDist(a, b) { const p = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16)); const x = p(a), y = p(b); return Math.hypot(x[0] - y[0], x[1] - y[1], x[2] - y[2]); }
+const ink = (bg) => (lum(bg) > 0.4 ? '#0B1220' : '#FFFFFF');
+function kits(m) {
+  const h = T(m.homeId), a = T(m.awayId);
+  const home = { fill: h.primary, edge: h.secondary };
+  let away = { fill: a.primary, edge: a.secondary };
+  if (colorDist(h.primary, a.primary) < 110) away = { fill: a.kit2, edge: a.primary };
+  return { home, away };
+}
+function uidKey() { return 'RQ-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10); }
+
+/* ---------- team logo (SVG, no external images) ---------- */
+let logoSeq = 0;
+function logo(team, size) {
+  size = size || 32; const id = 'lg' + (++logoSeq);
+  const shapes = {
+    shield: 'M50 4 L90 15 V47 C90 73 73 89 50 97 C27 89 10 73 10 47 V15 Z',
+    round: 'M50 4 A46 46 0 1 1 49.9 4 Z',
+    hex: 'M50 3 L91 26 V74 L50 97 L9 74 V26 Z',
+    crest: 'M14 8 H86 Q92 8 92 14 V52 C92 76 72 90 50 97 C28 90 8 76 8 52 V14 Q8 8 14 8 Z',
+  };
+  const d = shapes[team.shape] || shapes.shield; const fg = ink(team.primary);
+  const code = esc(team.id.slice(0, 3));
+  return `<svg class="logo" width="${size}" height="${size}" viewBox="0 0 100 100" role="img" aria-label="โลโก้ ${esc(team.name)}" style="flex:none;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4))">
+<defs><linearGradient id="${id}g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${team.primary}"/><stop offset="1" stop-color="${team.primary}" stop-opacity=".78"/></linearGradient><clipPath id="${id}c"><path d="${d}"/></clipPath></defs>
+<path d="${d}" fill="${team.secondary}"/><path d="${d}" fill="url(#${id}g)" transform="translate(50 50) scale(.88) translate(-50 -50)"/>
+<g clip-path="url(#${id}c)" opacity=".28"><path d="M-10 70 L110 30 L110 44 L-10 84 Z" fill="${team.secondary}"/></g>
+<path d="M50 14 l3.2 6.6 7.2 1 -5.2 5 1.2 7.2 -6.4 -3.4 -6.4 3.4 1.2 -7.2 -5.2 -5 7.2 -1 z" fill="${fg}" opacity=".9"/>
+<text x="50" y="68" text-anchor="middle" font-family="Kanit,sans-serif" font-weight="800" font-size="25" fill="${fg}" letter-spacing="1">${code}</text></svg>`;
+}
+
+/* ---------- status ---------- */
+function phase(m) { return svc.phaseOf(m); }
+function statusChip(m) {
+  const p = phase(m);
+  if (p === 'live') { const c = W69.clockOf(svc.gameTime(m)); return `<span class="st live">LIVE <span class="num" data-live-clock="${m.id}">${W69.fmtClock(c.sec)}</span></span>`; }
+  if (p === 'paused') return '<span class="st ht">หยุดชั่วคราว</span>';
+  if (p === 'halftime') return '<span class="st ht">พักครึ่ง</span>';
+  if (p === 'scheduled') return '<span class="st sched">ก่อนแข่ง</span>';
+  if (p === 'finished') return '<span class="st pend">รอยืนยันผล</span>';
+  if (p === 'confirmed') return '<span class="st ft">จบแล้ว</span>';
+  if (p === 'postponed') return '<span class="st pp">เลื่อนการแข่งขัน</span>';
+  if (p === 'cancelled') return '<span class="st cx">ยกเลิก</span>';
+  return '';
+}
+function liveScore(m) {
+  if (m.result && ['finished', 'confirmed'].includes(m.status)) return { home: m.result.home, away: m.result.away };
+  if (m.status === 'live') return W69.scoreAt(svc.simOf(m).events, svc.gameTime(m));
+  return null;
+}
+function formDots(form) { const f = (form || []).slice(-5); const pad = Array(5 - f.length).fill('N'); return '<span class="form" aria-label="ฟอร์ม 5 นัดล่าสุด">' + pad.concat(f).map((x) => `<i class="${x}">${x === 'N' ? '–' : { W: 'ช', D: 'ส', L: 'พ' }[x]}</i>`).join('') + '</span>'; }
+
+/* ---------- toast & modal ---------- */
+function toast(msg, kind) {
+  let box = $('.toasts'); if (!box) { box = document.createElement('div'); box.className = 'toasts'; box.setAttribute('role', 'status'); document.body.appendChild(box); }
+  const t = document.createElement('div'); t.className = 'toast ' + (kind || ''); t.textContent = msg; box.appendChild(t);
+  setTimeout(() => t.remove(), kind === 'err' ? 4500 : 3000);
+}
+function modal(html, onMount) {
+  closeModal();
+  const bg = document.createElement('div'); bg.className = 'modal-bg'; bg.innerHTML = `<div class="modal" role="dialog" aria-modal="true">${html}</div>`;
+  bg.addEventListener('click', (e) => { if (e.target === bg || e.target.closest('[data-close]')) closeModal(); });
+  document.body.appendChild(bg); const f = bg.querySelector('input,select,button.gold'); if (f) setTimeout(() => f.focus(), 30);
+  if (onMount) onMount(bg.querySelector('.modal'));
+  return bg;
+}
+function closeModal() { $$('.modal-bg').forEach((m) => m.remove()); }
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+/** run an API call with loading button, error toast. returns result or undefined */
+function call(btn, fn, okMsg) {
+  if (btn) { if (btn.classList.contains('loading')) return; btn.classList.add('loading'); btn.disabled = true; }
+  try { const r = fn(); if (okMsg) toast(okMsg, 'ok'); return r; }
+  catch (e) { toast(e.message || 'เกิดข้อผิดพลาด', 'err'); if (!(e instanceof W69.ApiError)) console.error(e); }
+  finally { if (btn) setTimeout(() => { btn.classList.remove('loading'); btn.disabled = false; }, 250); }
+}
+
+/* ---------- sound (Web Audio, synthesized, off until user enables) ---------- */
+const sound = {
+  ctx: null, on: false, crowd: null,
+  enable() {
+    try { this.ctx = this.ctx || new (window.AudioContext || window.webkitAudioContext)(); this.ctx.resume(); this.on = true; this.startCrowd(); this.whistle(1); }
+    catch (e) { toast('อุปกรณ์นี้เล่นเสียงไม่ได้', 'err'); }
+  },
+  disable() { this.on = false; this.stopCrowd(); },
+  noise(sec) { const c = this.ctx, b = c.createBuffer(1, c.sampleRate * sec, c.sampleRate), d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; return b; },
+  startCrowd() {
+    if (!this.on || this.crowd || !document.querySelector('canvas.pitch')) return;
+    const c = this.ctx, src = c.createBufferSource(); src.buffer = this.noise(3); src.loop = true;
+    const f = c.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 520; f.Q.value = 0.6;
+    const g = c.createGain(); g.gain.value = 0.035; src.connect(f).connect(g).connect(c.destination); src.start();
+    this.crowd = { src, g };
+  },
+  stopCrowd() { if (this.crowd) { try { this.crowd.src.stop(); } catch (e) {} this.crowd = null; } },
+  whistle(n) {
+    if (!this.on) return; const c = this.ctx; let t = c.currentTime;
+    for (let i = 0; i < (n || 1); i++) {
+      const o = c.createOscillator(), l = c.createOscillator(), lg = c.createGain(), g = c.createGain();
+      o.frequency.value = 2900; l.frequency.value = 38; lg.gain.value = 120; l.connect(lg).connect(o.frequency);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.09, t + 0.03); g.gain.setValueAtTime(0.09, t + (i === n - 1 ? 0.55 : 0.22)); g.gain.linearRampToValueAtTime(0, t + (i === n - 1 ? 0.65 : 0.3));
+      o.connect(g).connect(c.destination); o.start(t); l.start(t); o.stop(t + 0.7); l.stop(t + 0.7); t += i === n - 1 ? 0.7 : 0.38;
+    }
+  },
+  kick() { if (!this.on) return; const c = this.ctx, o = c.createOscillator(), g = c.createGain(); o.frequency.setValueAtTime(140, c.currentTime); o.frequency.exponentialRampToValueAtTime(50, c.currentTime + 0.12); g.gain.setValueAtTime(0.25, c.currentTime); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.15); o.connect(g).connect(c.destination); o.start(); o.stop(c.currentTime + 0.16); },
+  cheer() {
+    if (!this.on) return; const c = this.ctx, src = c.createBufferSource(); src.buffer = this.noise(3.2);
+    const f = c.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 900; f.Q.value = 0.4; const g = c.createGain(); const t = c.currentTime;
+    g.gain.setValueAtTime(0.0, t); g.gain.linearRampToValueAtTime(0.32, t + 0.35); g.gain.exponentialRampToValueAtTime(0.001, t + 3.1);
+    src.connect(f).connect(g).connect(c.destination); src.start(); src.stop(t + 3.2);
+    [523, 659, 784].forEach((fr, i) => { const o = c.createOscillator(), og = c.createGain(); o.type = 'triangle'; o.frequency.value = fr; og.gain.setValueAtTime(0, t + i * 0.09); og.gain.linearRampToValueAtTime(0.05, t + i * 0.09 + 0.05); og.gain.exponentialRampToValueAtTime(0.001, t + 1.2); o.connect(og).connect(c.destination); o.start(t); o.stop(t + 1.3); });
+  },
+};
+
+/* ---------- 2D animated pitch (Canvas) ---------- */
+const pitches = new Map(); // canvas -> Pitch
+const pitchMem = new Map(); // matchId -> positions (keeps continuity across re-renders)
+class Pitch {
+  /** getT(): current game time in seconds (-1 = before kickoff) */
+  constructor(canvas, match, getT, opts) {
+    this.c = canvas; this.m = match; this.getT = getT; this.opts = opts || {};
+    this.ctx = canvas.getContext('2d'); this.sim = (['live', 'finished', 'confirmed'].includes(match.status) || this.opts.replay) ? svc.simOf(match) : null;
+    this.lineup = { home: W69.snapshotTeam(T(match.homeId)).players, away: W69.snapshotTeam(T(match.awayId)).players };
+    if (this.sim) { const inp = svc.simInputFor(match); this.lineup = { home: inp.home.players, away: inp.away.players }; }
+    this.kits = kits(match);
+    const mem = pitchMem.get(match.id + (this.opts.replay ? ':r' : ''));
+    this.pos = mem || {}; pitchMem.set(match.id + (this.opts.replay ? ':r' : ''), this.pos);
+    this.lastIdx = -2; this.lastFrame = performance.now(); this.trail = [];
+    this.box = canvas.parentElement; this.resize();
+  }
+  resize() {
+    const w = this.box.clientWidth || 600, h = Math.round(w / 1.62), dpr = Math.min(2, window.devicePixelRatio || 1);
+    if (this.c.width !== Math.round(w * dpr)) { this.c.width = Math.round(w * dpr); this.c.height = Math.round(h * dpr); this.c.style.height = h + 'px'; }
+    this.W = w; this.H = h; this.dpr = dpr;
+  }
+  geo() { const mx = this.W * 0.045, my = this.H * 0.07; return { x0: mx, y0: my, w: this.W - 2 * mx, h: this.H - 2 * my }; }
+  P(x, y) { const g = this.geo(); return [g.x0 + x * g.w, g.y0 + y * g.h]; }
+  formation(side, half) {
+    const dir = (side === 'home') === (half === 1) ? 1 : -1; const out = {}; const idx = { GK: 0, DEF: 0, MID: 0, FWD: 0 };
+    for (const p of this.lineup[side]) {
+      const slots = W69.FORMATION[p.pos] || W69.FORMATION.MID; const s = slots[idx[p.pos]++ % slots.length];
+      const fx = Math.min(s[0], 0.46) * (p.pos === 'GK' ? 1 : 1); // kickoff: stay in own half
+      out[p.id] = { x: dir > 0 ? fx : 1 - fx, y: s[1], baseX: s[0], baseY: s[1], pos: p.pos, dir };
+    }
+    return out;
+  }
+  state(t) {
+    const half = t < W69.HT_END ? 1 : 2; const res = { half, ball: { x: 0.5, y: 0.5, z: 0 }, carrier: null, possession: null, mode: 'formation', idx: -1 };
+    if (!this.sim || t < 0) return res;
+    const ev = this.sim.events; const i = W69.eventIndexAt(ev, t); res.idx = i; if (i < 0) return res;
+    const e = ev[i], n = ev[i + 1], prev = ev[i - 1];
+    const phaseNow = W69.clockOf(t).phase;
+    if (phaseNow === 'HT' || phaseNow === 'FT' || e.type === 'halftime' || e.type === 'fulltime') return res;
+    res.possession = e.side;
+    const from = prev && !['halftime', 'fulltime'].includes(prev.type) ? { x: prev.x, y: prev.y } : { x: 0.5, y: 0.5 };
+    const dt = t - e.t;
+    const flight = e.type === 'shot' ? 0.8 : e.type === 'pass' ? Math.min(2.4, 0.6 + Math.hypot(e.x - from.x, e.y - from.y) * 6) : e.type === 'goal' ? 0.3 : 1.0;
+    const k = Math.min(1, dt / flight); const ease = 1 - (1 - k) * (1 - k);
+    let bx = from.x + (e.x - from.x) * ease, by = from.y + (e.y - from.y) * ease;
+    if (e.type === 'goal' || (e.type === 'shot' && e.outcome === 'goal')) {
+      res.mode = 'celebrate'; res.ball = { x: e.x, y: e.y, z: 0 }; if (e.type === 'shot') res.ball = { x: bx, y: by, z: 0 };
+      if (e.type === 'goal' && n) { const span = n.t - e.t; const kk = Math.max(0, Math.min(1, (dt - span * 0.5) / (span * 0.4))); res.ball = { x: e.x + (0.5 - e.x) * kk, y: 0.5, z: 0 }; }
+      res.scorer = e.player && e.player.id; res.scoringSide = e.side; return res;
+    }
+    if (k >= 1 && n && n.t > e.t && !['halftime', 'fulltime', 'goal'].includes(n.type)) {
+      const span = n.t - e.t - flight; const carry = n.type === 'dribble' ? 1 : n.side === e.side ? 0.3 : 0.15;
+      const kk = span > 0 ? Math.min(1, (dt - flight) / span) : 1;
+      bx += (n.x - e.x) * carry * kk * (n.type === 'dribble' ? 1 : 0.6); by += (n.y - e.y) * carry * kk * 0.6;
+    }
+    res.ball = { x: bx, y: by, z: e.type === 'pass' && k < 1 ? Math.sin(Math.PI * k) * Math.min(1, Math.hypot(e.x - from.x, e.y - from.y) * 2.2) : 0 };
+    res.carrier = e.type === 'pass' ? (k > 0.85 ? e.to && e.to.id : null) : e.type === 'shot' || e.type === 'corner' ? null : e.player && e.player.id;
+    if (e.type === 'corner') res.cornerTaker = e.player && e.player.id;
+    res.mode = e.type === 'kickoff' ? 'kickoff' : 'play'; res.ev = e; res.shooting = e.type === 'shot' && k < 1;
+    return res;
+  }
+  targets(s) {
+    const half = s.half; const out = {};
+    for (const side of ['home', 'away']) {
+      const f = this.formation(side, half); const own = side === s.possession;
+      for (const id in f) {
+        const p = f[id]; let x, y;
+        if (s.mode === 'formation' || s.mode === 'kickoff') { x = p.x; y = p.y; }
+        else if (s.mode === 'celebrate') {
+          const base = p.dir > 0 ? p.baseX : 1 - p.baseX;
+          if (side === s.scoringSide && p.pos !== 'GK') { x = s.ball.x * 0.25 + (p.dir > 0 ? 0.82 : 0.18) * 0.75; y = 0.5 + (p.baseY - 0.5) * 0.4; }
+          else { x = base; y = p.baseY; }
+        } else {
+          const fx = p.baseX + (own ? 0.1 : -0.04) + (p.pos === 'FWD' && own ? 0.06 : 0);
+          const shift = (s.ball.x - 0.5) * (p.pos === 'GK' ? 0.08 : own ? 0.5 : 0.38);
+          x = (p.dir > 0 ? fx : 1 - fx) + shift; y = p.baseY + (s.ball.y - 0.5) * (p.pos === 'GK' ? 0.35 : 0.3);
+          if (p.pos === 'GK') x = p.dir > 0 ? Math.min(0.1, Math.max(0.025, x)) : Math.max(0.9, Math.min(0.975, x));
+          else x = Math.max(0.07, Math.min(0.93, x));
+        }
+        out[id] = { x: Math.max(0.015, Math.min(0.985, x)), y: Math.max(0.04, Math.min(0.96, y)), side, pos: p.pos };
+      }
+    }
+    if (s.mode === 'play') {
+      const bx = s.ball.x, by = s.ball.y;
+      if (s.carrier && out[s.carrier]) { const d = out[s.carrier].side === 'home' === (s.half === 1) ? -1 : 1; out[s.carrier].x = bx + d * 0.012; out[s.carrier].y = by; }
+      else if (s.ev && s.ev.type === 'pass' && s.ev.to && out[s.ev.to.id]) { out[s.ev.to.id].x = s.ev.x; out[s.ev.to.id].y = s.ev.y; }
+      if (s.cornerTaker && out[s.cornerTaker]) { out[s.cornerTaker].x = bx; out[s.cornerTaker].y = by; }
+      // nearest defender presses the ball
+      const opp = s.possession === 'home' ? 'away' : 'home'; let best = null, bd = 9;
+      for (const id in out) if (out[id].side === opp && out[id].pos !== 'GK') { const d = Math.hypot(out[id].x - bx, out[id].y - by); if (d < bd) { bd = d; best = id; } }
+      if (best) { const g = s.possession === 'home' === (s.half === 1) ? 1 : -1; out[best].x = bx + g * 0.035; out[best].y = by + (out[best].y > by ? 0.03 : -0.03); }
+    }
+    return out;
+  }
+  frame(nowMs) {
+    if (!this.c.isConnected) return false;
+    this.resize();
+    const t = this.getT(); const s = this.state(t); const tg = this.targets(s);
+    const dtReal = Math.min(0.1, (nowMs - this.lastFrame) / 1000); this.lastFrame = nowMs;
+    const spd = this.opts.speed ? this.opts.speed() : 1; const k = 1 - Math.exp(-dtReal * (2.2 + Math.sqrt(spd) * 1.6));
+    for (const id in tg) { const p = this.pos[id]; if (!p || isNaN(p.x)) this.pos[id] = { x: tg[id].x, y: tg[id].y }; else { p.x += (tg[id].x - p.x) * k; p.y += (tg[id].y - p.y) * k; } }
+    // events crossing (sound / goal fx)
+    if (this.sim && s.idx !== this.lastIdx) {
+      if (this.lastIdx >= -1 && s.idx > this.lastIdx && s.idx - this.lastIdx < 6) {
+        for (let j = this.lastIdx + 1; j <= s.idx; j++) { const e = this.sim.events[j]; if (!e) continue;
+          if (e.type === 'goal') { this.onGoal(e); } else if (e.type === 'shot') sound.kick(); else if (e.type === 'halftime') sound.whistle(2); else if (e.type === 'fulltime') sound.whistle(3); else if (e.type === 'kickoff' && e.t === 0) sound.whistle(1); }
+      }
+      this.lastIdx = s.idx;
+    }
+    if (s.shooting) { this.trail.push({ x: s.ball.x, y: s.ball.y, a: 1 }); if (this.trail.length > 14) this.trail.shift(); } else this.trail = this.trail.filter((p) => (p.a -= 0.08) > 0);
+    this.draw(s, tg);
+    const ht = this.box.querySelector('.htfx'); if (ht) { const ph = W69.clockOf(Math.max(0, t)).phase; const lab = t < 0 ? 'ผังตัวจริง 2-2-2' : ph === 'HT' ? 'พักครึ่ง' : ph === 'FT' ? 'จบการแข่งขัน' : ''; ht.textContent = lab; ht.classList.toggle('on', !!lab); }
+    return true;
+  }
+  onGoal(e) {
+    sound.cheer(); const fx = this.box.querySelector('.goalfx'); if (!fx) return;
+    fx.querySelector('.who').textContent = (e.player ? e.player.name + ' ' : '') + '(' + T(e.side === 'home' ? this.m.homeId : this.m.awayId).name + ')';
+    fx.classList.remove('on'); void fx.offsetWidth; fx.classList.add('on'); clearTimeout(this.gt); this.gt = setTimeout(() => fx.classList.remove('on'), 2600);
+    if (navigator.vibrate) try { navigator.vibrate(120); } catch (_) {}
+  }
+  draw(s, tg) {
+    const c = this.ctx, W = this.W, H = this.H; c.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    // grass
+    c.fillStyle = '#16602f'; c.fillRect(0, 0, W, H);
+    const n = 12; for (let i = 0; i < n; i++) { c.fillStyle = i % 2 ? '#1f7a3d' : '#23863f'; c.fillRect((W / n) * i, 0, W / n + 1, H); }
+    const vg = c.createRadialGradient(W / 2, H / 2, H * 0.2, W / 2, H / 2, W * 0.7); vg.addColorStop(0, 'rgba(255,255,255,.05)'); vg.addColorStop(1, 'rgba(0,0,0,.28)'); c.fillStyle = vg; c.fillRect(0, 0, W, H);
+    const g = this.geo(); c.strokeStyle = 'rgba(255,255,255,.85)'; c.lineWidth = Math.max(1.5, W / 420);
+    c.strokeRect(g.x0, g.y0, g.w, g.h);
+    c.beginPath(); c.moveTo(g.x0 + g.w / 2, g.y0); c.lineTo(g.x0 + g.w / 2, g.y0 + g.h); c.stroke();
+    c.beginPath(); c.arc(g.x0 + g.w / 2, g.y0 + g.h / 2, g.h * 0.16, 0, Math.PI * 2); c.stroke();
+    c.fillStyle = '#fff'; c.beginPath(); c.arc(g.x0 + g.w / 2, g.y0 + g.h / 2, 2.5, 0, Math.PI * 2); c.fill();
+    for (const side of [0, 1]) {
+      const bw = g.w * 0.15, bh = g.h * 0.56, sw = g.w * 0.055, sh = g.h * 0.3;
+      const x = side ? g.x0 + g.w - bw : g.x0; c.strokeRect(x, g.y0 + (g.h - bh) / 2, bw, bh);
+      const xs = side ? g.x0 + g.w - sw : g.x0; c.strokeRect(xs, g.y0 + (g.h - sh) / 2, sw, sh);
+      const px = side ? g.x0 + g.w - g.w * 0.11 : g.x0 + g.w * 0.11; c.beginPath(); c.arc(px, g.y0 + g.h / 2, 2.2, 0, Math.PI * 2); c.fill();
+      // goal + net
+      const gh = g.h * 0.2, gd = g.x0 * 0.75; const gx = side ? g.x0 + g.w : g.x0 - gd; const gy = g.y0 + (g.h - gh) / 2;
+      c.save(); c.fillStyle = 'rgba(255,255,255,.12)'; c.fillRect(gx, gy, gd, gh); c.strokeStyle = 'rgba(255,255,255,.35)'; c.lineWidth = 0.7;
+      for (let k = 1; k < 5; k++) { c.beginPath(); c.moveTo(gx, gy + (gh / 5) * k); c.lineTo(gx + gd, gy + (gh / 5) * k); c.stroke(); }
+      for (let k = 1; k < 3; k++) { c.beginPath(); c.moveTo(gx + (gd / 3) * k, gy); c.lineTo(gx + (gd / 3) * k, gy + gh); c.stroke(); }
+      c.strokeStyle = '#fff'; c.lineWidth = 2.5; c.strokeRect(gx, gy, gd, gh); c.restore();
+    }
+    // corner arcs
+    c.lineWidth = Math.max(1.2, W / 520); [[0, 0, 0], [1, 0, Math.PI / 2], [1, 1, Math.PI], [0, 1, Math.PI * 1.5]].forEach(([a, b, st]) => { c.beginPath(); c.arc(g.x0 + a * g.w, g.y0 + b * g.h, 7, st, st + Math.PI / 2); c.stroke(); });
+    // players
+    const r = Math.max(8, H * 0.034); const fs = Math.max(8, r * 0.95);
+    const draws = [];
+    for (const side of ['home', 'away']) for (const p of this.lineup[side]) { const q = this.pos[p.id]; if (q) draws.push({ p, q, side }); }
+    draws.sort((a, b) => a.q.y - b.q.y);
+    for (const { p, q, side } of draws) {
+      const [x, y] = this.P(q.x, q.y); const kit = this.kits[side]; const isGK = p.pos === 'GK';
+      const fill = isGK ? (side === 'home' ? '#111827' : '#F8FAFC') : kit.fill; const edge = isGK ? (side === 'home' ? '#F5C451' : '#0f172a') : kit.edge;
+      c.fillStyle = 'rgba(0,0,0,.28)'; c.beginPath(); c.ellipse(x + 2, y + r * 0.75, r * 0.95, r * 0.4, 0, 0, Math.PI * 2); c.fill();
+      const hl = s.carrier === p.id; if (hl) { c.strokeStyle = 'rgba(245,196,81,.9)'; c.lineWidth = 2.5; c.beginPath(); c.arc(x, y, r + 4, 0, Math.PI * 2); c.stroke(); }
+      c.fillStyle = fill; c.strokeStyle = edge; c.lineWidth = 2.2; c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fill(); c.stroke();
+      c.fillStyle = ink(fill); c.font = `700 ${fs}px Kanit, sans-serif`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(String(p.num), x, y + 0.5);
+    }
+    // ball trail + ball
+    for (const tp of this.trail) { const [x, y] = this.P(tp.x, tp.y); c.fillStyle = `rgba(255,236,170,${tp.a * 0.35})`; c.beginPath(); c.arc(x, y, r * 0.35, 0, Math.PI * 2); c.fill(); }
+    const [bx, by] = this.P(s.ball.x, s.ball.y); const lift = s.ball.z * r * 1.4;
+    c.fillStyle = 'rgba(0,0,0,.35)'; c.beginPath(); c.ellipse(bx + 2, by + 3, r * 0.42, r * 0.22, 0, 0, Math.PI * 2); c.fill();
+    const br = r * 0.44 * (1 + s.ball.z * 0.35); const bg = c.createRadialGradient(bx - br * 0.4, by - lift - br * 0.4, 1, bx, by - lift, br); bg.addColorStop(0, '#fff'); bg.addColorStop(1, '#cfd6e0');
+    c.fillStyle = bg; c.strokeStyle = '#0b1220'; c.lineWidth = 1.2; c.beginPath(); c.arc(bx, by - lift, br, 0, Math.PI * 2); c.fill(); c.stroke();
+    c.fillStyle = '#0b1220'; c.beginPath(); c.arc(bx, by - lift, br * 0.38, 0, Math.PI * 2); c.fill();
+  }
+}
+function mountPitches(root) {
+  $$('canvas.pitch', root).forEach((cv) => {
+    if (pitches.has(cv)) return; const m = svc.state.matches.find((x) => x.id === cv.dataset.match); if (!m) return;
+    let getT, speed;
+    if (cv.dataset.replay) { const st = performance.now(); const rs = Number(cv.dataset.replay); getT = () => Math.min(W69.FT, ((performance.now() - st) / 1000) * rs); speed = () => rs; }
+    else { getT = () => (['scheduled', 'postponed', 'cancelled'].includes(m.status) ? -1 : svc.gameTime(m)); speed = () => (m.run ? m.run.speed : 1); }
+    pitches.set(cv, new Pitch(cv, m, getT, { speed, replay: !!cv.dataset.replay }));
+  });
+  if (sound.on) sound.startCrowd();
+}
+function pitchLoop(ts) {
+  for (const [cv, p] of pitches) { try { if (!p.frame(ts)) pitches.delete(cv); } catch (e) { console.error(e); pitches.delete(cv); } }
+  if (!document.querySelector('canvas.pitch')) sound.stopCrowd();
+  requestAnimationFrame(pitchLoop);
+}
+requestAnimationFrame(pitchLoop);
+
+/* ===== views: player-facing pages ===== */
+const ICON = {
+  home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',
+  cal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+  pred: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="m12 7 3 2.5-1 4h-4l-1-4z"/></svg>',
+  table: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h16M4 18h16M9 4v16"/></svg>',
+  hist: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg>',
+  sndOn: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>',
+  sndOff: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="m17 9 5 6M22 9l-5 6"/></svg>',
+  menu: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
+};
+const NAV = [['home', 'หน้าหลัก', 'home'], ['fixtures', 'โปรแกรมแข่ง', 'cal'], ['table', 'ตารางคะแนน', 'table'], ['teams', 'ทีม', null], ['predict', 'ทายผล', 'pred'], ['history', 'ประวัติ', 'hist']];
+
+function renderHeader() {
+  const r = app.route[0] || 'home'; const u = app.session && svc.state.users[app.session.userId];
+  const nav = NAV.map(([k, l]) => `<a href="#/${k}" class="${r === k || (k === 'predict' && r === 'champion') || (k === 'teams' && r === 'team') ? 'on' : ''}">${l}</a>`).join('') + (EMBED && !LINK_ADMIN ? '' : `<a href="#/admin" class="${r === 'admin' ? 'on' : ''}">ผู้ดูแล</a>`);
+  $('#hdr').innerHTML = `${EMBED ? '' : '<div class="demo-strip">โหมดทดลอง (Demo Mode) การแข่งขันทั้งหมดเป็นการจำลอง ใช้เครดิตทดลองที่ไม่ใช่เงินจริง และแลกเป็นเงินไม่ได้</div>'}
+  <div class="wrap"><a class="brand" href="#/home" aria-label="WINNER69 Football League 7 หน้าหลัก"><div><div class="mark">WINNER<b>69</b></div><div class="sub">Football League 7</div></div></a>
+  <nav class="nav" aria-label="เมนูหลัก">${nav}</nav>
+  <div class="right">
+   <button class="iconbtn" data-act="sound" aria-label="${sound.on ? 'ปิดเสียง' : 'เปิดเสียงสนาม'}" title="${sound.on ? 'ปิดเสียง' : 'เปิดเสียงสนาม'}">${sound.on ? ICON.sndOn : ICON.sndOff}</button>
+   ${u ? `<button class="credits" data-act="account" aria-label="${EMBED ? 'บัญชี' : 'บัญชีทดลอง'}"><span class="coin"></span><span class="num">${fmtN(u.balance)}</span><span class="tiny muted hide-m">${EMBED ? 'เครดิต' : 'Demo Credits'}</span></button>`
+    : (EMBED ? '' : '<button class="btn gold sm" data-act="login">เข้าสู่ระบบทดลอง</button>')}
+   <button class="iconbtn" data-act="menu" aria-label="เมนูเพิ่มเติม" style="display:${matchMedia('(max-width:860px)').matches ? 'grid' : 'none'}">${ICON.menu}</button>
+  </div></div>`;
+  $('#bnav').innerHTML = [['home', 'หน้าหลัก', 'home'], ['fixtures', 'โปรแกรม', 'cal'], ['predict', 'ทายผล', 'pred'], ['table', 'ตาราง', 'table'], ['history', 'ประวัติ', 'hist']]
+    .map(([k, l, i]) => `<a href="#/${k}" class="${r === k || (k === 'predict' && r === 'champion') ? 'on' : ''}">${ICON[i]}<span>${l}</span></a>`).join('');
+}
+
+function teamCell(id, cls) { const t = T(id); return `<div class="tm ${cls || ''}">${logo(t, 28)}<span>${esc(t.name)}</span></div>`; }
+function matchRow(m, opts) {
+  opts = opts || {}; const sc = liveScore(m); const ph = phase(m);
+  const mid = sc ? `<div class="sc num" data-live-score="${m.id}">${sc.home} - ${sc.away}</div>` : ph === 'cancelled' ? '<div class="muted small">ยกเลิก</div>' : `<div class="tt num">${m.time}</div>`;
+  return `<a class="mrow" href="#/match/${m.id}">${teamCell(m.homeId)}<div class="mid">${mid}</div>${teamCell(m.awayId, 'away')}
+  <div class="mmeta"><span>${opts.date ? thDate(m.date) + ' ' : ''}${m.time} น. นัดที่ ${m.no} รอบ ${m.round}</span>${statusChip(m)}</div></a>`;
+}
+function liveMatches() { return svc.state.matches.filter((m) => m.status === 'live').sort((a, b) => a.kickoff - b.kickoff); }
+function nextMatch() { return svc.state.matches.filter((m) => m.status === 'scheduled' && m.kickoff > now()).sort((a, b) => a.kickoff - b.kickoff)[0]; }
+
+function scoreboard(m, big) {
+  const sc = liveScore(m); const ph = phase(m); const g = svc.gameTime(m); const c = W69.clockOf(Math.max(0, g));
+  const halfLabel = ph === 'live' || ph === 'paused' ? (c.half === 1 ? 'ครึ่งแรก' : 'ครึ่งหลัง') : ph === 'halftime' ? 'พักครึ่ง' : '';
+  const centre = sc ? `<div class="score num"><span data-live-score="${m.id}" data-fmt="big">${sc.home}<span class="sep">-</span>${sc.away}</span></div>
+     ${ph === 'live' || ph === 'paused' || ph === 'halftime' ? `<div class="clock"><span data-live-clock="${m.id}">${W69.fmtClock(c.sec)}</span> <span class="small" data-live-half="${m.id}">${halfLabel}</span></div>` : `<div class="clock" style="color:var(--muted)">${ph === 'finished' ? 'จบ 30 นาที (รอยืนยัน)' : 'จบการแข่งขัน'}</div>`}`
+    : `<div class="kick num">${m.time}</div><div class="clock small" style="color:var(--muted)">${ph === 'cancelled' ? 'ยกเลิกการแข่งขัน' : ph === 'postponed' ? 'เลื่อนการแข่งขัน' : `เริ่มใน <span class="num" data-countdown="${m.kickoff}">${countdown(m.kickoff)}</span>`}</div>`;
+  const h = T(m.homeId), a = T(m.awayId);
+  return `<div class="board"><div class="team">${logo(h, big ? 64 : 52)}<span>${esc(h.name)}</span><span class="tiny muted">เหย้า</span></div><div>${centre}</div><div class="team">${logo(a, big ? 64 : 52)}<span>${esc(a.name)}</span><span class="tiny muted">เยือน</span></div></div>`;
+}
+function pitchBox(m, replay) {
+  return `<div class="pitchbox"><canvas class="pitch" data-match="${m.id}" ${replay ? `data-replay="${replay}"` : ''} aria-label="สนามจำลองการแข่งขัน ${esc(T(m.homeId).name)} พบ ${esc(T(m.awayId).name)}"></canvas><div class="htfx"></div><div class="goalfx" aria-live="assertive"><div class="g">GOAL!</div><div class="who"></div></div></div>`;
+}
+
+/* ---------- Home ---------- */
+function vHome() {
+  const lives = liveMatches(); const sel = app.homeDate || today();
+  if (app.heroIdx >= lives.length) app.heroIdx = 0;
+  const hm = lives[app.heroIdx || 0] || nextMatch();
+  let hero = '';
+  if (hm) {
+    const isLive = hm.status === 'live';
+    hero = `<section class="hero" aria-label="${isLive ? 'แมตช์ที่กำลังแข่ง' : 'แมตช์ถัดไป'}">
+      ${scoreboard(hm, true)}${pitchBox(hm)}
+      <div class="foot"><div class="row">${statusChip(hm)}<span class="st sim">แมตช์จำลอง</span><span class="small muted">${thDate(hm.date)} ${hm.time} น.</span></div>
+      <div class="row">${lives.length > 1 ? lives.map((m, i) => `<button class="chip ${i === (app.heroIdx || 0) ? 'on' : ''}" data-act="hero" data-i="${i}">${T(m.homeId).id} - ${T(m.awayId).id}</button>`).join('') : ''}
+      <a class="btn ${isLive ? '' : 'gold'}" href="#/match/${hm.id}">${isLive ? 'ดูรายละเอียดการแข่งขัน' : 'ดูข้อมูลก่อนแข่งและทายผล'}</a></div></div></section>`;
+  } else hero = `<section class="hero pad"><div class="empty">ไม่มีแมตช์ที่กำลังจะแข่ง ฤดูกาลนี้อาจจบแล้ว ดูผลได้ที่ <a href="#/table">ตารางคะแนน</a></div></section>`;
+
+  const days = []; for (let i = -3; i <= 3; i++) days.push(W69.addDays(today(), i));
+  const dm = svc.state.matches.filter((m) => m.date === sel).sort((a, b) => a.kickoff - b.kickoff || a.no - b.no);
+  const st = svc.standings(); const probs = svc.titleProbabilities();
+  const champ = svc.state.season.closed ? svc.state.season.champion : null;
+  const race = st.slice().sort((a, b) => (probs[b.teamId] || 0) - (probs[a.teamId] || 0)).slice(0, 5);
+  return `${hero}
+  <div class="grid g2 sec">
+   <section aria-labelledby="h-today"><div class="sec-h"><h2 id="h-today">${sel === today() ? 'แมตช์วันนี้' : 'แมตช์วันที่เลือก'}</h2><a class="link" href="#/fixtures">โปรแกรมทั้งหมด</a></div>
+    <div class="chips" role="tablist" aria-label="เลือกวัน">${days.map((d) => `<button class="chip ${d === sel ? 'on' : ''}" data-act="homeDate" data-d="${d}" role="tab" aria-selected="${d === sel}">${d === today() ? 'วันนี้' : wkfmt.format(new Date(W69.bkkToEpoch(d, '12:00')))}<b>${thDateShort(d)}</b></button>`).join('')}</div>
+    <div class="card" style="margin-top:10px">${dm.length ? dm.map((m) => matchRow(m) + recentStrip(m)).join('') : `<div class="empty">ไม่มีแมตช์ใน${thDate(sel)}</div>`}</div>
+    <p class="tiny muted" style="margin:8px 2px">เวลาทั้งหมดเป็นเวลาประเทศไทย (Asia/Bangkok) ปิดรับคำทายเมื่อแมตช์เริ่ม</p>
+   </section>
+   <section aria-labelledby="h-tbl"><div class="sec-h"><h2 id="h-tbl">ตารางคะแนน</h2><a class="link" href="#/table">ดูอันดับเต็ม</a></div>
+    <div class="card"><div class="tbl-wrap">${tableHtml(st.slice(0, 6), true)}</div></div>
+   </section>
+  </div>
+  <section class="sec" aria-labelledby="h-race"><div class="sec-h"><h2 id="h-race">${champ ? 'แชมป์ฤดูกาล' : 'ลุ้นแชมป์ฤดูกาล'}</h2><a class="link" href="#/champion">ทายทีมแชมป์</a></div>
+   <div class="card pad">${champ ? `<div class="row">${logo(T(champ), 56)}<div><h2>${esc(T(champ).name)}</h2><div class="muted small">แชมป์ ${esc(svc.state.season.name)} จากตารางคะแนนอย่างเป็นทางการ</div></div></div>` :
+    race.map((r) => `<div class="prob">${logo(T(r.teamId), 30)}<div><div class="split"><b>${esc(T(r.teamId).name)}</b><span class="small muted">อันดับ ${r.rank} ${r.points} คะแนน ${formDots(r.form)}</span></div><div class="bar" style="margin-top:6px"><i style="width:${((probs[r.teamId] || 0) * 100).toFixed(1)}%"></i></div></div><b class="num" style="min-width:56px;text-align:right">${((probs[r.teamId] || 0) * 100).toFixed(1)}%</b></div>`).join('')}
+    <p class="disclaim">เปอร์เซ็นต์โอกาสเป็นแชมป์เป็นค่าประมาณจากแบบจำลอง (จำลองฤดูกาลที่เหลือ 1,200 ครั้ง) ไม่ใช่การรับประกันผล</p></div>
+  </section>`;
+}
+function recentStrip(m) {
+  if (m.status !== 'scheduled') return '';
+  const st = svc.standings(); const f = (id) => (st.find((r) => r.teamId === id) || {}).form;
+  return `<div class="split tiny muted" style="padding:0 14px 10px">${formDots(f(m.homeId))}<span>ฟอร์ม 5 นัดล่าสุด</span>${formDots(f(m.awayId))}</div>`;
+}
+
+/* ---------- Table ---------- */
+function tableHtml(rows, compact) {
+  return `<table class="tbl ${compact ? 'compact' : ''}"><thead><tr><th>#</th><th class="t">ทีม</th><th title="แข่ง">แข่ง</th><th title="ชนะ">ช</th><th title="เสมอ">ส</th><th title="แพ้">พ</th>${compact ? '' : '<th title="ประตูได้">ได้</th><th title="ประตูเสีย">เสีย</th>'}<th title="ผลต่างประตู">+/-</th><th>คะแนน</th>${compact ? '' : '<th>ฟอร์ม</th>'}</tr></thead><tbody>
+  ${rows.map((r) => `<tr class="${r.rank <= 4 ? 'top' : ''}"><td class="num">${r.rank}</td><td class="t"><a href="#/team/${r.teamId}" class="tm" style="text-decoration:none">${logo(T(r.teamId), 24)}<span>${esc(T(r.teamId).name)}</span></a></td><td>${r.played}</td><td>${r.won}</td><td>${r.drawn}</td><td>${r.lost}</td>${compact ? '' : `<td>${r.gf}</td><td>${r.ga}</td>`}<td>${r.gd > 0 ? '+' : ''}${r.gd}</td><td class="pts">${r.points}</td>${compact ? '' : `<td>${formDots(r.form)}</td>`}</tr>`).join('')}</tbody></table>`;
+}
+function vTable() {
+  const st = svc.standings(); const done = svc.state.matches.filter((m) => m.status === 'confirmed').length;
+  return `<div class="sec-h"><h1>ตารางคะแนน</h1><span class="muted small">${esc(svc.state.season.name)} ยืนยันผลแล้ว ${done}/${svc.state.matches.length} นัด</span></div>
+  <div class="card"><div class="tbl-wrap">${tableHtml(st)}</div></div>
+  <p class="small muted" style="margin-top:12px">ชนะ 3 คะแนน เสมอ 1 แพ้ 0 นับเฉพาะผลที่ยืนยันแล้ว หากคะแนนเท่ากันพิจารณา ผลต่างประตู ประตูได้ และผลการพบกัน ตามลำดับ แถบสีทองคือ 4 อันดับแรก</p>`;
+}
+
+/* ---------- Fixtures ---------- */
+function vFixtures() {
+  const f = app.fixTeam || ''; const ms = svc.state.matches.filter((m) => !f || m.homeId === f || m.awayId === f).sort((a, b) => a.kickoff - b.kickoff || a.no - b.no);
+  const byDate = {}; ms.forEach((m) => { (byDate[m.date] = byDate[m.date] || []).push(m); });
+  const s = svc.state.season;
+  return `<div class="sec-h"><h1>โปรแกรมแข่ง</h1><button class="btn sm" data-act="gotoToday">ไปที่วันนี้</button></div>
+  <div class="row" style="margin-bottom:12px"><label class="small muted" for="fixTeam">กรองทีม</label><select id="fixTeam" class="inp" style="max-width:260px" data-change="fixTeam"><option value="">ทุกทีม</option>${s.teamIds.map((id) => `<option value="${id}" ${f === id ? 'selected' : ''}>${esc(T(id).name)}</option>`).join('')}</select>
+  <span class="small muted">${esc(s.name)} ${svc.state.matches.length} นัด เริ่ม ${thDate(s.startDate)} แข่งวันละ ${svc.state.settings.matchesPerDay} คู่ เวลา ${svc.state.settings.slotTimes.join(' และ ')} น.</span></div>
+  ${Object.keys(byDate).length ? Object.entries(byDate).map(([d, list]) => `<section class="sec" id="d-${d}"><div class="sec-h"><h3>${thDate(d)}${d === today() ? ' <span class="st live" style="margin-left:6px">วันนี้</span>' : ''}</h3><span class="tiny muted">วันแข่งที่ ${list[0].day}</span></div><div class="card">${list.map((m) => matchRow(m)).join('')}</div></section>`).join('') : '<div class="card empty">ไม่พบแมตช์</div>'}`;
+}
+
+/* ---------- Teams ---------- */
+function vTeams() {
+  const st = svc.standings();
+  return `<div class="sec-h"><h1>ทีมทั้งหมด</h1><span class="muted small">${svc.state.season.teamIds.length} ทีม 7 คน (GK 1, DEF 2, MID 2, FWD 2) + สำรอง</span></div>
+  <div class="grid gt">${st.map((r) => { const t = T(r.teamId); const s = W69.teamStrength(t); return `<a class="card pad" href="#/team/${t.id}" style="text-decoration:none;display:block;background:linear-gradient(135deg,${t.primary}22,transparent 55%),var(--card)">
+    <div class="row">${logo(t, 54)}<div style="flex:1;min-width:0"><h3>${esc(t.name)}</h3><div class="small muted">อันดับ ${r.rank} ${r.points} คะแนน ${r.won}-${r.drawn}-${r.lost}</div></div><div style="text-align:center"><div class="num" style="font-size:24px;font-weight:700;color:var(--gold)">${s.overall}</div><div class="tiny muted">ความแข็งแกร่ง</div></div></div>
+    <div class="split" style="margin-top:10px">${formDots(r.form)}<span class="tiny muted">ได้ ${r.gf} เสีย ${r.ga}</span></div></a>`; }).join('')}</div>`;
+}
+function vTeam(id) {
+  const t = T(id); if (!t) return '<div class="card empty">ไม่พบทีม <a href="#/teams">กลับหน้าทีม</a></div>';
+  const r = svc.standings().find((x) => x.teamId === id) || { rank: '-', played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, gd: 0, points: 0, form: [] };
+  const s = W69.teamStrength(t); const ms = svc.teamMatches(id);
+  const recent = ms.filter((m) => m.status === 'confirmed').sort((a, b) => b.kickoff - a.kickoff).slice(0, 5);
+  const up = ms.filter((m) => ['scheduled', 'live', 'postponed'].includes(m.status)).sort((a, b) => a.kickoff - b.kickoff).slice(0, 3);
+  const bar = (l, v) => `<div style="margin:6px 0"><div class="split small"><span class="muted">${l}</span><b class="num">${v}</b></div><div class="bar"><i style="width:${v}%"></i></div></div>`;
+  const pl = (p) => `<div class="pl"><span class="n">${p.num}</span><span>${esc(p.name)}</span><span class="pos ${p.pos}">${p.pos}</span><b class="num" title="ค่าความสามารถรวม">${p.ovr}</b></div>`;
+  return `<a href="#/teams" class="small muted" style="text-decoration:none">ทีมทั้งหมด</a>
+  <div class="teamhead" style="margin-top:8px;background:linear-gradient(120deg,${t.primary}40,${t.secondary}20 50%,var(--card))">${logo(t, 84)}<div><h1>${esc(t.name)}</h1><div class="muted">อันดับ ${r.rank} ${r.points} คะแนน ${t.active ? '' : '<span class="st cx">ปิดใช้งาน</span>'}</div><div style="margin-top:6px">${formDots(r.form)}</div></div></div>
+  <div class="grid g2 sec"><div class="grid">
+   <div class="card pad"><h3>สถิติฤดูกาล</h3><div class="kpis" style="margin-top:10px;grid-template-columns:repeat(4,1fr)">${[['แข่ง', r.played], ['ชนะ', r.won], ['เสมอ', r.drawn], ['แพ้', r.lost], ['ได้', r.gf], ['เสีย', r.ga], ['+/-', (r.gd > 0 ? '+' : '') + r.gd], ['คะแนน', r.points]].map(([k, v]) => `<div class="kpi"><div class="v">${v}</div><div class="k">${k}</div></div>`).join('')}</div></div>
+   <div class="card"><div class="pad"><h3>ตัวจริง 7 คน</h3></div>${t.players.filter((p) => p.starter).map(pl).join('')}<div class="pad" style="padding-bottom:4px"><h3>สำรอง</h3></div>${t.players.filter((p) => !p.starter).map(pl).join('')}<div class="pad tiny muted">ค่าความสามารถ: ความเร็ว การส่ง การยิง การป้องกัน และผู้รักษาประตู รวมเป็นค่ารวมตามตำแหน่ง</div></div>
+  </div><div class="grid" style="align-content:start">
+   <div class="card pad"><div class="split"><h3>ความแข็งแกร่งทีม</h3><b class="num" style="font-size:26px;color:var(--gold)">${s.overall}</b></div>${bar('เกมรุก', s.attack)}${bar('กองกลาง', s.midfield)}${bar('เกมรับ', s.defense)}${bar('ผู้รักษาประตู', s.keeper)}</div>
+   <div class="card"><div class="pad" style="padding-bottom:0"><h3>ผลล่าสุด</h3></div>${recent.length ? recent.map((m) => matchRow(m, { date: true })).join('') : '<div class="empty">ยังไม่มีผลการแข่งขัน</div>'}</div>
+   <div class="card"><div class="pad" style="padding-bottom:0"><h3>นัดถัดไป</h3></div>${up.length ? up.map((m) => matchRow(m, { date: true })).join('') : '<div class="empty">ไม่มีนัดที่เหลือ</div>'}</div>
+  </div></div>`;
+}
+
+/* ---------- Match detail ---------- */
+const EV_TXT = {
+  kickoff: (e, tn) => `เขี่ยลูก ${tn}`, pass: (e) => `${esc(e.player.name)} ส่งบอลให้ ${esc(e.to.name)}`, dribble: (e) => `${esc(e.player.name)} เลี้ยงบอลขึ้นหน้า`,
+  tackle: (e) => `${esc(e.player.name)} แย่งบอลได้`, shot: (e) => `${esc(e.player.name)} ยิง${e.outcome === 'wide' ? 'ออกนอกกรอบ' : e.outcome === 'goal' ? '' : 'เข้ากรอบ'}`,
+  save: (e) => `${esc(e.player.name)} เซฟได้`, corner: (e, tn) => `เตะมุม ${tn}`, goal: (e, tn) => `ประตู! ${esc(e.player.name)} (${tn}) สกอร์ ${e.score.home}-${e.score.away}`,
+  halftime: (e) => `หมดครึ่งแรก ${e.score.home}-${e.score.away}`, fulltime: (e) => `จบการแข่งขัน ${e.score.home}-${e.score.away}`,
+};
+const KEY_EV = new Set(['kickoff', 'shot', 'save', 'corner', 'goal', 'halftime', 'fulltime']);
+function eventLog(m, upto, all) {
+  const ev = svc.simOf(m).events; const i = W69.eventIndexAt(ev, upto);
+  const list = ev.slice(0, i + 1).filter((e) => all || KEY_EV.has(e.type)).reverse();
+  if (!list.length) return '<div class="empty">ยังไม่มีเหตุการณ์</div>';
+  const k = kits(m);
+  return list.map((e) => { const tn = e.side ? esc(T(e.side === 'home' ? m.homeId : m.awayId).name) : ''; const c = W69.clockOf(e.t);
+    return `<div class="ev ${e.type === 'goal' ? 'goal' : KEY_EV.has(e.type) ? 'key' : ''}"><span class="t">${e.type === 'halftime' ? 'HT' : e.type === 'fulltime' ? 'FT' : W69.fmtClock(c.sec)}</span><span class="x">${e.side ? `<span class="dot" style="background:${k[e.side].fill};box-shadow:0 0 0 1px ${k[e.side].edge}"></span>` : ''}${EV_TXT[e.type](e, tn)}</span></div>`; }).join('');
+}
+function statsAt(m, upto) {
+  const ev = svc.simOf(m).events; const s = { home: { shots: 0, on: 0, passes: 0, tackles: 0, corners: 0, saves: 0, poss: 0 }, away: { shots: 0, on: 0, passes: 0, tackles: 0, corners: 0, saves: 0, poss: 0 } };
+  for (let i = 0; i < ev.length && ev[i].t <= upto; i++) { const e = ev[i]; if (!e.side) continue; const x = s[e.side];
+    if (e.type === 'shot') { x.shots++; if (e.outcome !== 'wide') x.on++; } else if (e.type === 'pass') x.passes++; else if (e.type === 'tackle') x.tackles++; else if (e.type === 'corner') x.corners++; else if (e.type === 'save') x.saves++;
+    const nx = ev[i + 1]; if (nx && e.type !== 'halftime') x.poss += Math.max(0, Math.min(nx.t, upto) - e.t); }
+  const tot = s.home.poss + s.away.poss || 1; s.home.pp = Math.round((s.home.poss / tot) * 100); s.away.pp = tot > 1 ? 100 - s.home.pp : 0; if (tot <= 1) s.home.pp = 0;
+  const row = (l, a, b) => `<div class="l">${a}</div><div class="c">${l}</div><div class="r">${b}</div>`;
+  return `<div class="kv">${row('ครองบอล %', s.home.pp, s.away.pp)}${row('ยิง', s.home.shots, s.away.shots)}${row('ยิงเข้ากรอบ', s.home.on, s.away.on)}${row('ส่งบอล', s.home.passes, s.away.passes)}${row('แย่งบอล', s.home.tackles, s.away.tackles)}${row('เตะมุม', s.home.corners, s.away.corners)}${row('เซฟ', s.home.saves, s.away.saves)}</div>`;
+}
+function preMatch(m) {
+  const st = svc.standings(); const rh = st.find((r) => r.teamId === m.homeId) || {}, ra = st.find((r) => r.teamId === m.awayId) || {};
+  const sh = W69.teamStrength(T(m.homeId)), sa = W69.teamStrength(T(m.awayId)); const h2h = svc.headToHead(m.homeId, m.awayId);
+  const avg = (r, k) => (r.played ? (r[k] / r.played).toFixed(2) : '-');
+  const ready = (t) => { const s = t.players.filter((p) => p.starter); return s.length === 7 && s.filter((p) => p.pos === 'GK').length === 1 ? `พร้อม (ตัวจริง 7 สำรอง ${t.players.length - 7})` : 'ไม่พร้อม'; };
+  const row = (l, a, b) => `<div class="l">${a}</div><div class="c">${l}</div><div class="r">${b}</div>`;
+  return `<div class="kv">${row('อันดับ', rh.rank || '-', ra.rank || '-')}${row('คะแนน', rh.points ?? 0, ra.points ?? 0)}${row('ฟอร์ม 5 นัด', formDots(rh.form), formDots(ra.form))}${row('ประตูได้เฉลี่ย/นัด', avg(rh, 'gf'), avg(ra, 'gf'))}${row('ประตูเสียเฉลี่ย/นัด', avg(rh, 'ga'), avg(ra, 'ga'))}${row('ความแข็งแกร่งรวม', sh.overall, sa.overall)}${row('เกมรุก / เกมรับ', sh.attack + ' / ' + sh.defense, sa.attack + ' / ' + sa.defense)}${row('ความพร้อม', '<span class="small">' + ready(T(m.homeId)) + '</span>', '<span class="small">' + ready(T(m.awayId)) + '</span>')}</div>
+  <div style="margin-top:14px"><h3 style="font-size:14.5px">สถิติพบกัน</h3>${h2h.length ? h2h.map((x) => `<div class="split small" style="padding:6px 0;border-top:1px solid var(--line)"><span>${thDate(x.date)}</span><span>${esc(T(x.homeId).name)} <b class="num">${x.result.home}-${x.result.away}</b> ${esc(T(x.awayId).name)}</span></div>`).join('') : '<div class="small muted">ยังไม่เคยพบกันในฤดูกาลนี้</div>'}</div>`;
+}
+function vMatch(id) {
+  const m = svc.state.matches.find((x) => x.id === id); if (!m) return '<div class="card empty">ไม่พบแมตช์ <a href="#/fixtures">ดูโปรแกรม</a></div>';
+  const ph = phase(m); const started = ['live', 'paused', 'halftime', 'finished', 'confirmed'].includes(ph);
+  const replay = app.replay === m.id && ['finished', 'confirmed'].includes(m.status);
+  const upto = replay ? W69.FT : started ? svc.gameTime(m) : -1;
+  const myPreds = app.session ? svc.state.predictions.filter((p) => p.matchId === m.id && p.userId === app.session.userId) : [];
+  const allLog = !!app.allLog;
+  return `<button class="btn sm ghost" data-act="back">ย้อนกลับ</button>
+  <section class="hero" style="margin-top:8px">${scoreboard(m, true)}${replay ? pitchBox(m, 15) : pitchBox(m)}
+   <div class="foot"><div class="row">${statusChip(m)}<span class="st sim">แมตช์จำลอง</span><span class="small muted">${thDate(m.date)} ${m.time} น. นัดที่ ${m.no} รอบ ${m.round}</span></div>
+   <div class="row">${['finished', 'confirmed'].includes(m.status) ? `<button class="btn sm" data-act="replay" data-id="${m.id}">${replay ? 'ปิดรีเพลย์' : 'ดูรีเพลย์ x15'}</button>` : ''}${app.admin ? `<a class="btn sm" href="#/admin/matches">จัดการแมตช์</a>` : ''}</div></div></section>
+  ${m.note ? `<div class="notice gold sec">หมายเหตุ: ${esc(m.note)}${m.postponedFrom ? ' (เดิม ' + esc(m.postponedFrom) + ')' : ''}</div>` : ''}
+  ${(m.corrections || []).length ? `<div class="notice gold sec">ผลการแข่งขันถูกแก้ไขโดยผู้ดูแล: ${m.corrections.map((c) => `${esc(c.old)} → ${esc(c.new)} (${esc(c.reason)})`).join(', ')} ภาพในสนามแสดงผลจากระบบจำลองเดิม</div>` : ''}
+  <div class="grid g2 sec">
+   <div class="grid" style="align-content:start">
+    ${ph === 'scheduled' ? predictPanel(m) : `<div class="card pad"><h3>ทายผล</h3><p class="small muted" style="margin:6px 0 0">${ph === 'cancelled' ? 'แมตช์ถูกยกเลิก คำทายที่ค้างอยู่ได้รับเครดิตคืนแล้ว' : ph === 'postponed' ? 'แมตช์ถูกเลื่อน รอกำหนดวันใหม่จากผู้ดูแล' : 'ปิดรับคำทายแล้ว ระบบจะตัดสินจากผลการแข่งขันที่ยืนยันแล้ว'}</p></div>`}
+    ${myPreds.length ? `<div class="card"><div class="pad" style="padding-bottom:4px"><h3>คำทายของคุณในแมตช์นี้</h3></div>${myPreds.map(predRow).join('')}</div>` : ''}
+    ${started ? `<div class="card"><div class="pad split" style="padding-bottom:6px"><h3>Match Event Log</h3><div class="tabs" style="padding:3px"><button class="${allLog ? '' : 'on'}" data-act="log" data-v="0">สำคัญ</button><button class="${allLog ? 'on' : ''}" data-act="log" data-v="1">ทั้งหมด</button></div></div><div class="log" data-log="${m.id}" data-all="${allLog ? 1 : 0}">${eventLog(m, upto, allLog)}</div></div>` : ''}
+   </div>
+   <div class="grid" style="align-content:start">
+    ${started ? `<div class="card pad"><h3 style="margin-bottom:10px">สถิติการแข่งขัน</h3><div data-stats="${m.id}">${statsAt(m, upto)}</div></div>` : ''}
+    <div class="card pad"><h3 style="margin-bottom:10px">ข้อมูลก่อนการแข่งขัน</h3>${preMatch(m)}</div>
+   </div></div>`;
+}
+
+/* ---------- Prediction ---------- */
+function predRow(p) {
+  const m = svc.state.matches.find((x) => x.id === p.matchId); const lab = predLabel(p, m);
+  const chip = { pending: '<span class="st sched">รอผล</span>', won: '<span class="st live" style="--x:0">ทายถูก</span>', lost: '<span class="st cx">ทายผิด</span>', void: '<span class="st ft">คืนเครดิต</span>' }[p.status];
+  return `<div class="pad" style="border-top:1px solid var(--line);padding:10px 14px"><div class="split"><div><b>${lab}</b><div class="tiny muted">${m ? esc(T(m.homeId).name) + ' vs ' + esc(T(m.awayId).name) + ' ' : ''}${thDT(p.placedAt)}</div></div>${chip}</div>
+  <div class="split small" style="margin-top:4px"><span class="muted">ใช้ ${fmtN(p.stake)} อัตรา ×${p.odds.toFixed(2)}${p.resultSeen ? ' ผล ' + p.resultSeen : ''}</span><b class="num">${p.status === 'won' ? '+' + fmtN(p.payout) : p.status === 'lost' ? '-' + fmtN(p.stake) : p.status === 'void' ? 'คืน ' + fmtN(p.stake) : 'รับคืน ' + fmtN(p.potential)}</b></div><div class="tiny muted">รหัสรายการ ${p.id}</div></div>`;
+}
+function predLabel(p, m) {
+  if (p.market === 'SCORE') return 'ทายสกอร์ ' + p.pick;
+  if (!m) return p.pick; return p.pick === 'draw' ? 'เสมอ' : (p.pick === 'home' ? T(m.homeId).name : T(m.awayId).name) + ' ชนะ';
+}
+function predictPanel(m) {
+  const pk = app.pick && app.pick.matchId === m.id ? app.pick : (app.pick = { matchId: m.id, market: '1X2', pick: null, home: 1, away: 1, stake: svc.state.settings.stakeOptions[Math.min(1, svc.state.settings.stakeOptions.length - 1)] });
+  const odds = svc.oddsFor(m); const h = T(m.homeId), a = T(m.awayId); const u = app.session && svc.state.users[app.session.userId];
+  const o = pk.market === '1X2' ? (pk.pick ? odds[pk.pick] : null) : W69.scoreOdds(h, a, pk.home, pk.away);
+  const ret = o ? Math.round(pk.stake * o * 100) / 100 : 0; const bal = u ? u.balance : 0;
+  const mine = app.session ? svc.state.predictions.filter((p) => p.matchId === m.id && p.userId === app.session.userId && p.status !== 'void') : [];
+  const done = mine.some((p) => p.market === pk.market);
+  const ready = u && o && !done && bal >= pk.stake;
+  return `<div class="card pad" id="predict"><div class="split"><h3>ทายผลการแข่งขัน</h3><span class="st sim">${EMBED ? 'อัตราจ่าย' : 'อัตราจำลอง'}</span></div>
+   <p class="small muted" style="margin:4px 0 10px">ปิดรับ ${thDT(m.kickoff)} (อีก <span class="num" data-countdown="${m.kickoff}">${countdown(m.kickoff)}</span>)</p>
+   <div class="tabs" style="margin-bottom:12px"><button class="${pk.market === '1X2' ? 'on' : ''}" data-act="market" data-v="1X2">ผลแพ้ชนะ</button><button class="${pk.market === 'SCORE' ? 'on' : ''}" data-act="market" data-v="SCORE">ทายสกอร์เต็มเวลา</button></div>
+   ${pk.market === '1X2' ? `<div class="pickgrid" role="radiogroup" aria-label="เลือกผล">${[['home', esc(h.name) + ' ชนะ'], ['draw', 'เสมอ'], ['away', esc(a.name) + ' ชนะ']].map(([k, l]) => `<button class="pick ${pk.pick === k ? 'on' : ''}" role="radio" aria-checked="${pk.pick === k}" data-act="pick" data-v="${k}"><span class="lb">${l}</span><span class="od num">${odds[k].toFixed(2)}</span><span class="tiny muted">${(odds.probs[k] * 100).toFixed(0)}%</span></button>`).join('')}</div>`
+    : `<div class="split" style="justify-content:center;gap:16px"><div style="text-align:center"><div class="small muted" style="margin-bottom:4px">${esc(h.name)}</div><div class="stepper"><button data-act="sc" data-s="home" data-d="-1" aria-label="ลดประตูทีมเหย้า">−</button><span class="v">${pk.home}</span><button data-act="sc" data-s="home" data-d="1" aria-label="เพิ่มประตูทีมเหย้า">+</button></div></div><b class="num" style="font-size:24px;margin-top:20px">:</b><div style="text-align:center"><div class="small muted" style="margin-bottom:4px">${esc(a.name)}</div><div class="stepper"><button data-act="sc" data-s="away" data-d="-1" aria-label="ลดประตูทีมเยือน">−</button><span class="v">${pk.away}</span><button data-act="sc" data-s="away" data-d="1" aria-label="เพิ่มประตูทีมเยือน">+</button></div></div></div>
+       <p class="tiny muted" style="text-align:center;margin:8px 0 0">${EMBED ? 'อัตราจ่าย' : 'อัตราจำลอง'}สำหรับสกอร์นี้ ×${o.toFixed(2)}</p>`}
+   <div style="margin:14px 0 6px" class="small muted">เครดิตที่ใช้ต่อคำทาย</div>
+   <div class="chips">${svc.state.settings.stakeOptions.map((s) => `<button class="chip ${pk.stake === s ? 'on' : ''}" data-act="stake" data-v="${s}"><b>${fmtN(s)}</b></button>`).join('')}</div>
+   <div class="summary" style="margin-top:12px"><span class="muted">เครดิตที่ใช้</span><span class="v">${fmtN(pk.stake)}</span><span class="muted">${EMBED ? 'อัตราจ่าย' : 'อัตราจำลอง'}</span><span class="v">${o ? '×' + o.toFixed(2) : '-'}</span><span class="muted">รับคืนรวมหากทายถูก</span><span class="v" style="color:var(--gold)">${o ? fmtN(ret) : '-'}</span><span class="muted">กำไรสุทธิหากทายถูก</span><span class="v">${o ? '+' + fmtN(ret - pk.stake) : '-'}</span><span class="muted">ยอดคงเหลือหลังยืนยัน</span><span class="v">${u ? fmtN(bal - pk.stake) : '-'}</span></div>
+   ${done ? '<div class="notice gold" style="margin-top:10px">คุณทายประเภทนี้ของแมตช์นี้แล้ว (1 รายการต่อประเภทต่อแมตช์)</div>' : u && bal < pk.stake ? '<div class="notice err" style="margin-top:10px">เครดิตทดลองไม่พอ เลือกจำนวนที่น้อยลง</div>' : ''}
+   <div style="margin-top:12px">${u ? `<button class="btn gold block" data-act="reviewPred" ${ready ? '' : 'disabled'}>${pk.market === '1X2' && !pk.pick ? 'เลือกผลที่ต้องการทาย' : 'ตรวจสอบก่อนยืนยัน'}</button>` : '<button class="btn gold block" data-act="login">เข้าสู่ระบบทดลองเพื่อทายผล</button>'}</div>
+   <p class="disclaim">อัตราต่อรองเป็น${EMBED ? 'อัตราจ่าย' : 'อัตราจำลอง'}จากแบบจำลองความแข็งแกร่งทีม ไม่ใช่อัตราจากตลาดจริง และไม่รับประกันกำไร</p></div>`;
+}
+function vPredict() {
+  const open = svc.state.matches.filter((m) => m.status === 'scheduled' && m.kickoff > now()).sort((a, b) => a.kickoff - b.kickoff).slice(0, 10);
+  const mine = app.session ? svc.state.predictions.filter((p) => p.userId === app.session.userId && p.status === 'pending') : [];
+  return `<div class="sec-h"><h1>ทายผล</h1><a class="btn sm gold" href="#/champion">ทายทีมแชมป์</a></div>
+  <div class="notice gold">${EMBED ? 'ทายผลด้วยเครดิตในกระเป๋า WINNER 69' : 'ทายผลด้วยเครดิตทดลองเท่านั้น'} ส่งคำทายได้ก่อนแมตช์เริ่ม ระบบปิดรับอัตโนมัติเมื่อสถานะเป็น LIVE โดยใช้เวลาของระบบ</div>
+  ${mine.length ? `<section class="sec"><div class="sec-h"><h2>รอผล (${mine.length})</h2><a class="link" href="#/history/preds">ประวัติทั้งหมด</a></div><div class="card">${mine.map(predRow).join('')}</div></section>` : ''}
+  <section class="sec"><div class="sec-h"><h2>แมตช์ที่เปิดรับคำทาย</h2></div>
+  <div class="card">${open.length ? open.map((m) => { const o = svc.oddsFor(m); return `${matchRow(m, { date: true })}<div class="row" style="padding:0 14px 12px;gap:8px">${[['home', '1'], ['draw', 'X'], ['away', '2']].map(([k, l]) => `<a class="chip" style="flex:1;text-decoration:none" href="#/match/${m.id}" data-act="prepick" data-id="${m.id}" data-v="${k}">${l}<b>${o[k].toFixed(2)}</b></a>`).join('')}</div>`; }).join('') : '<div class="empty">ยังไม่มีแมตช์ที่เปิดรับคำทาย</div>'}</div></section>`;
+}
+
+/* ---------- Championship ---------- */
+function vChampion() {
+  const s = svc.state.season; const st = svc.standings(); const probs = svc.titleProbabilities(); const open = svc.champOpen();
+  const remain = (id) => svc.teamMatches(id).filter((m) => !['confirmed', 'cancelled'].includes(m.status)).length;
+  const u = app.session && svc.state.users[app.session.userId];
+  const mine = app.session ? svc.state.champPicks.filter((p) => p.userId === app.session.userId) : [];
+  const cur = mine.find((p) => p.seasonId === s.id && p.status !== 'void');
+  const cp = app.champ || (app.champ = { teamId: null, stake: svc.state.settings.stakeOptions[0] });
+  const odds = (id) => Math.min(200, Math.max(1.05, Math.round((1 / (Math.max(probs[id] || 0.004, 0.004) * 1.12)) * 100) / 100));
+  return `<div class="sec-h"><h1>ทายทีมแชมป์ลีก</h1><span class="muted small">${esc(s.name)}</span></div>
+  ${s.closed ? `<div class="card pad row" style="background:linear-gradient(120deg,rgba(245,196,81,.15),var(--card))">${logo(T(s.champion), 64)}<div><div class="muted small">แชมป์ฤดูกาล (ตัดสินจากตารางคะแนนอย่างเป็นทางการ)</div><h1>${esc(T(s.champion).name)}</h1></div></div>`
+    : `<div class="notice ${open ? 'gold' : 'err'}">${open ? `ปิดรับคำทายแชมป์ ${thDT(s.champDeadline)} (อีก <span class="num" data-countdown="${s.champDeadline}">${countdown(s.champDeadline)}</span>) เลือกได้ 1 ทีมต่อฤดูกาล และแก้ไขไม่ได้หลังยืนยัน` : 'ปิดรับคำทายแชมป์ของฤดูกาลนี้แล้ว ระบบจะตัดสินอัตโนมัติเมื่อปิดฤดูกาล'}</div>`}
+  ${cur ? `<div class="card sec"><div class="pad" style="padding-bottom:0"><h3>ทีมที่คุณเลือก</h3></div>${champRow(cur)}</div>` : ''}
+  <div class="card sec"><div class="tbl-wrap"><table class="tbl"><thead><tr>${open && !cur ? '<th></th>' : ''}<th>#</th><th class="t">ทีม</th><th>คะแนน</th><th>เหลือ</th><th>ได้-เสีย</th><th>ฟอร์ม</th><th>โอกาสแชมป์</th><th>${EMBED ? 'อัตราจ่าย' : 'อัตราจำลอง'}</th></tr></thead><tbody>
+  ${st.map((r) => `<tr class="${r.rank <= 4 ? 'top' : ''}" ${open && !cur ? `data-act="champPick" data-v="${r.teamId}" style="cursor:pointer"` : ''}>${open && !cur ? `<td><input type="radio" name="champ" aria-label="เลือก ${esc(T(r.teamId).name)}" ${cp.teamId === r.teamId ? 'checked' : ''} style="width:20px;height:20px;accent-color:#F5C451"></td>` : ''}<td class="num">${r.rank}</td><td class="t"><span class="tm">${logo(T(r.teamId), 24)}<span>${esc(T(r.teamId).name)}</span></span></td><td class="pts">${r.points}</td><td>${remain(r.teamId)}</td><td>${r.gf}-${r.ga}</td><td>${formDots(r.form)}</td><td><b class="num">${((probs[r.teamId] || 0) * 100).toFixed(1)}%</b></td><td class="num">×${odds(r.teamId).toFixed(2)}</td></tr>`).join('')}</tbody></table></div></div>
+  ${open && !cur ? `<div class="card pad sec"><div class="small muted" style="margin-bottom:6px">เครดิตที่ใช้</div><div class="chips">${svc.state.settings.stakeOptions.map((x) => `<button class="chip ${cp.stake === x ? 'on' : ''}" data-act="champStake" data-v="${x}"><b>${fmtN(x)}</b></button>`).join('')}</div>
+   ${cp.teamId ? `<div class="summary" style="margin-top:12px"><span class="muted">ทีม</span><span class="v">${esc(T(cp.teamId).name)}</span><span class="muted">เครดิตที่ใช้</span><span class="v">${fmtN(cp.stake)}</span><span class="muted">${EMBED ? 'อัตราจ่าย' : 'อัตราจำลอง'}</span><span class="v">×${odds(cp.teamId).toFixed(2)}</span><span class="muted">รับคืนรวมหากถูก</span><span class="v" style="color:var(--gold)">${fmtN(Math.round(cp.stake * odds(cp.teamId) * 100) / 100)}</span></div>` : ''}
+   <div style="margin-top:12px">${u ? `<button class="btn gold block" data-act="reviewChamp" ${cp.teamId && u.balance >= cp.stake ? '' : 'disabled'}>${cp.teamId ? (u.balance >= cp.stake ? 'ตรวจสอบก่อนยืนยัน' : 'เครดิตไม่พอ') : 'แตะแถวทีมเพื่อเลือก'}</button>` : '<button class="btn gold block" data-act="login">เข้าสู่ระบบทดลองเพื่อทาย</button>'}</div></div>` : ''}
+  <p class="disclaim">โอกาสแชมป์และ${EMBED ? 'อัตราจ่าย' : 'อัตราจำลอง'}คำนวณจากแบบจำลอง Monte Carlo ของนัดที่เหลือ เป็นค่าประมาณ ไม่ใช่การรับประกันผล</p>
+  ${mine.length ? `<section class="sec"><h2 style="margin-bottom:10px">ประวัติการเลือกทีมแชมป์</h2><div class="card">${mine.slice().reverse().map(champRow).join('')}</div></section>` : ''}`;
+}
+function champRow(p) {
+  const chip = { pending: '<span class="st sched">รอปิดฤดูกาล</span>', won: '<span class="st live">ทายถูก</span>', lost: '<span class="st cx">ทายผิด</span>', void: '<span class="st ft">คืนเครดิต</span>' }[p.status];
+  return `<div class="pad split" style="border-top:1px solid var(--line)"><div class="row">${logo(T(p.teamId), 34)}<div><b>${esc(T(p.teamId).name)}</b><div class="tiny muted">ฤดูกาล ${p.seasonId.slice(1)} ใช้ ${fmtN(p.stake)} ×${p.odds.toFixed(2)} ${thDT(p.placedAt)}</div></div></div>${chip}</div>`;
+}
+
+/* ---------- History ---------- */
+function vHistory(tab) {
+  tab = tab || 'results';
+  const tabs = `<div class="tabs" style="margin-bottom:14px"><button class="${tab === 'results' ? 'on' : ''}" data-act="go" data-h="#/history/results">ผลการแข่งขัน</button><button class="${tab === 'preds' ? 'on' : ''}" data-act="go" data-h="#/history/preds">คำทายของฉัน</button><button class="${tab === 'credits' ? 'on' : ''}" data-act="go" data-h="#/history/credits">ประวัติเครดิต</button></div>`;
+  let body = '';
+  if (tab === 'results') {
+    const ms = svc.state.matches.filter((m) => ['confirmed', 'finished', 'cancelled'].includes(m.status)).sort((a, b) => b.kickoff - a.kickoff || b.no - a.no);
+    body = `<div class="card">${ms.length ? ms.map((m) => matchRow(m, { date: true })).join('') : '<div class="empty">ยังไม่มีผลการแข่งขัน</div>'}</div>`;
+  } else if (!app.session) body = '<div class="card empty">เข้าสู่ระบบทดลองเพื่อดูประวัติของคุณ<div style="margin-top:12px"><button class="btn gold" data-act="login">เข้าสู่ระบบทดลอง</button></div></div>';
+  else if (tab === 'preds') {
+    const ps = svc.state.predictions.filter((p) => p.userId === app.session.userId).sort((a, b) => b.placedAt - a.placedAt);
+    const cs = svc.state.champPicks.filter((p) => p.userId === app.session.userId);
+    const all = ps.concat(cs); const settled = all.filter((p) => p.status === 'won' || p.status === 'lost');
+    const won = settled.filter((p) => p.status === 'won'); const net = won.reduce((t, p) => t + p.potential, 0) - settled.reduce((t, p) => t + p.stake, 0);
+    body = `<div class="kpis" style="margin-bottom:14px">${[['คำทายทั้งหมด', all.length], ['ทายถูก', won.length], ['ทายผิด', settled.length - won.length], ['รอผล', all.filter((p) => p.status === 'pending').length], ['อัตราทายถูก', settled.length ? Math.round((won.length / settled.length) * 100) + '%' : '-'], ['สุทธิ (เครดิต)', (net >= 0 ? '+' : '') + fmtN(net)]].map(([k, v]) => `<div class="kpi"><div class="v">${v}</div><div class="k">${k}</div></div>`).join('')}</div>
+    <div class="card">${ps.length ? ps.map(predRow).join('') : '<div class="empty">ยังไม่มีคำทาย <a href="#/predict">เริ่มทายผล</a></div>'}</div>`;
+  } else {
+    const tx = svc.state.ledger.filter((t) => t.userId === app.session.userId).slice().reverse();
+    const TY = { INIT: 'เครดิตเริ่มต้น', STAKE: 'ใช้ทายผล', PAYOUT: 'รับคืน', REFUND: 'คืนเครดิต', RESET: 'รีเซ็ตบัญชี' };
+    body = `<div class="card"><div class="tbl-wrap"><table class="tbl"><thead><tr><th class="t">เวลา</th><th class="t">รายการ</th><th>จำนวน</th><th>คงเหลือ</th><th class="t">Transaction ID</th></tr></thead><tbody>${tx.map((t) => `<tr><td class="t small">${thDT(t.at)}</td><td class="t">${TY[t.type] || t.type}<div class="tiny muted">${esc(t.note)}</div></td><td class="num" style="color:${t.amount >= 0 ? 'var(--live)' : '#FF9BA6'}">${t.amount >= 0 ? '+' : ''}${fmtN(t.amount)}</td><td class="num">${fmtN(t.balanceAfter)}</td><td class="t tiny muted">${t.id}</td></tr>`).join('')}</tbody></table></div></div>`;
+  }
+  return `<div class="sec-h"><h1>ประวัติ</h1></div>${tabs}${body}`;
+}
+
+/* ===== Admin dashboard ===== */
+const AUD_TH = { ADMIN_LOGIN: 'เข้าสู่ระบบผู้ดูแล', SEASON_CREATED: 'สร้างฤดูกาล', MATCH_STARTED: 'เริ่มแมตช์', MATCH_SPEED: 'ปรับความเร็ว', MATCH_PAUSED: 'หยุดแมตช์', MATCH_RESUMED: 'เล่นต่อ', MATCH_SIMULATED_INSTANT: 'จำลองจบทันที', RESULT_CONFIRMED: 'ยืนยันผล', MATCH_RESCHEDULED: 'เปลี่ยนวันแข่ง', MATCH_POSTPONED: 'เลื่อนแมตช์', MATCH_CANCELLED: 'ยกเลิกแมตช์', RESULT_EDITED: 'แก้ไขผล', TEAM_UPDATED: 'แก้ไขทีม', TEAM_ADDED: 'เพิ่มทีม', PLAYER_UPDATED: 'แก้ไขนักเตะ', SEASON_CLOSED: 'ปิดฤดูกาล', SETTINGS_UPDATED: 'แก้ไขการตั้งค่า', RESET_CREDITS: 'รีเซ็ตเครดิต', EXPORT_CSV: 'ส่งออก CSV', ADMIN_PASSWORD_CHANGED: 'เปลี่ยนรหัสผ่าน' };
+function vAdmin(tab) {
+  if (!app.admin && EMBED) return '<div class="card empty" style="margin-top:20px">ส่วนนี้สำหรับผู้ดูแล จัดการลีกได้จากหน้าแอดมิน WINNER 69</div>';
+  if (!app.admin) return `<div style="max-width:420px;margin:20px auto" class="card pad"><h1>ผู้ดูแลระบบ</h1><p class="small muted">พื้นที่สำหรับผู้ดูแลเท่านั้น แยกจากบัญชีผู้เล่น</p>
+    <form data-form="adminLogin"><div class="field"><label for="au">ชื่อผู้ใช้</label><input id="au" class="inp" name="u" autocomplete="username" required></div>
+    <div class="field"><label for="ap">รหัสผ่าน</label><input id="ap" class="inp" type="password" name="p" autocomplete="current-password" required></div>
+    <button class="btn gold block" type="submit">เข้าสู่ระบบผู้ดูแล</button></form>
+    <div class="notice" style="margin-top:12px">บัญชีสำหรับพัฒนาในเครื่อง: <b>admin</b> / <b>winner69admin</b> ระบบจะให้เปลี่ยนรหัสผ่านหลังเข้าสู่ระบบ ต้องเปลี่ยนก่อนใช้งานจริง</div></div>`;
+  tab = tab || 'overview'; const s = svc.state; const ms = s.matches;
+  const cnt = (f) => ms.filter(f).length;
+  const tabs = [['overview', 'ภาพรวม'], ['matches', 'แมตช์'], ['teams', 'ทีมและนักเตะ'], ['season', 'ฤดูกาล'], ['credits', 'คำทายและเครดิต'], ['audit', 'Audit Log'], ['settings', 'ตั้งค่า']];
+  let body = '';
+  if (tab === 'overview') {
+    const pend = cnt((m) => m.status === 'finished');
+    body = `<div class="kpis">${[['ทีม', s.season.teamIds.length], ['แมตช์ทั้งหมด', ms.length], ['กำลังแข่ง', cnt((m) => m.status === 'live')], ['จบแล้ว', cnt((m) => ['finished', 'confirmed'].includes(m.status))], ['กำลังจะเริ่ม', cnt((m) => m.status === 'scheduled')], ['ฤดูกาล', s.season.id.slice(1) + (s.season.closed ? ' (ปิด)' : '')]].map(([k, v]) => `<div class="kpi"><div class="v">${v}</div><div class="k">${k}</div></div>`).join('')}</div>
+    ${pend ? `<div class="notice gold sec">มี ${pend} แมตช์รอยืนยันผล <a href="#/admin/matches">ไปยืนยัน</a></div>` : ''}
+    <div class="grid g2 sec"><div class="card"><div class="pad split"><h3>ตารางคะแนน</h3><a class="link small" href="#/table" style="color:var(--gold)">เต็ม</a></div><div class="tbl-wrap">${tableHtml(svc.standings(), true)}</div></div>
+    <div class="grid" style="align-content:start"><div class="card"><div class="pad"><h3>รายงานผลล่าสุด</h3></div>${ms.filter((m) => ['finished', 'confirmed'].includes(m.status)).sort((a, b) => b.finishedAt - a.finishedAt).slice(0, 5).map((m) => matchRow(m, { date: true })).join('') || '<div class="empty">ยังไม่มีผล</div>'}</div>
+    <div class="card pad"><h3>สรุปคำทาย</h3><div class="kv" style="grid-template-columns:1fr auto;margin-top:8px">${[['คำทายทั้งหมด', s.predictions.length], ['รอผล', s.predictions.filter((p) => p.status === 'pending').length], ['ทายแชมป์', s.champPicks.length], [EMBED ? 'สมาชิกที่ทายผล' : 'ผู้ใช้ทดลอง', Object.keys(s.users).length], ['ธุรกรรมเครดิต', s.ledger.length]].map(([k, v]) => `<div class="muted">${k}</div><div class="r">${v}</div>`).join('')}</div></div></div></div>`;
+  } else if (tab === 'matches') {
+    const f = app.amf || 'active'; const d = app.amd || today();
+    let list = ms;
+    if (f === 'active') list = ms.filter((m) => m.status === 'live' || m.status === 'finished' || (m.status === 'scheduled' && m.date <= W69.addDays(today(), 1)) || m.status === 'postponed');
+    else if (f === 'date') list = ms.filter((m) => m.date === d);
+    else if (f !== 'all') list = ms.filter((m) => m.status === f);
+    list = list.slice().sort((a, b) => a.kickoff - b.kickoff || a.no - b.no);
+    body = `<div class="row" style="margin-bottom:12px"><select class="inp" style="max-width:220px" data-change="amf">${[['active', 'ต้องดูแลตอนนี้'], ['date', 'ตามวันที่'], ['live', 'กำลังแข่ง'], ['finished', 'รอยืนยันผล'], ['scheduled', 'ยังไม่แข่ง'], ['postponed', 'เลื่อน'], ['cancelled', 'ยกเลิก'], ['confirmed', 'ยืนยันแล้ว'], ['all', 'ทั้งหมด']].map(([k, l]) => `<option value="${k}" ${f === k ? 'selected' : ''}>${l}</option>`).join('')}</select>
+      ${f === 'date' ? `<input type="date" class="inp" style="max-width:180px" value="${d}" data-change="amd">` : ''}
+      <button class="btn sm" data-act="simToday">จำลองแมตช์วันนี้ให้จบทันที</button><button class="btn sm danger" data-act="simAll">จำลองทุกนัดที่เหลือ</button></div>
+      <div class="card">${list.length ? list.map(adminMatchRow).join('') : '<div class="empty">ไม่มีแมตช์ตามตัวกรอง</div>'}</div>`;
+  } else if (tab === 'teams') {
+    const sel = app.ateam || s.teams[0].id; const t = T(sel);
+    body = `<div class="row" style="margin-bottom:12px"><select class="inp" style="max-width:260px" data-change="ateam">${s.teams.map((x) => `<option value="${x.id}" ${x.id === sel ? 'selected' : ''}>${esc(x.name)}${x.active ? '' : ' (ปิดใช้งาน)'}</option>`).join('')}</select><button class="btn sm" data-act="addTeam">เพิ่มทีม</button></div>
+    <div class="grid g2"><div class="card pad"><div class="row">${logo(t, 56)}<h2>${esc(t.name)}</h2></div>
+      <form data-form="team" data-id="${t.id}" style="margin-top:12px"><div class="field"><label>ชื่อทีม</label><input class="inp" name="name" value="${esc(t.name)}" required></div>
+      <div class="row"><div class="field"><label>สีหลัก</label><input type="color" class="inp" style="width:70px;padding:4px" name="primary" value="${t.primary}"></div><div class="field"><label>สีรอง</label><input type="color" class="inp" style="width:70px;padding:4px" name="secondary" value="${t.secondary}"></div><div class="field"><label>ชุดเยือน</label><input type="color" class="inp" style="width:70px;padding:4px" name="kit2" value="${t.kit2}"></div></div>
+      <label class="row small" style="margin-bottom:12px"><input type="checkbox" name="active" ${t.active ? 'checked' : ''} style="width:20px;height:20px"> เปิดใช้งาน (ปิดแล้วนัดที่ยังไม่แข่งของทีมจะถูกยกเลิกและคืนเครดิต)</label>
+      <button class="btn gold" type="submit">บันทึกทีม</button></form>
+      <p class="tiny muted">ทีมที่เพิ่มใหม่จะเข้าร่วมเมื่อสร้างฤดูกาลใหม่ (ต้องมีจำนวนทีมเป็นเลขคู่)</p></div>
+      <div class="card"><div class="pad"><h3>รายชื่อนักเตะ</h3><p class="tiny muted" style="margin:4px 0 0">ตัวจริงต้องมี 7 คน และ GK 1 คน การเปลี่ยนแปลงมีผลกับแมตช์ที่ยังไม่เริ่มเท่านั้น</p></div>
+      ${t.players.map((p) => `<div class="pl" style="grid-template-columns:34px 1fr auto auto"><span class="n">${p.num}</span><span>${esc(p.name)} ${p.starter ? '' : '<span class="tiny muted">(สำรอง)</span>'}</span><span class="pos ${p.pos}">${p.pos} ${p.ovr}</span><button class="btn sm" data-act="editPlayer" data-t="${t.id}" data-p="${p.id}">แก้ไข</button></div>`).join('')}</div></div>`;
+  } else if (tab === 'season') {
+    const done = ms.filter((m) => ['confirmed', 'cancelled'].includes(m.status)).length;
+    body = `<div class="grid g2"><div class="card pad"><h3>${esc(s.season.name)}</h3><div class="small muted" style="margin:6px 0 12px">เริ่ม ${thDate(s.season.startDate)} ${s.season.totalDays} วันแข่ง ${ms.length} นัด ยืนยัน/ยกเลิกแล้ว ${done} นัด seed: ${esc(s.season.seed)}<br>ปิดรับทายแชมป์ ${thDT(s.season.champDeadline)}</div>
+      ${s.season.closed ? `<div class="notice ok">ปิดฤดูกาลแล้ว แชมป์: <b>${esc(T(s.season.champion).name)}</b></div>` : `<button class="btn gold" data-act="closeSeason" ${done === ms.length ? '' : 'disabled'}>ปิดฤดูกาลและประกาศแชมป์</button>${done === ms.length ? '' : '<p class="tiny muted">ต้องยืนยันผลหรือยกเลิกครบทุกนัดก่อน (ใช้ "จำลองทุกนัดที่เหลือ" ในแท็บแมตช์เพื่อทดสอบ)</p>'}`}</div>
+      <div class="card pad"><h3>สร้างฤดูกาลใหม่ (โปรแกรมอัตโนมัติ)</h3><form data-form="newSeason" style="margin-top:10px"><div class="field"><label>วันเริ่มแข่ง (เวลาไทย)</label><input class="inp" type="date" name="start" value="${today()}" required></div>
+      <div class="field"><label>Seed สำหรับระบบสุ่ม (ทดสอบซ้ำได้)</label><input class="inp" name="seed" value="S${s.archive.length + 2}-${Date.now().toString(36).slice(-4)}"></div>
+      <p class="small muted">ทีมที่เปิดใช้งาน ${s.teams.filter((t) => t.active).length} ทีม แบบพบกันหมดเหย้า-เยือน วันละ ${s.settings.matchesPerDay} คู่ เวลา ${s.settings.slotTimes.join(', ')} น. คำทายที่ค้างจะได้รับเครดิตคืน</p>
+      <button class="btn" type="submit">สร้างโปรแกรมฤดูกาลใหม่</button></form></div></div>
+      ${s.archive.length ? `<section class="sec"><h3>ฤดูกาลที่ผ่านมา</h3><div class="card">${s.archive.map((a) => `<div class="pad split" style="border-top:1px solid var(--line)"><span>${esc(a.season.name)} (เริ่ม ${thDate(a.season.startDate)})</span><span>${a.champion ? 'แชมป์ ' + esc(T(a.champion).name) : 'ไม่ได้ปิดฤดูกาล'}</span></div>`).join('')}</div></section>` : ''}`;
+  } else if (tab === 'credits') {
+    const users = Object.values(s.users);
+    body = `<div class="card"><div class="pad split"><h3>${EMBED ? 'สมาชิกที่ทายผล' : 'บัญชีทดลอง'} (${users.length})</h3>${EMBED ? '' : `<button class="btn sm danger" data-act="resetAll" ${users.length ? '' : 'disabled'}>รีเซ็ตทุกบัญชี</button>`}</div>
+      ${users.length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr><th class="t">ผู้ใช้</th><th>เครดิต</th><th>คำทาย</th><th>รอผล</th><th></th></tr></thead><tbody>${users.map((u) => `<tr><td class="t">${esc(u.name)}</td><td class="num">${fmtN(u.balance)}</td><td>${s.predictions.filter((p) => p.userId === u.id).length}</td><td>${s.predictions.filter((p) => p.userId === u.id && p.status === 'pending').length}</td><td>${EMBED ? '' : `<button class="btn sm" data-act="resetOne" data-u="${u.id}">Reset Demo Account</button>`}</td></tr>`).join('')}</tbody></table></div>` : '<div class="empty">ยังไม่มีผู้ใช้ทดลอง</div>'}</div>
+      <div class="card sec"><div class="pad"><h3>${EMBED ? 'รายการคำทายล่าสุด' : 'รายการคำทายจำลองล่าสุด'}</h3></div><div class="tbl-wrap"><table class="tbl"><thead><tr><th class="t">เวลา</th><th class="t">ผู้ใช้</th><th class="t">แมตช์</th><th class="t">คำทาย</th><th>เครดิต</th><th>อัตรา</th><th>สถานะ</th></tr></thead><tbody>${s.predictions.slice(-60).reverse().map((p) => { const m = ms.find((x) => x.id === p.matchId); return `<tr><td class="t small">${thDT(p.placedAt)}</td><td class="t">${esc((s.users[p.userId] || {}).name)}</td><td class="t small">${m ? m.id : p.matchId}</td><td class="t">${esc(predLabel(p, m))}</td><td>${fmtN(p.stake)}</td><td>×${p.odds.toFixed(2)}</td><td>${p.status}</td></tr>`; }).join('') || '<tr><td colspan="7" class="empty">ไม่มีรายการ</td></tr>'}</tbody></table></div></div>
+      <div class="card sec"><div class="pad"><h3>${EMBED ? 'ประวัติเครดิต' : 'ประวัติ Demo Credits'}</h3></div><div class="tbl-wrap"><table class="tbl"><thead><tr><th class="t">เวลา</th><th class="t">ผู้ใช้</th><th>ประเภท</th><th>จำนวน</th><th>คงเหลือ</th><th class="t">TX ID</th></tr></thead><tbody>${s.ledger.slice(-80).reverse().map((t) => `<tr><td class="t small">${thDT(t.at)}</td><td class="t">${esc((s.users[t.userId] || {}).name)}</td><td>${t.type}</td><td class="num">${t.amount >= 0 ? '+' : ''}${fmtN(t.amount)}</td><td class="num">${fmtN(t.balanceAfter)}</td><td class="t tiny muted">${t.id}</td></tr>`).join('')}</tbody></table></div></div>`;
+  } else if (tab === 'audit') {
+    body = `<div class="card"><div class="tbl-wrap"><table class="tbl"><thead><tr><th class="t">เวลา</th><th class="t">ผู้ทำรายการ</th><th class="t">การกระทำ</th><th class="t">รายละเอียด (ค่าเดิม/ค่าใหม่)</th></tr></thead><tbody>${s.audit.slice(-200).reverse().map((a) => `<tr><td class="t small" style="white-space:nowrap">${thDT(a.at)}</td><td class="t">${esc(a.actor)}</td><td class="t">${AUD_TH[a.action] || a.action}</td><td class="t tiny" style="max-width:420px;word-break:break-word;color:var(--muted)">${esc(JSON.stringify(a.detail))}</td></tr>`).join('')}</tbody></table></div></div>`;
+  } else if (tab === 'settings') {
+    const st = s.settings;
+    body = `<div class="grid g2"><div class="card pad"><h3>${EMBED ? 'การทายผลและการแข่งขัน' : 'Demo Credits และการแข่งขัน'}</h3><form data-form="settings" style="margin-top:10px">
+      ${EMBED ? '' : `<div class="field"><label>เครดิตเริ่มต้นต่อบัญชี</label><input class="inp" type="number" name="startingCredits" min="100" value="${st.startingCredits}"></div>`}
+      <div class="field"><label>จำนวนเครดิตต่อคำทาย (คั่นด้วยจุลภาค)</label><input class="inp" name="stakeOptions" value="${st.stakeOptions.join(',')}"></div>
+      <div class="field"><label>รูปแบบเวลาแข่ง 2 คู่ต่อวัน</label><select class="inp" name="slotMode"><option value="same" ${st.slotTimes[0] === st.slotTimes[1] ? 'selected' : ''}>เล่นพร้อมกัน 21:00 ทั้งสองคู่</option><option value="split" ${st.slotTimes[0] !== st.slotTimes[1] ? 'selected' : ''}>แบ่งเวลา (คู่ที่สองตามเวลาด้านล่าง)</option></select></div>
+      <div class="row"><div class="field"><label>เวลาคู่แรก</label><input class="inp" type="time" name="t1" value="${st.slotTimes[0]}"></div><div class="field"><label>เวลาคู่ที่สอง</label><input class="inp" type="time" name="t2" value="${st.slotTimes[1] || st.slotTimes[0]}"></div></div>
+      <div class="field"><label>ความเร็วเริ่มต้นเมื่อแมตช์เริ่มตามตาราง</label><select class="inp" name="defaultSpeed">${[1, 5, 15].map((x) => `<option value="${x}" ${st.defaultSpeed === x ? 'selected' : ''}>x${x}</option>`).join('')}</select></div>
+      <label class="row small" style="margin-bottom:12px"><input type="checkbox" name="autoConfirm" ${st.autoConfirm ? 'checked' : ''} style="width:20px;height:20px"> ยืนยันผลอัตโนมัติเมื่อจบเกม (ปิดเพื่อให้ผู้ดูแลยืนยันเอง)</label>
+      <button class="btn gold" type="submit">บันทึกการตั้งค่า</button><p class="tiny muted">เวลาแข่งใหม่มีผลกับฤดูกาลที่สร้างหลังจากนี้</p></form></div>
+      <div class="grid" style="align-content:start"><div class="card pad"><h3>ส่งออกข้อมูล</h3><p class="small muted">ผลการแข่งขันทั้งฤดูกาลเป็นไฟล์ CSV (UTF-8 รองรับภาษาไทย)</p><button class="btn" data-act="csv">ส่งออกผลการแข่งขัน CSV</button></div>
+      ${EMBED ? '' : `<div class="card pad"><h3>รหัสผ่านผู้ดูแล</h3><form data-form="adminPass" style="margin-top:8px"><div class="field"><label>รหัสผ่านใหม่ (อย่างน้อย 8 ตัว)</label><input class="inp" type="password" name="p" minlength="8" autocomplete="new-password" required></div><button class="btn" type="submit">เปลี่ยนรหัสผ่าน</button></form></div>
+      <div class="card pad"><h3>ข้อมูลระบบทดลอง</h3><p class="small muted">ล้างข้อมูลทั้งหมดในเบราว์เซอร์นี้และเริ่มใหม่ด้วยข้อมูลตัวอย่าง</p><button class="btn danger" data-act="wipe">ล้างข้อมูลทั้งหมด</button></div>`}</div></div>`;
+  }
+  const must = s.admins[app.admin.admin] && s.admins[app.admin.admin].mustChange;
+  return `<div class="sec-h"><h1>Admin Dashboard</h1><div class="row"><span class="small muted">${esc(app.admin.admin)}</span>${EMBED ? '' : '<button class="btn sm" data-act="adminLogout">ออกจากระบบ</button>'}</div></div>
+  ${must ? '<div class="notice err" style="margin-bottom:12px">ยังใช้รหัสผ่านตัวอย่างอยู่ เปลี่ยนรหัสผ่านที่แท็บ "ตั้งค่า" ก่อนใช้งานจริง</div>' : ''}
+  <div class="tabs" style="margin-bottom:14px">${tabs.map(([k, l]) => `<button class="${tab === k ? 'on' : ''}" data-act="go" data-h="#/admin/${k}">${l}</button>`).join('')}</div>${body}`;
+}
+function adminMatchRow(m) {
+  const sc = liveScore(m); const st = m.status; const b = (act, label, cls) => `<button class="btn sm ${cls || ''}" data-act="${act}" data-id="${m.id}">${label}</button>`;
+  let acts = '';
+  if (st === 'scheduled' || st === 'postponed') acts = b('startNow', 'เริ่มทันที', 'gold') + b('finishNow', 'จำลองจบทันที') + b('reschedule', 'เปลี่ยนวันแข่ง') + (st === 'scheduled' ? b('markPostponed', 'เลื่อน (ยังไม่กำหนดวัน)') : '') + b('cancelMatch', 'ยกเลิก', 'danger');
+  if (st === 'live') acts = [1, 5, 15].map((x) => `<button class="btn sm ${m.run.speed === x ? 'gold' : ''}" data-act="speed" data-id="${m.id}" data-v="${x}">x${x}</button>`).join('') + b('pause', m.run.paused ? 'เล่นต่อ' : 'หยุด') + b('finishNow', 'จำลองจบทันที') + b('cancelMatch', 'ยกเลิก', 'danger');
+  if (st === 'finished') acts = b('confirm', 'ยืนยันผล', 'gold') + b('editResult', 'แก้ไขผล');
+  if (st === 'confirmed') acts = b('editResult', 'แก้ไขผล');
+  return `<div style="border-top:1px solid var(--line);padding:12px 14px"><div class="split"><a href="#/match/${m.id}" style="text-decoration:none"><b>${esc(T(m.homeId).name)} ${sc ? `<span class="num" data-live-score="${m.id}">${sc.home} - ${sc.away}</span>` : 'vs'} ${esc(T(m.awayId).name)}</b><div class="tiny muted">${m.id} ${thDate(m.date)} ${m.time} น. รอบ ${m.round}</div></a>${statusChip(m)}</div>
+  <div class="row" style="margin-top:8px;gap:6px">${acts}<a class="btn sm ghost" href="#/match/${m.id}">Event Log</a></div></div>`;
+}
+
+/* ===== Router ===== */
+function parseRoute() { const h = curHash().replace(/^#\/?/, ''); app.route = h ? h.split('/') : ['home']; }
+let lastSig = '';
+function render(keepScroll) {
+  parseRoute(); const [r, a] = app.route; const y = window.scrollY;
+  let html;
+  try {
+    html = r === 'fixtures' ? vFixtures() : r === 'table' ? vTable() : r === 'teams' ? vTeams() : r === 'team' ? vTeam(a) : r === 'match' ? vMatch(a) : r === 'predict' ? vPredict() : r === 'champion' ? vChampion() : r === 'history' ? vHistory(a) : r === 'admin' ? vAdmin(a) : vHome();
+  } catch (e) { console.error(e); html = `<div class="card pad notice err">แสดงหน้านี้ไม่ได้: ${esc(e.message)} <button class="btn sm" data-act="go" data-h="#/home">กลับหน้าหลัก</button></div>`; }
+  renderHeader();
+  pitches.clear(); $('#view').innerHTML = html; mountPitches($('#view'));
+  lastSig = sigOf(); app.pendingRender = false;
+  if (keepScroll) window.scrollTo(0, y);
+  const titles = { fixtures: 'โปรแกรมแข่ง', table: 'ตารางคะแนน', teams: 'ทีม', team: 'ทีม', match: 'แมตช์', predict: 'ทายผล', champion: 'ทายทีมแชมป์', history: 'ประวัติ', admin: 'ผู้ดูแลระบบ' };
+  document.title = (titles[r] ? titles[r] + ' | ' : '') + 'WINNER69 Football League 7';
+}
+function sigOf() { return svc.state.matches.filter((m) => m.status === 'live').map((m) => m.id + phase(m) + (m.run && m.run.speed)).join('|') + ':' + svc.state.ledger.length + ':' + svc.state.audit.length; }
+window.addEventListener('hashchange', () => { closeModal(); render(false); window.scrollTo(0, 0); });
+
+/* ===== live updates (server clock ticks every second) ===== */
+function updateLive() {
+  $$('[data-live-clock]').forEach((el) => { const m = svc.state.matches.find((x) => x.id === el.dataset.liveClock); if (m && m.status === 'live') el.textContent = W69.fmtClock(W69.clockOf(svc.gameTime(m)).sec); });
+  $$('[data-live-half]').forEach((el) => { const m = svc.state.matches.find((x) => x.id === el.dataset.liveHalf); if (m && m.status === 'live') { const p = phase(m); const c = W69.clockOf(svc.gameTime(m)); el.textContent = p === 'halftime' ? 'พักครึ่ง' : c.half === 1 ? 'ครึ่งแรก' : 'ครึ่งหลัง'; } });
+  $$('[data-live-score]').forEach((el) => { const m = svc.state.matches.find((x) => x.id === el.dataset.liveScore); if (!m || m.status !== 'live') return; const s = liveScore(m); const html = el.dataset.fmt === 'big' ? `${s.home}<span class="sep">-</span>${s.away}` : `${s.home} - ${s.away}`; if (el.innerHTML !== html) el.innerHTML = html; });
+  $$('[data-countdown]').forEach((el) => { el.textContent = countdown(Number(el.dataset.countdown)); });
+  $$('[data-log]').forEach((el) => { const m = svc.state.matches.find((x) => x.id === el.dataset.log); if (!m || m.status !== 'live') return; const up = svc.gameTime(m); const n = W69.eventIndexAt(svc.simOf(m).events, up); if (el.dataset.n != n) { el.dataset.n = n; el.innerHTML = eventLog(m, up, el.dataset.all === '1'); const st = $(`[data-stats="${m.id}"]`); if (st) st.innerHTML = statsAt(m, up); } });
+}
+setInterval(() => {
+  let changed = false; try { changed = svc.tick(); } catch (e) { console.error(e); }
+  const typing = document.activeElement && /INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName) && $('#view').contains(document.activeElement);
+  if ((changed || sigOf() !== lastSig || app.pendingRender) && !$('.modal-bg')) { if (typing) app.pendingRender = true; else render(true); }
+  else updateLive();
+}, 1000);
+document.addEventListener('focusout', () => { if (app.pendingRender) setTimeout(() => { if (!document.activeElement || !/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) render(true); }, 50); });
+window.addEventListener('resize', () => renderHeader());
+
+/* ===== actions ===== */
+const adminTok = () => app.admin;
+function confirmBox(title, text, okLabel, fn, danger) {
+  modal(`<h2>${title}</h2><p class="muted" style="margin:8px 0 16px">${text}</p><div class="row" style="justify-content:flex-end"><button class="btn ghost" data-close>ยกเลิก</button><button class="btn ${danger ? 'danger' : 'gold'}" id="cfOk">${okLabel}</button></div>`,
+    (md) => md.querySelector('#cfOk').addEventListener('click', (e) => { const r = call(e.currentTarget, fn); if (r !== undefined) { closeModal(); render(true); } }));
+}
+const ACT = {
+  sound() { if (sound.on) { sound.disable(); toast('ปิดเสียงแล้ว'); } else { sound.enable(); if (sound.on) toast('เปิดเสียงสนามแล้ว', 'ok'); } renderHeader(); },
+  login() {
+    modal(`<h2>เข้าสู่ระบบทดลอง</h2><p class="small muted" style="margin:6px 0 14px">ใช้ชื่อผู้ใช้อย่างเดียว ระบบจะสร้างบัญชีทดลองพร้อม ${fmtN(svc.state.settings.startingCredits)} Demo Credits (ไม่ใช่เงินจริง)</p>
+     <form id="lf"><div class="field"><label for="un">ชื่อผู้ใช้</label><input id="un" class="inp" name="u" autocomplete="username" maxlength="20" required placeholder="เช่น player69"></div><button class="btn gold block" type="submit">เข้าสู่ระบบ</button></form>`,
+    (md) => md.querySelector('#lf').addEventListener('submit', (e) => { e.preventDefault(); const tok = call(e.submitter, () => svc.loginUser(e.target.u.value)); if (tok) { app.session = tok; ls.set(SESSION_KEY, tok); closeModal(); toast('ยินดีต้อนรับ ' + svc.state.users[tok.userId].name, 'ok'); render(true); } }));
+  },
+  account() {
+    const u = svc.state.users[app.session.userId];
+    modal(`<h2>${esc(u.name)}</h2><div class="summary" style="margin:12px 0"><span class="muted">${EMBED ? 'เครดิต' : 'Demo Credits'}</span><span class="v" style="color:var(--gold)">${fmtN(u.balance)}</span><span class="muted">คำทายรอผล</span><span class="v">${svc.state.predictions.filter((p) => p.userId === u.id && p.status === 'pending').length}</span></div>
+      <p class="tiny muted">${EMBED ? 'ใช้เครดิตเดียวกับกระเป๋า WINNER 69 ฝาก/ถอนได้ที่หน้ากระเป๋าของเว็บ' : 'เครดิตทดลองใช้ภายในเกมนี้เท่านั้น ไม่มีการฝาก ถอน หรือแลกเป็นเงินจริง'}</p><div class="row" style="justify-content:flex-end"><a class="btn" href="#/history/credits">ประวัติเครดิต</a>${EMBED ? '' : '<button class="btn danger" id="lo">ออกจากระบบ</button>'}</div>`,
+    (md) => md.querySelector('#lo') && md.querySelector('#lo').addEventListener('click', () => { app.session = null; ls.set(SESSION_KEY, null); closeModal(); render(true); }));
+  },
+  menu() { modal(`<h2 style="margin-bottom:10px">เมนู</h2><div class="grid">${[['teams', 'ทีม'], ['champion', 'ทายทีมแชมป์'], ['table', 'ตารางคะแนน'], ['history', 'ประวัติ']].concat(EMBED && !LINK_ADMIN ? [] : [['admin', 'ผู้ดูแลระบบ']]).map(([k, l]) => `<a class="btn block" href="#/${k}">${l}</a>`).join('')}</div>`); },
+  go(el) { goHash(el.dataset.h); },
+  back() { if (LINK) { navBack(); return; } if (history.length > 1) history.back(); else goHash('#/home'); },
+  hero(el) { app.heroIdx = Number(el.dataset.i); render(true); },
+  homeDate(el) { app.homeDate = el.dataset.d; render(true); },
+  gotoToday() { const el = $('#d-' + today()) || $$('[id^="d-"]').find((x) => x.id.slice(2) >= today()); if (el) el.scrollIntoView({ behavior: 'smooth' }); else toast('ไม่มีแมตช์วันนี้'); },
+  replay(el) { app.replay = app.replay === el.dataset.id ? null : el.dataset.id; pitchMem.delete(el.dataset.id + ':r'); render(true); },
+  log(el) { app.allLog = el.dataset.v === '1'; render(true); },
+  market(el) { app.pick.market = el.dataset.v; render(true); },
+  pick(el) { app.pick.pick = el.dataset.v; render(true); },
+  prepick(el, e) { app.pick = { matchId: el.dataset.id, market: '1X2', pick: el.dataset.v, home: 1, away: 1, stake: (app.pick && app.pick.stake) || svc.state.settings.stakeOptions[1] || svc.state.settings.stakeOptions[0] }; },
+  sc(el) { const k = el.dataset.s; app.pick[k] = Math.max(0, Math.min(15, app.pick[k] + Number(el.dataset.d))); render(true); },
+  stake(el) { app.pick.stake = Number(el.dataset.v); render(true); },
+  reviewPred() {
+    const pk = app.pick; const m = svc.match(pk.matchId); const odds = svc.oddsFor(m);
+    const o = pk.market === '1X2' ? odds[pk.pick] : W69.scoreOdds(T(m.homeId), T(m.awayId), pk.home, pk.away);
+    const label = pk.market === '1X2' ? predLabel({ market: '1X2', pick: pk.pick }, m) : 'ทายสกอร์ ' + pk.home + '-' + pk.away;
+    const key = uidKey(); const ret = Math.round(pk.stake * o * 100) / 100; const u = svc.state.users[app.session.userId];
+    modal(`<h2>ยืนยันคำทาย</h2><p class="small muted" style="margin:4px 0 12px">${esc(T(m.homeId).name)} vs ${esc(T(m.awayId).name)} ${thDT(m.kickoff)}</p>
+      <div class="summary"><span class="muted">คำทาย</span><span class="v">${esc(label)}</span><span class="muted">เครดิตที่ใช้</span><span class="v">${fmtN(pk.stake)}</span><span class="muted">${EMBED ? 'อัตราจ่าย' : 'อัตราจำลอง'}</span><span class="v">×${o.toFixed(2)}</span><span class="muted">หากทายถูก รับคืนรวม</span><span class="v" style="color:var(--gold)">${fmtN(ret)} (กำไร ${fmtN(ret - pk.stake)})</span><span class="muted">หากทายผิด</span><span class="v">เสีย ${fmtN(pk.stake)}</span><span class="muted">เครดิตก่อน / หลังยืนยัน</span><span class="v">${fmtN(u.balance)} / ${fmtN(u.balance - pk.stake)}</span></div>
+      <p class="tiny muted" style="margin:10px 0">ยืนยันแล้วแก้ไขหรือยกเลิกไม่ได้ ${EMBED ? 'อัตราจ่าย' : 'อัตราจำลอง'}ล็อกตามเวลาที่ยืนยัน หากระบบปิดรับก่อนส่งถึง รายการจะไม่ถูกบันทึก</p>
+      <div class="row" style="justify-content:flex-end"><button class="btn ghost" data-close>กลับไปแก้ไข</button><button class="btn gold" id="go">ยืนยันคำทาย</button></div>`,
+    (md) => md.querySelector('#go').addEventListener('click', (e) => {
+      const btn = e.currentTarget; btn.classList.add('loading'); btn.disabled = true;
+      const req = { matchId: m.id, market: pk.market, pick: pk.pick, home: pk.home, away: pk.away, stake: pk.stake, requestKey: key };
+      const showDone = (p, left) => {
+          md.innerHTML = `<h2>บันทึกคำทายแล้ว</h2><div class="notice ok" style="margin:12px 0">${esc(label)} ใช้ ${fmtN(p.stake)} เครดิต อัตรา ×${p.odds.toFixed(2)}</div><div class="summary"><span class="muted">รหัสคำทาย</span><span class="v tiny">${p.id}</span><span class="muted">Transaction ID</span><span class="v tiny">${p.txId}</span><span class="muted">เครดิตคงเหลือ</span><span class="v">${fmtN(left)}</span></div><div class="row" style="justify-content:flex-end;margin-top:14px"><a class="btn" href="#/history/preds">ดูประวัติคำทาย</a><button class="btn gold" data-close>เสร็จสิ้น</button></div>`;
+          renderHeader(); render(true);
+      };
+      const showErr = (err) => { btn.classList.remove('loading'); btn.disabled = false; md.querySelector('.notice.err')?.remove(); btn.parentElement.insertAdjacentHTML('beforebegin', `<div class="notice err" style="margin-bottom:10px">${esc(err.message)}</div>`); };
+      if (LINK) { // the server takes the stake from the WINNER 69 wallet and records the prediction
+        linkAct('placePrediction', [req]).then((p) => { const u = svc.state.users[app.session.userId]; const left = u ? u.balance - (p && p.stake || 0) : 0; if (u) u.balance = left; showDone(p, left); }, showErr);
+        return;
+      }
+      setTimeout(() => { // simulate network latency so loading state & double-tap protection are visible
+        try { const p = svc.placePrediction(app.session, req); showDone(p, svc.balance(app.session.userId)); }
+        catch (err) { showErr(err); }
+      }, 450);
+    }));
+  },
+  champPick(el) { app.champ.teamId = el.dataset.v; render(true); },
+  champStake(el) { app.champ.stake = Number(el.dataset.v); render(true); },
+  reviewChamp() {
+    const cp = app.champ; const key = uidKey();
+    confirmBox('ยืนยันทีมแชมป์', `เลือก <b>${esc(T(cp.teamId).name)}</b> ใช้ ${fmtN(cp.stake)} เครดิต เลือกได้ครั้งเดียวต่อฤดูกาล และแก้ไขไม่ได้หลังยืนยัน`, 'ยืนยันทีมแชมป์', () => {
+      const req = { teamId: cp.teamId, stake: cp.stake, requestKey: key };
+      if (LINK) { linkAct('placeChampionPick', [req]).then((p) => toast('บันทึกคำทายแชมป์แล้ว ' + p.id, 'ok'), (e) => toast(e.message || 'บันทึกไม่สำเร็จ', 'err')); return true; }
+      const p = svc.placeChampionPick(app.session, req); toast('บันทึกคำทายแชมป์แล้ว ' + p.id, 'ok'); return p; });
+  },
+  adminLogout() { app.admin = null; ls.set(ADMIN_KEY, null); render(false); },
+  startNow(el) {
+    const id = el.dataset.id;
+    modal(`<h2>เริ่มแมตช์ทันที</h2><p class="small muted">ระบบจะปิดรับคำทายทันที และเปลี่ยนเวลาเริ่มเป็นตอนนี้ (บันทึกใน Audit Log)</p><div class="field"><label>ความเร็ว</label><select class="inp" id="spd"><option value="1">x1 เวลาจริง (35 นาที)</option><option value="5">x5 ทดสอบ (7 นาที)</option><option value="15" selected>x15 ทดสอบระบบ (2 นาที 20 วินาที)</option></select></div><div class="row" style="justify-content:flex-end"><button class="btn ghost" data-close>ยกเลิก</button><button class="btn gold" id="ok">เริ่มเลย</button></div>`,
+      (md) => md.querySelector('#ok').addEventListener('click', (e) => { if (call(e.currentTarget, () => (svc.adminStartNow(adminTok(), id, Number(md.querySelector('#spd').value)), true), 'เริ่มแมตช์แล้ว')) { closeModal(); goHash('#/match/' + id); render(true); } }));
+  },
+  speed(el) { call(null, () => svc.adminSetSpeed(adminTok(), el.dataset.id, Number(el.dataset.v)), 'ปรับความเร็วเป็น x' + el.dataset.v); render(true); },
+  pause(el) { const m = svc.match(el.dataset.id); call(null, () => svc.adminPause(adminTok(), m.id, !m.run.paused)); render(true); },
+  finishNow(el) { confirmBox('จำลองแมตช์ให้จบทันที', 'ระบบจะคำนวณผลจาก Match Engine ทันที (ผลเดียวกับที่แสดงในสนาม)', 'จำลองจบ', () => (svc.adminFinishNow(adminTok(), el.dataset.id), true)); },
+  confirm(el) { call(null, () => svc.adminConfirm(adminTok(), el.dataset.id), 'ยืนยันผลและตัดสินคำทายแล้ว'); render(true); },
+  markPostponed(el) { reasonBox('เลื่อนการแข่งขัน (ยังไม่กำหนดวัน)', 'เลื่อน', (r) => svc.adminMarkPostponed(adminTok(), el.dataset.id, r)); },
+  cancelMatch(el) { reasonBox('ยกเลิกการแข่งขัน', 'ยกเลิกแมตช์', (r) => svc.adminCancel(adminTok(), el.dataset.id, r), 'คำทายที่ค้างอยู่ของแมตช์นี้จะได้รับเครดิตคืนทั้งหมด'); },
+  reschedule(el) {
+    const m = svc.match(el.dataset.id);
+    modal(`<h2>เปลี่ยนวันแข่ง</h2><p class="small muted">${esc(T(m.homeId).name)} vs ${esc(T(m.awayId).name)} (เดิม ${thDate(m.date)} ${m.time} น.) เวลาไทย</p>
+      <form id="rf"><div class="row"><div class="field"><label>วันที่</label><input class="inp" type="date" name="d" value="${m.date}" required></div><div class="field"><label>เวลา</label><input class="inp" type="time" name="t" value="${m.time}" required></div></div><div class="field"><label>เหตุผล</label><input class="inp" name="r" required></div><button class="btn gold block" type="submit">บันทึกวันแข่งใหม่</button></form>`,
+    (md) => md.querySelector('#rf').addEventListener('submit', (e) => { e.preventDefault(); const f = e.target; if (call(e.submitter, () => (svc.adminPostpone(adminTok(), m.id, f.d.value, f.t.value, f.r.value), true), 'เปลี่ยนวันแข่งแล้ว')) { closeModal(); render(true); } }));
+  },
+  editResult(el) {
+    const m = svc.match(el.dataset.id);
+    modal(`<h2>แก้ไขผลการแข่งขัน</h2><p class="small muted">ผลปัจจุบัน ${m.result.home}-${m.result.away} การแก้ไขจะถูกบันทึกใน Audit Log พร้อมค่าเดิม/ค่าใหม่ คำทายที่ตัดสินแล้วจะไม่ถูกตัดสินซ้ำ</p>
+      <form id="ef"><div class="row"><div class="field"><label>${esc(T(m.homeId).name)}</label><input class="inp" type="number" min="0" max="30" name="h" value="${m.result.home}" style="width:100px"></div><div class="field"><label>${esc(T(m.awayId).name)}</label><input class="inp" type="number" min="0" max="30" name="a" value="${m.result.away}" style="width:100px"></div></div>
+      <div class="field"><label>เหตุผล (จำเป็น)</label><textarea class="inp" name="r" required minlength="5"></textarea></div><button class="btn gold block" type="submit">บันทึกการแก้ไข</button></form>`,
+    (md) => md.querySelector('#ef').addEventListener('submit', (e) => { e.preventDefault(); const f = e.target; if (call(e.submitter, () => (svc.adminEditResult(adminTok(), m.id, f.h.value, f.a.value, f.r.value), true), 'แก้ไขผลแล้ว')) { closeModal(); render(true); } }));
+  },
+  simToday() { confirmBox('จำลองแมตช์วันนี้', 'จำลองทุกแมตช์ของวันนี้ที่ยังไม่จบให้จบทันที', 'จำลอง', () => { svc.state.matches.filter((m) => m.date === today() && ['scheduled', 'live'].includes(m.status)).forEach((m) => svc.adminFinishNow(adminTok(), m.id)); return true; }); },
+  simAll() { confirmBox('จำลองทุกนัดที่เหลือ', 'ใช้สำหรับทดสอบการปิดฤดูกาลและตัดสินคำทายแชมป์ แมตช์ที่ยังไม่แข่งทั้งหมดจะจบทันที และคำทายจะถูกตัดสิน', 'จำลองทั้งหมด', () => { svc.state.matches.filter((m) => ['scheduled', 'live', 'postponed'].includes(m.status)).forEach((m) => svc.adminFinishNow(adminTok(), m.id)); svc.state.matches.filter((m) => m.status === 'finished').forEach((m) => svc.adminConfirm(adminTok(), m.id)); return true; }, true); },
+  closeSeason() { confirmBox('ปิดฤดูกาลและประกาศแชมป์', 'แชมป์จะตัดสินจากตารางคะแนนอย่างเป็นทางการ และคำทายแชมป์จะถูกตัดสินอัตโนมัติ', 'ปิดฤดูกาล', () => { const c = svc.adminCloseSeason(adminTok()); toast('แชมป์: ' + T(c).name, 'ok'); return c; }); },
+  resetAll() { confirmBox('รีเซ็ตทุกบัญชีทดลอง', 'ยอดเครดิตทุกบัญชีจะกลับเป็นค่าเริ่มต้น คำทายที่รอผลจะถูกยกเลิก (บันทึกใน Audit Log)', 'รีเซ็ต', () => (svc.resetCredits(adminTok()), true), true); },
+  resetOne(el) { confirmBox('Reset Demo Account', 'รีเซ็ตเครดิตของบัญชีนี้เป็นค่าเริ่มต้น', 'รีเซ็ต', () => (svc.resetCredits(adminTok(), el.dataset.u), true), true); },
+  addTeam() {
+    modal(`<h2>เพิ่มทีม</h2><form id="tf"><div class="field"><label>ชื่อทีม (ภาษาอังกฤษสำหรับรหัสทีม)</label><input class="inp" name="n" required minlength="3"></div><div class="field"><label>สีหลัก</label><input type="color" class="inp" name="c" value="#5BC0EB" style="width:80px;padding:4px"></div><button class="btn gold block" type="submit">เพิ่มทีมพร้อมนักเตะสุ่ม</button></form>`,
+      (md) => md.querySelector('#tf').addEventListener('submit', (e) => { e.preventDefault(); const id = call(e.submitter, () => svc.adminAddTeam(adminTok(), e.target.n.value, e.target.c.value), 'เพิ่มทีมแล้ว'); if (id) { app.ateam = id; closeModal(); render(true); } }));
+  },
+  editPlayer(el) {
+    const t = T(el.dataset.t); const p = t.players.find((x) => x.id === el.dataset.p); const A = { pac: 'ความเร็ว', pas: 'การส่ง', sho: 'การยิง', def: 'การป้องกัน', gk: 'ผู้รักษาประตู' };
+    modal(`<h2>แก้ไขนักเตะ</h2><form id="pf"><div class="field"><label>ชื่อ</label><input class="inp" name="name" value="${esc(p.name)}" required></div>
+      <div class="row"><div class="field"><label>หมายเลข</label><input class="inp" type="number" name="num" min="1" max="99" value="${p.num}" style="width:90px"></div><div class="field"><label>ตำแหน่ง</label><select class="inp" name="pos">${['GK', 'DEF', 'MID', 'FWD'].map((x) => `<option ${x === p.pos ? 'selected' : ''}>${x}</option>`).join('')}</select></div><label class="row small"><input type="checkbox" name="starter" ${p.starter ? 'checked' : ''} style="width:20px;height:20px"> ตัวจริง</label></div>
+      <div class="row">${Object.entries(A).map(([k, l]) => `<div class="field"><label>${l}</label><input class="inp" type="number" min="1" max="99" name="${k}" value="${p.attrs[k]}" style="width:84px"></div>`).join('')}</div><button class="btn gold block" type="submit">บันทึกนักเตะ</button></form>`,
+    (md) => md.querySelector('#pf').addEventListener('submit', (e) => { e.preventDefault(); const f = e.target; const attrs = {}; Object.keys(A).forEach((k) => { attrs[k] = f[k].value; });
+      if (call(e.submitter, () => (svc.adminUpdatePlayer(adminTok(), t.id, p.id, { name: f.name.value, num: f.num.value, pos: f.pos.value, starter: f.starter.checked, attrs }), true), 'บันทึกนักเตะแล้ว')) { closeModal(); render(true); } }));
+  },
+  async csv() {
+    const text = call(null, () => svc.exportCsv(adminTok())); if (!text) return;
+    const name = 'winner69-fl7-' + svc.state.season.id + '-results.csv';
+    try { const dl = window.claude && window.claude.use ? await window.claude.use('downloads') : null;
+      if (dl) { await dl.save({ filename: name, data: new Blob([text], { type: 'text/csv' }) }); toast('ส่งออก CSV แล้ว', 'ok'); render(true); return; } } catch (e) { if (e && e.code === 'declined') { toast('ยกเลิกการดาวน์โหลด'); return; } }
+    modal(`<h2>CSV ผลการแข่งขัน</h2><p class="small muted">หน้านี้ดาวน์โหลดไฟล์ตรงไม่ได้ คัดลอกข้อความด้านล่างไปบันทึกเป็นไฟล์ ${name}</p><textarea class="inp" style="height:240px;font-size:12px" readonly>${esc(text)}</textarea><div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn gold" id="cp">คัดลอก</button></div>`,
+      (md) => md.querySelector('#cp').addEventListener('click', () => { const ta = md.querySelector('textarea'); ta.select(); (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(() => toast('คัดลอกแล้ว', 'ok')).catch(() => { document.execCommand('copy'); toast('คัดลอกแล้ว', 'ok'); }); }));
+  },
+  wipe() { confirmBox('ล้างข้อมูลทั้งหมด', 'ข้อมูลฤดูกาล ผู้ใช้ เครดิต และ Audit Log ในเบราว์เซอร์นี้จะถูกลบ แล้วเริ่มใหม่ด้วยข้อมูลตัวอย่าง', 'ล้างข้อมูล', () => { try { localStorage.removeItem(STORE_KEY); } catch (e) {} svc = new W69.LeagueService({ storage }); svc.tick(); app.session = null; app.admin = null; ls.set(SESSION_KEY, null); ls.set(ADMIN_KEY, null); goHash('#/home'); return true; }, true); },
+};
+function reasonBox(title, ok, fn, extra) {
+  modal(`<h2>${title}</h2>${extra ? `<p class="small muted">${extra}</p>` : ''}<form id="rb"><div class="field"><label>เหตุผล</label><input class="inp" name="r" required></div><div class="row" style="justify-content:flex-end"><button type="button" class="btn ghost" data-close>ปิด</button><button class="btn danger" type="submit">${ok}</button></div></form>`,
+    (md) => md.querySelector('#rb').addEventListener('submit', (e) => { e.preventDefault(); if (call(e.submitter, () => (fn(e.target.r.value), true), 'บันทึกแล้ว')) { closeModal(); render(true); } }));
+}
+document.addEventListener('click', (e) => {
+  const el = e.target.closest('[data-act]'); if (!el) return; const fn = ACT[el.dataset.act]; if (!fn) return;
+  if (el.tagName === 'A' && el.dataset.act !== 'prepick') e.preventDefault();
+  if (el.disabled) return; fn(el, e);
+});
+document.addEventListener('change', (e) => {
+  const el = e.target.closest('[data-change]'); if (!el) return; const k = el.dataset.change; app[k] = el.value; render(true);
+});
+document.addEventListener('submit', (e) => {
+  const f = e.target.closest('[data-form]'); if (!f) return; e.preventDefault(); const k = f.dataset.form; const btn = e.submitter;
+  if (k === 'adminLogin') { const tok = call(btn, () => svc.loginAdmin(f.u.value.trim(), f.p.value)); if (tok) { app.admin = tok; ls.set(ADMIN_KEY, tok); toast('เข้าสู่ระบบผู้ดูแลแล้ว', 'ok'); render(false); } }
+  if (k === 'adminPass') { if (call(btn, () => (svc.changeAdminPassword(adminTok(), f.p.value), true), 'เปลี่ยนรหัสผ่านแล้ว')) render(true); }
+  if (k === 'team') { if (call(btn, () => (svc.adminUpdateTeam(adminTok(), f.dataset.id, { name: f.name.value.trim(), primary: f.primary.value.toUpperCase(), secondary: f.secondary.value.toUpperCase(), kit2: f.kit2.value.toUpperCase(), active: f.active.checked }), true), 'บันทึกทีมแล้ว')) render(true); }
+  if (k === 'settings') {
+    const t1 = f.t1.value, t2 = f.slotMode.value === 'same' ? t1 : f.t2.value;
+    if (call(btn, () => (svc.adminUpdateSettings(adminTok(), { startingCredits: f.startingCredits ? f.startingCredits.value : undefined, stakeOptions: f.stakeOptions.value.split(','), autoConfirm: f.autoConfirm.checked, slotTimes: [t1, t2], defaultSpeed: f.defaultSpeed.value }), true), 'บันทึกการตั้งค่าแล้ว')) render(true);
+  }
+  if (k === 'newSeason') {
+    const start = f.start.value, seed = f.seed.value;
+    const go = (force) => svc.createSeason({ startDate: start, seed, force }, app.admin.admin);
+    try { go(false); toast('สร้างฤดูกาลใหม่แล้ว', 'ok'); render(true); }
+    catch (err) { if (err.code === 'SEASON_OPEN') confirmBox('ฤดูกาลปัจจุบันยังไม่ปิด', 'สร้างใหม่จะเก็บฤดูกาลปัจจุบันเข้าคลัง (ไม่ประกาศแชมป์) และคืนเครดิตคำทายที่รอผล ต้องการดำเนินการต่อหรือไม่', 'สร้างฤดูกาลใหม่', () => (go(true), true), true); else toast(err.message, 'err'); }
+  }
+});
+
+/* boot */
+if (!LINK && !location.hash) location.replace('#/home');
+render(false);
+</script>
+</body></html>
