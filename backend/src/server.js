@@ -6,6 +6,11 @@ import jwt from "jsonwebtoken";
 import { readDb, writeDb, id, now, audit, saveSlip, loadSlip, deleteSlip } from "./store.js";
 import { registerGames, gameSettings, cleanGameSettings } from "./games.js";
 import { registerLottery } from "./lottery.js";
+import { registerPoker } from "./pokerRoutes.js";
+import { registerPokDeng } from "./pokdengRoutes.js";
+import { registerDummy } from "./dummyRoutes.js";
+import { registerPhomSip } from "./phomsipRoutes.js";
+import { registerFootball } from "./footballRoutes.js";
 import { hashPassword, verifyPassword, signUser, auth } from "./auth.js";
 
 const app = express();
@@ -418,6 +423,8 @@ function publicMember(m) {
     data: m.data || {}, dataRev: m.dataRev || 0
   };
   out.phone = m.phone;
+  out.nickname = m.nickname || "";
+  out.avatar = m.avatar || null; // { type: "preset", id } | { type: "image", rev } (the picture itself: GET /api/members/avatar/:username)
   return out;
 }
 function signMember(m) {
@@ -513,6 +520,70 @@ app.post("/api/members/me/sync", memberAuth, rateLimit(600, 60_000), (req, res) 
   if (Date.now() - (m.lastActiveAt || 0) > 30_000) { m.lastActiveAt = Date.now(); changed = true; }
   if (changed) writeDb(db);
   res.json({ member: publicMember(m), dataAccepted });
+});
+
+// ---------------------------------------------------------------------------
+// Profile: display name + picture. Every save costs PROFILE_FEE from the wallet.
+// The login name (US0001...) never changes; the nickname is what other players see.
+// ---------------------------------------------------------------------------
+const PROFILE_FEE = Number(process.env.PROFILE_FEE) || 10;
+const AVATAR_PRESETS = 16; // ids p1..p16, drawn by the app
+const AVATAR_MAX = 80_000;  // data-URL length (the app sends a ~160px JPEG, usually 8-20 KB)
+const BAD_NICK = /(admin|แอดมิน|ทีมงาน|staff|support|winner\s*69|ผู้ดูแล)/i;
+function cleanNickname(v) {
+  return String(v || "").normalize("NFC").replace(/[\u0000-\u001f\u007f<>"'`\\]/g, "").replace(/\s+/g, " ").trim();
+}
+app.post("/api/members/me/profile", memberAuth, rateLimit(10, 60_000), (req, res) => {
+  const body = req.body || {};
+  const db = readDb();
+  const m = findMember(db, req.memberName);
+  if (!m) return res.status(404).json({ error: "Member not found" });
+  if (m.suspended) return res.status(403).json({ error: "Account suspended" });
+  let nick = null, avatar = null, image = null;
+  if (body.nickname !== undefined) {
+    nick = cleanNickname(body.nickname);
+    if ([...nick].length < 2 || [...nick].length > 16) return res.status(400).json({ error: "nick_length" });
+    if (BAD_NICK.test(nick)) return res.status(400).json({ error: "nick_reserved" });
+    const low = nick.toLowerCase();
+    const taken = (db.members || []).some((o) => o.username !== m.username && ((o.nickname || "").toLowerCase() === low || o.username.toLowerCase() === low));
+    if (taken) return res.status(409).json({ error: "nick_taken" });
+    if (nick === (m.nickname || "")) nick = null;
+  }
+  if (body.preset !== undefined) {
+    const id = String(body.preset);
+    const n = Number(id.replace(/^p/, ""));
+    if (!/^p\d{1,2}$/.test(id) || n < 1 || n > AVATAR_PRESETS) return res.status(400).json({ error: "bad_avatar" });
+    if (!(m.avatar && m.avatar.type === "preset" && m.avatar.id === id)) avatar = { type: "preset", id };
+  } else if (body.image !== undefined) {
+    image = String(body.image);
+    if (image.length > AVATAR_MAX || !/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(image)) return res.status(400).json({ error: "bad_avatar" });
+    avatar = { type: "image", rev: Date.now() };
+  }
+  if (nick === null && !avatar) return res.status(400).json({ error: "nothing_changed" });
+  if (m.balance < PROFILE_FEE) return res.status(400).json({ error: "insufficient_balance" });
+  m.balance = roundMoney(m.balance - PROFILE_FEE);
+  if (nick !== null) m.nickname = nick;
+  if (avatar) {
+    if (image) saveSlip("avatar-" + m.username, image);
+    else if (m.avatar && m.avatar.type === "image") deleteSlip("avatar-" + m.username);
+    m.avatar = avatar;
+  }
+  db.gameStats = db.gameStats || {};
+  db.gameStats.profileFees = roundMoney((db.gameStats.profileFees || 0) + PROFILE_FEE);
+  audit(db, "MEMBER_PROFILE", m.username, { nickname: m.nickname || "", avatar: m.avatar ? m.avatar.type : "", fee: PROFILE_FEE });
+  writeDb(db);
+  res.json({ ok: true, fee: PROFILE_FEE, member: publicMember(m) });
+});
+app.get("/api/members/avatar/:username", (req, res) => {
+  const name = String(req.params.username || "");
+  if (!/^[A-Za-z0-9_]{1,32}$/.test(name)) return res.status(404).end();
+  const dataUrl = loadSlip("avatar-" + name);
+  const mm = /^data:(image\/(?:jpeg|png|webp));base64,(.+)$/.exec(dataUrl || "");
+  if (!mm) return res.status(404).end();
+  res.set("Content-Type", mm[1]);
+  res.set("Cache-Control", "public, max-age=31536000, immutable"); // the app adds ?v=<rev>
+  res.set("Cross-Origin-Resource-Policy", "cross-origin");
+  res.send(Buffer.from(mm[2], "base64"));
 });
 
 app.post("/api/members/me/password", memberAuth, rateLimit(10, 60_000), (req, res) => {
@@ -736,6 +807,11 @@ app.post("/api/admin/chats/:username/read", adminOnly, (req, res) => {
 
 registerGames(app, { readDb, writeDb, findMember, memberAuth, rateLimit, publicMember });
 registerLottery(app, { readDb, writeDb, audit, id, findMember, memberAuth, adminOnly, rateLimit, publicMember });
+registerPoker(app, { readDb, writeDb, findMember, memberAuth, rateLimit, publicMember });
+registerPokDeng(app, { readDb, writeDb, findMember, memberAuth, rateLimit, publicMember });
+registerDummy(app, { readDb, writeDb, findMember, memberAuth, rateLimit, publicMember });
+registerPhomSip(app, { readDb, writeDb, findMember, memberAuth, rateLimit, publicMember });
+registerFootball(app, { readDb, writeDb, findMember, memberAuth, adminOnly, rateLimit, publicMember, audit });
 app.get("/api/admin/game-stats", adminOnly, (_req, res) => { res.json({ stats: readDb().gameStats || {} }); });
 
 // ---------------------------------------------------------------------------

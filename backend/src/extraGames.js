@@ -88,12 +88,15 @@ function copper(st, body, { rng, rtp, charge }) {
 }
 
 // ---------------------------------------------------------------- Fish Shooter (ยิงปลา)
+// Played in points: 1 baht = 100 points (FISH.PTS). Shots are sent in points; the wallet is charged
+// and paid in baht (points / 100), so there is nothing to exchange back - leftover points are the wallet.
 // Every shot is paid for when it is fired. When a shot's net/explosion touches fish, the browser
 // claims that shot ONCE with the list of fish it touched; each claimed fish dies with chance
 //   rtp / (fishes in the claim x fish value), so a shot is worth exactly the RTP whatever the
 // browser claims. Special fish also carry a chain-reaction budget paid with the kill.
 export const FISH = {
-  BETS: [1, 2, 3, 5, 10, 20, 30, 50, 90, 100],
+  PTS: 100, // points per baht
+  BETS: [10, 20, 30, 50, 100, 200, 300, 500, 900, 1000], // points per shot (0.10 - 10 baht)
   BMULTS: [1, 2, 5, 10],
   VALUES: { clown: 2, puffer: 3, tang: 4, angel: 5, dolphin: 8, sword: 12, crab: 10, angler: 15, octo: 20, lobster: 25, chest: 30, turtle: 40, koi: 55, whale: 80, rocket: 100, dragon: 150, queen: 300, poseidon: 500 },
   SPECIAL: { crab: "bomb", whale: "zap", rocket: "rocket", dragon: "chain", queen: "queen", poseidon: "trident", chest: "chest" },
@@ -101,25 +104,27 @@ export const FISH = {
   MULTS: [1, 2, 3, 4, 5, 7, 10],
   MAX_OPEN: 400, MAX_FISH_PER_CLAIM: 8,
 };
-const FISH_BET_OK = new Set(FISH.BETS.flatMap((b) => FISH.BMULTS.map((m) => b * m)));
+const FISH_BET_OK = new Set(FISH.BETS.flatMap((b) => FISH.BMULTS.map((m) => b * m))); // in points
 function fish(st, body, { rng, rtp, charge }) {
   st.open = st.open || {};
   const shots = Array.isArray(body.shots) ? body.shots.slice(0, 200) : [];
   const claims = Array.isArray(body.claims) ? body.claims.slice(0, 200) : [];
-  let wager = 0;
+  let wagerPts = 0;
   for (const s of shots) {
     const b = Number(s && s.bet), id = String(s && s.id || "");
     if (!FISH_BET_OK.has(b) || !id || id.length > 24 || st.open[id]) return { error: "Invalid shot" };
-    wager += b;
+    wagerPts += b;
   }
+  const wager = r2(wagerPts / FISH.PTS);
   if (wager > 0) { const e = charge(wager); if (e) return { error: e }; }
   for (const s of shots) st.open[String(s.id)] = Number(s.bet);
   const ids = Object.keys(st.open);
   if (ids.length > FISH.MAX_OPEN) ids.slice(0, ids.length - FISH.MAX_OPEN).forEach((k) => delete st.open[k]); // very old shots that never hit are lost
   const kills = []; let payout = 0;
   for (const c of claims) {
-    const id = String(c && c.b || ""), bet = st.open[id];
-    if (!bet) continue; // unknown or already claimed shot
+    const id = String(c && c.b || ""), betPts = st.open[id];
+    const bet = betPts / FISH.PTS; // baht
+    if (!betPts) continue; // unknown or already claimed shot
     delete st.open[id];
     const list = (Array.isArray(c.fish) ? c.fish : []).slice(0, FISH.MAX_FISH_PER_CLAIM).filter((f) => f && FISH.VALUES[f.t] && FISH.MULTS.includes(Number(f.m) || 1));
     const n = list.length;

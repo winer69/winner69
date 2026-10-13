@@ -19,10 +19,13 @@ const pickIdx = (rng, w) => { let t = 0; for (const x of w) t += x; let r = rng(
 const BASE_EDGES = [0, 0.5, 1, 2, 5, 15, 50, 200];
 const MIN_MASS = 0.004; // rare top buckets are merged so a matching spin is always found quickly
 const bucketIn = (edges, x) => { if (x <= 0) return 0; let b = 1; while (b < edges.length && x > edges[b]) b++; return b; };
-function makeTilt(seed, sample, capX, n = 20000) {
+// MIN_WIN_X: a paid spin never pays less than this many bets - a "win" of 2.5 on a 10 bet is not drawn
+// (spins whose combos would add up to less are treated like a scatter-free blank and not shown).
+export const MIN_WIN_X = 1;
+function makeTilt(seed, sample, capX, n = 20000, minX = 0) {
   const rng = seeded(seed);
   const xs = [];
-  for (let i = 0; i < n * 3 && xs.length < n; i++) { const s = sample(rng); if (s.total <= capX) xs.push([s.total, s.award || 0]); }
+  for (let i = 0; i < n * 6 && xs.length < n; i++) { const s = sample(rng); if (s.total <= capX && !(s.total > 0 && s.total < minX)) xs.push([s.total, s.award || 0]); }
   // drop top edges until the highest bucket holds at least MIN_MASS of the spins
   let edges = BASE_EDGES.slice();
   for (;;) {
@@ -31,12 +34,16 @@ function makeTilt(seed, sample, capX, n = 20000) {
     edges = edges.slice(0, -1);
   }
   const K = edges.length + 1, cnt = new Array(K).fill(0), sumT = new Array(K).fill(0), sumA = new Array(K).fill(0);
-  for (const [t, a] of xs) { const b = bucketIn(edges, t); cnt[b]++; sumT[b] += t; sumA[b] += a; }
-  const p = cnt.map((c) => c / xs.length);
-  const cache = {};
+  // freq: how often each bucket comes up naturally; cnt/sumT/sumA: what an average spin of the bucket pays
+  const freq = new Array(K).fill(0);
+  let seen = 0;
+  const add = (t, a, countFreq) => { const b = bucketIn(edges, t); cnt[b]++; sumT[b] += t; sumA[b] += a; if (countFreq) { freq[b]++; seen++; } };
+  for (const [t, a] of xs) add(t, a, true);
+  let cache = {}, fresh = 0;
   const tilt = (rtp) => {
     if (cache[rtp]) return cache[rtp];
     const T = rtp / 100;
+    const p = freq.map((c) => c / seen);
     // each free spin awarded is itself played at this RTP, so it is worth about T bets
     const m = cnt.map((c, i) => (c ? (sumT[i] + sumA[i] * T) / c : 0));
     const mean = (lam) => { let sw = 0, sx = 0; p.forEach((pi, i) => { if (!pi) return; const w = pi * Math.exp(lam * m[i]); sw += w; sx += w * m[i]; }); return sx / sw; };
@@ -45,21 +52,32 @@ function makeTilt(seed, sample, capX, n = 20000) {
     let tot = 0; const q = p.map((pi, i) => { const w = pi ? pi * Math.exp(lam * m[i]) : 0; tot += w; return w; });
     return (cache[rtp] = q.map((w) => w / tot));
   };
+  // every natural spin drawn while looking for a match is an unbiased sample of its bucket, so the bucket
+  // averages keep improving; only the first draw of each search counts towards how common a bucket is
+  // (later draws depend on when the search stopped). The real RTP settles on the target over time.
+  tilt.learn = (t, a, first) => { add(t, a, first); if (++fresh >= 3000) { fresh = 0; cache = {}; } };
   tilt.edges = edges;
+  tilt.minX = minX;
   return tilt;
 }
-function tilted(rng, rtp, tilt, sample, capX) {
+// draw one spin of `bet` at the target RTP. Buckets are in bets, so the spin's total is divided by the bet.
+function tilted(rng, rtp, tilt, sample, bet, capX) {
   const q = tilt(rtp);
   let r = rng(), b = 0;
   for (; b < q.length - 1; b++) { r -= q[b]; if (r < 0) break; }
-  let last = null;
-  for (let i = 0; i < 6000; i++) {
+  let blank = null, first = true;
+  for (let i = 0; i < 8000; i++) {
     const s = sample();
-    if (s.total > capX) continue;
-    if (bucketIn(tilt.edges, s.total) === b) return s;
-    if (!last || s.total === 0) last = s;
+    const x = s.total / bet;
+    if (x > capX) continue;
+    if (x > 0 && x < tilt.minX) continue;
+    tilt.learn(x, s.award || 0, first); first = false;
+    if (bucketIn(tilt.edges, x) === b) return s;
+    if (!blank && s.total === 0 && !s.award) blank = s;
   }
-  return last || sample();
+  if (blank) return blank;
+  for (let i = 0; i < 2000; i++) { const s = sample(); if (s.total === 0) return s; }
+  return sample();
 }
 
 // ============================================================ Inferno 7s
@@ -90,8 +108,8 @@ function infernoSpin(rng, bet) {
 }
 let infernoTilt = null;
 export function infernoPlay(rng, bet, rtp) {
-  if (!infernoTilt) infernoTilt = makeTilt(707, (g) => infernoSpin(g, 1), 1500, 60000);
-  return tilted(rng, rtp, infernoTilt, () => infernoSpin(rng, bet), bet * 1500);
+  if (!infernoTilt) infernoTilt = makeTilt(707, (g) => infernoSpin(g, 1), 1500, 400000, MIN_WIN_X);
+  return tilted(rng, rtp, infernoTilt, () => infernoSpin(rng, bet), bet, 1500);
 }
 
 // ============================================================ Fruit Canopy
@@ -146,8 +164,8 @@ function fruitSpin(rng, bet, feat) {
 const fruitTilt = {};
 export function fruitPlay(rng, bet, rtp, feat = null) {
   const k = feat == null ? "base" : "f" + feat;
-  if (!fruitTilt[k]) fruitTilt[k] = makeTilt(feat == null ? 1101 : 1200 + feat, (g) => fruitSpin(g, 1, feat), 2000);
-  return tilted(rng, rtp, fruitTilt[k], () => fruitSpin(rng, bet, feat), bet * 2000);
+  if (!fruitTilt[k]) fruitTilt[k] = makeTilt(feat == null ? 1101 : 1200 + feat, (g) => fruitSpin(g, 1, feat), 2000, 20000, feat == null ? MIN_WIN_X : 0);
+  return tilted(rng, rtp, fruitTilt[k], () => fruitSpin(rng, bet, feat), bet, 2000);
 }
 export const fruitPickFeature = (rng) => FRUIT.FEATS[Math.floor(rng() * 4)];
 
@@ -201,8 +219,8 @@ function alohaSpin(rng, bet, free, sticky) {
 const alohaTilt = {};
 export function alohaPlay(rng, bet, rtp, free = false, sticky = []) {
   const k = free ? "free" + sticky.length : "base";
-  if (!alohaTilt[k]) { const st = Array.from({ length: sticky.length }, (_, i) => ["1,0", "2,0", "3,0", "4,0", "1,1"][i]); alohaTilt[k] = makeTilt(free ? 3600 + sticky.length : 3601, (g) => alohaSpin(g, 1, free, st), 3000, 12000); }
-  return tilted(rng, rtp, alohaTilt[k], () => alohaSpin(rng, bet, free, sticky), bet * 3000);
+  if (!alohaTilt[k]) { const st = Array.from({ length: sticky.length }, (_, i) => ["1,0", "2,0", "3,0", "4,0", "1,1"][i]); alohaTilt[k] = makeTilt(free ? 3600 + sticky.length : 3601, (g) => alohaSpin(g, 1, free, st), 3000, 12000, free ? 0 : MIN_WIN_X); }
+  return tilted(rng, rtp, alohaTilt[k], () => alohaSpin(rng, bet, free, sticky), bet, 3000);
 }
 
 // ============================================================ Copper Gulch
@@ -273,6 +291,6 @@ function copperSpin(rng, bet, mIdx, forceScatter = 0) {
 const copperTilt = {};
 export function copperPlay(rng, bet, rtp, { free = false, mIdx = 0 } = {}) {
   const k = (free ? "f" : "b") + mIdx;
-  if (!copperTilt[k]) copperTilt[k] = makeTilt(5000 + mIdx * 7 + (free ? 1 : 0), (g) => copperSpin(g, 1, mIdx), 1000, 12000);
-  return tilted(rng, rtp, copperTilt[k], () => copperSpin(rng, bet, mIdx), bet * 1000);
+  if (!copperTilt[k]) copperTilt[k] = makeTilt(5000 + mIdx * 7 + (free ? 1 : 0), (g) => copperSpin(g, 1, mIdx), 1000, 12000, free ? 0 : MIN_WIN_X);
+  return tilted(rng, rtp, copperTilt[k], () => copperSpin(rng, bet, mIdx), bet, 1000);
 }

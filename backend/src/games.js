@@ -6,7 +6,7 @@ import { CASCADE_GAMES } from "./slotThemes.js";
 import { ntCleanBets, ntPick, ntPayout } from "./namtao.js";
 import { EXTRA_GAMES, extraState } from "./extraGames.js";
 
-export const DEFAULT_EDGES = { dice: 99, limbo: 97, mines: 97, hilo: 97, keno: 97, slot: 97, jungle: 95, classicslots: 96, hoohey: 96, horserace: 94, roulette: 97.3, fortune: 95, dragontiger: 96.5, neonfortune: 97, plushieparadise: 92, neonfishing: 94, stocktrading: 96, goldendragon: 96.5, inferno7s: 96, fruitcanopy: 96, alohatotem: 96, coppergulch: 96, fishshooter: 95 };
+export const DEFAULT_EDGES = { dice: 99, limbo: 97, mines: 97, hilo: 97, keno: 97, slot: 97, jungle: 95, classicslots: 96, hoohey: 96, horserace: 94, roulette: 97.3, fortune: 95, dragontiger: 96.5, neonfortune: 97, plushieparadise: 92, neonfishing: 94, stocktrading: 96, goldendragon: 96.5, inferno7s: 96, fruitcanopy: 96, alohatotem: 96, coppergulch: 96, fishshooter: 95, pokdeng: 96 };
 export const DEFAULT_BOOST_BONUS = 120; // RTP % while a boost bet is active (can be above 100 = player-favoured)
 const BOOST_COST = 50;
 const BOOST_BETS_PER_USE = 3;
@@ -479,21 +479,26 @@ export function registerGames(app, { readDb, writeDb, findMember, memberAuth, ra
     if (scatters >= 3 && NF_PAY.SCATTER[Math.min(scatters, 5)]) total += NF_PAY.SCATTER[Math.min(scatters, 5)] * bet;
     return { total, lineWins, scatters };
   }
+  // a paid spin that wins pays at least the bet (no 0.4x "wins"); scatter-only spins count as wins
+  const NF_MIN_WIN_X = 1;
+  const nfIsWin = (w, bet, minX) => (w.total > 0 && w.total >= bet * minX) || (w.total === 0 && w.scatters >= 3);
+  const nfIsLoss = (w) => w.total === 0 && w.scatters < 3;
   // average payout multiple of a winning Neon Fortune spin (incl. the 8% jackpot chance), measured once
-  const NF_AVG_WIN = (() => {
+  function nfAverageWin(minX, free) {
     let sum = 0, n = 0;
-    for (let i = 0; i < 200000 && n < 4000; i++) {
+    for (let i = 0; i < 600000 && n < 12000; i++) {
       const c = nfSpinGrid(); const w = nfWins(c.grid, 1);
-      if (w.total <= 0) continue;
+      if (!nfIsWin(w, 1, minX)) continue;
       let x = w.total;
       if (w.total >= 10 && w.lineWins.some((l) => l.count === 5 && NF_HIGH.has(l.symbol))) x = 0.92 * w.total + 0.08 * (w.total * 10 + 100);
-      if (w.scatters >= 3) x += (w.scatters === 3 ? 8 : w.scatters === 4 ? 12 : 20) * 0.9; // free spins are worth about one bet each
+      if (w.scatters >= 3) x += (free ? (w.scatters === 3 ? 5 : w.scatters === 4 ? 8 : 12) : (w.scatters === 3 ? 8 : w.scatters === 4 ? 12 : 20)) * 0.96; // each free spin is itself played at about the RTP
       sum += x; n++;
     }
-    const avg = n ? sum / n : 2;
-    console.log(`[games] neonfortune: average win ${avg.toFixed(2)}x`);
-    return avg;
-  })();
+    return n ? sum / n : 2;
+  }
+  const NF_AVG_WIN = nfAverageWin(NF_MIN_WIN_X, false);
+  const NF_AVG_WIN_FREE = nfAverageWin(0, true);
+  console.log(`[games] neonfortune: average win ${NF_AVG_WIN.toFixed(2)}x (free spins ${NF_AVG_WIN_FREE.toFixed(2)}x)`);
   // ---- Imported games (Inferno 7s, Fruit Canopy, Aloha Totem, Copper Gulch, ยิงปลา):
   // handlers in extraGames.js decide everything; here they get the member's wallet.
   for (const [game, def] of Object.entries(EXTRA_GAMES)) {
@@ -567,10 +572,16 @@ export function registerGames(app, { readDb, writeDb, findMember, memberAuth, ra
       if (!(want >= 1 && want <= 5000)) return { error: "Invalid bet" };
       const t = takeBet(m, want); if (t.error) return t; bet = wager = t.bet;
     }
-    const won = rand() < winChance(edgeFor(db, m, "neonfortune"), NF_AVG_WIN);
+    const won = rand() < winChance(edgeFor(db, m, "neonfortune"), isFree ? NF_AVG_WIN_FREE : NF_AVG_WIN);
     let res = null;
-    for (let i = 0; i < 500 && !res; i++) { const c = nfSpinGrid(); if ((nfWins(c.grid, bet).total > 0) === won) res = c; }
-    if (!res) res = nfSpinGrid();
+    const minX = isFree ? 0 : NF_MIN_WIN_X;
+    let blank = null;
+    for (let i = 0; i < 1500 && !res; i++) {
+      const c = nfSpinGrid(); const w0 = nfWins(c.grid, bet);
+      if (won ? nfIsWin(w0, bet, minX) : nfIsLoss(w0)) res = c;
+      else if (!blank && nfIsLoss(w0)) blank = c;
+    }
+    if (!res) res = blank || nfSpinGrid();
     const w = nfWins(res.grid, bet);
     let payout = w.total, jackpot = false;
     if (w.total > 0 && w.total / bet >= 10 && w.lineWins.some((l) => l.count === 5 && NF_HIGH.has(l.symbol)) && rand() < 0.08) {

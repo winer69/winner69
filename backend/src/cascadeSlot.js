@@ -41,6 +41,9 @@ export function winTier(totalWin, bet) {
   return null;
 }
 
+// a paid spin that wins pays at least this many bets (no 2.5-on-a-10 "wins")
+export const MIN_WIN_X = 1;
+
 export function makeCascadeGame(cfg) {
   const { reels, rows, paytable, weights, wildReels, wildWeight, scatterWeight, mults, freeSpins, maxWinX = 2500, seed = 1688 } = cfg;
   const paying = Object.keys(paytable);
@@ -100,29 +103,42 @@ export function makeCascadeGame(cfg) {
 
   // Average win (in bets) of a winning spin: turns the admin RTP into a win chance, the same
   // approach every WINNER 69 game uses. Seeded so the server and browser agree.
+  // a "win" pays at least minX bets, or awards free spins; a loss pays nothing and awards nothing
+  const isWin = (s, bet, minX) => (s.total > 0 && s.total >= bet * minX) || (s.total === 0 && s.freeSpins > 0);
+  const isLoss = (s) => s.total === 0 && !s.freeSpins;
   const avgCache = {};
-  function averageWin(free = false) {
+  function avgStats(free) {
     const key = free ? "free" : "base";
     if (avgCache[key]) return avgCache[key];
     const rng = seeded(free ? seed + 336 : seed);
-    let sum = 0, n = 0;
-    for (let i = 0; i < 60000 && n < 3000; i++) {
+    const minX = free ? 0 : MIN_WIN_X;
+    let sum = 0, fsum = 0, n = 0;
+    for (let i = 0; i < 400000 && n < 8000; i++) {
       const s = spin(rng, 1, free);
-      if (s.total <= 0) continue;
-      sum += s.total + s.freeSpins * 0.9; n++;
+      if (!isWin(s, 1, minX)) continue;
+      sum += s.total; fsum += s.freeSpins; n++;
     }
-    avgCache[key] = n ? sum / n : 2;
-    return avgCache[key];
+    return (avgCache[key] = { sum: n ? sum : 2, fsum, n: n || 1 });
   }
+  // each awarded free spin is itself played at the target RTP, so it is worth about rtp/100 bets
+  function averageWin(free = false, rtp = 96) { const a = avgStats(free); return (a.sum + a.fsum * rtp / 100) / a.n; }
+  // every winning spin handed out is a fresh unbiased sample of "a win": keep refining the average
+  function learnWin(free, x, fs) { const a = avgStats(free); a.sum += x; a.fsum += fs; a.n++; }
 
   // one spin at a given RTP %: decide win/lose first, then draw a matching spin
   function play(rng, bet, rtp, free = false) {
-    const won = rng() < winChance(rtp, averageWin(free));
-    for (let i = 0; i < 400; i++) {
+    const won = rng() < winChance(rtp, averageWin(free, rtp));
+    // paid spins never "win" less than the bet
+    let blank = null;
+    for (let i = 0; i < 1500; i++) {
       const s = spin(rng, bet, free);
-      if ((s.total > 0) === won) return s;
+      if (won ? isWin(s, bet, free ? 0 : MIN_WIN_X) : isLoss(s)) {
+        if (won) learnWin(free, s.total / bet, s.freeSpins);
+        return s;
+      }
+      if (!blank && isLoss(s)) blank = s;
     }
-    return spin(rng, bet, free);
+    return blank || spin(rng, bet, free);
   }
 
   return { ...cfg, maxWinX, paying, evaluate, spin, averageWin, play };
